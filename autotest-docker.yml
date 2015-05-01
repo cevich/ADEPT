@@ -1,0 +1,143 @@
+---
+- hosts: '{{ hosts }}'
+  gather_facts: False
+  vars:
+    autotest_path: /usr/local/autotest
+    autotest_docker:
+        repo: https://github.com/autotest/autotest-docker.git
+        #repo: https://github.com/cevich/autotest-docker.git
+        version: latest
+        path: "{{ autotest_path }}/client/tests/docker"
+        subtests:
+          - docker_cli/dockerhelp
+          - docker_cli/version
+          - docker_cli/run_cgroups
+          - docker_cli/build/https_file
+        test_image:
+            name: rhel-tools
+            tag: latest
+            host: registry.access.redhat.com
+            user: rhel7
+    # Atomic doesn't have 'git'
+    spc_fqin: registry.access.redhat.com/rhel7/rhel-tools:latest
+    spc_args: --interactive
+              --rm
+              --privileged
+              --net=host
+              --ipc=host
+              --pid=host
+              --volume /run:/run
+              --volume /var/log:/var/log
+              --volume /:/host
+
+  remote_user: root
+  tasks:
+  - name: Atomic package
+    yum: name=atomic state=present
+
+  - name: Docker package
+    yum: name=docker state=present
+
+  - name: Docker Service
+    service: name=docker state=started enabled=yes
+
+  # Optional
+  - name: EPEL repo. installed/enabled
+    yum:
+    args:
+      name: http://mirror.cs.pitt.edu/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+      state: present
+    ignore_errors: True
+
+  # Optional
+  - name: Python bugzilla package is installed
+    yum: name=python-bugzilla
+    ignore_errors: True
+
+  - name: Docker-autotest image was built
+    command: /usr/bin/docker inspect --format \{\{.Created\}\}
+             autotest-docker:{{ autotest_docker.version }}
+    register: autotest_docker_built
+    ignore_errors: True
+    args:
+      warn: no
+
+  - name: Docker-autotest image is build
+    command: /usr/bin/docker run {{ spc_args }}
+             {{ spc_fqin }}
+             /usr/bin/docker build
+             --quiet
+             --tag autotest-docker:{{ autotest_docker.version }}
+             {{ autotest_docker.repo }}
+    when: autotest_docker_built|failed
+
+  - name: Docker Autotest is installed
+    command: /usr/bin/atomic install
+             autotest-docker:{{ autotest_docker.version }}
+    args:
+      creates: "{{ autotest_docker.path }}/control"
+
+  - name: Docker Autotest control configured
+    ini_file:
+    args:
+      dest: "{{ autotest_docker.path }}/config_custom/control.ini"
+      option: include
+      section: Control
+      value: '{{ autotest_docker.subtests | join(",") }}'
+
+  - name: Test image name is configured
+    ini_file:
+    args:
+      dest: "{{ autotest_docker.path }}/config_custom/defaults.ini"
+      option: docker_repo_name
+      section: DEFAULTS
+      value: "{{ autotest_docker.test_image.name }}"
+
+  - name: Test image tag is configured
+    ini_file:
+    args:
+      dest: "{{ autotest_docker.path }}/config_custom/defaults.ini"
+      option: docker_repo_tag
+      section: DEFAULTS
+      value: "{{ autotest_docker.test_image.tag }}"
+
+  - name: Test registry host is configured
+    ini_file:
+    args:
+      dest: "{{ autotest_docker.path }}/config_custom/defaults.ini"
+      option: docker_registry_host
+      section: DEFAULTS
+      value: "{{ autotest_docker.test_image.host }}"
+
+  - name: Test registry user is configured
+    ini_file:
+    args:
+      dest: "{{ autotest_docker.path }}/config_custom/defaults.ini"
+      option: docker_registry_user
+      section: DEFAULTS
+      value: "{{ autotest_docker.test_image.user }}"
+
+  - name: Autotest results do not exist
+    command: rm -rf {{ autotest_path }}/client/results/default
+    args:
+      removes: "{{ autotest_path }}/client/results/default"
+
+  - name: Autotest is executed
+    shell: "AUTOTEST_PATH={{ autotest_path }}
+            {{ autotest_path }}/client/autotest-local run docker &> /dev/null"
+    args:
+      creates: "{{ autotest_path }}/client/results/default/status"
+    async: 14400
+    poll: 30
+
+  - name: Autotest verbose results exist
+    shell: tar -cjf /tmp/results.tbz results
+    args:
+      chdir: "{{ autotest_path }}/client"
+
+  - name: Autotest JUnit results exist
+    shell: tools/results2junit.py
+           results/default
+           | tee /tmp/results.junit
+    args:
+      chdir: "{{ autotest_path }}/client"
