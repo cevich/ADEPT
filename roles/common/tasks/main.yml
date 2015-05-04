@@ -1,0 +1,7 @@
+---
+- include: redhat-release.yml
+- include: rhsm_details.yml
+  when: not is_centos or not is_fedora
+- include: packages.yml
+  when: is_centos or is_rhel
+- include: services.yml

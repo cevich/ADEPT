@@ -1,0 +1,6 @@
+---
+- hosts: all
+  remote_user: cloud-user
+  sudo: yes
+  roles:
+    - test-quick

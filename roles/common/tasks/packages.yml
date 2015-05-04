@@ -1,0 +1,10 @@
+---
+- name: Optionally, python-bugzilla is installed
+  yum: name=python-bugzilla
+  ignore_errors: True
+
+- name: Atomic package is installed
+  yum: name=atomic state=present
+
+- name: Docker package is installed
+  yum: name=docker state=present
