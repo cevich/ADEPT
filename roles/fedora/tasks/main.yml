@@ -1,0 +1,18 @@
+---
+- name: Docker package is installed
+  yum:
+  args:
+    name: docker-io
+    state: present
+
+- name: Package python-bugzilla is installed
+  yum:
+  args:
+    name: python-bugzilla
+    state: present
+
+- name: Atomic package is installed
+  yum:
+  args:
+    name: atomic
+    state: present

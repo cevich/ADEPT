@@ -1,0 +1,34 @@
+---
+- hosts: all
+  roles:
+    - redhat_release
+
+- hosts: rhel:rhelah
+  roles:
+    - subscribed
+
+- hosts: rhel:centos
+  roles:
+    - epel
+
+- hosts: rhel
+  roles:
+    - rhel
+
+- hosts: rhelah
+  roles:
+    - rhelah
+
+- hosts: centos
+  roles:
+    - centos
+
+- hosts: fedora
+  roles:
+    - fedora
+
+- include: autotested.yml
+
+- hosts: rhel:rhelah
+  roles:
+    - unsubscribed

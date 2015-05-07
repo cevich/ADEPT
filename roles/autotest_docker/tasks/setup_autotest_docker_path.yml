@@ -1,0 +1,21 @@
+---
+- name: Use version-controled Docker Autotest
+  set_fact:
+    autotest_docker_is_versioned: true
+  when: autotest_docker.version is defined and
+        autotest_docker.version != None
+
+- name: Use latest Docker Autotest
+  set_fact:
+    autotest_docker_is_versioned: false
+  when: autotest_docker_is_versioned is not defined
+
+- name: Path to Versioned Docker Autotest is defined
+  set_fact:
+    autotest_docker_path: "{{ autotest.path }}/client/tests/docker_{{ autotest_docker.version }}"
+  when: autotest_docker_is_versioned
+
+- name: Path to Latest Docker Autotest is defined
+  set_fact:
+    autotest_docker_path: "{{ autotest.path }}/client/tests/docker"
+  when: autotest_docker_path is not defined

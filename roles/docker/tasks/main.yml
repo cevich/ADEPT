@@ -1,0 +1,30 @@
+---
+- name: Docker sysconfig is copied
+  copy:
+  args:
+    backup: true
+    dest: /etc/sysconfig/docker
+    src: docker
+    owner: root
+    group: root
+    setype: etc_t
+  notify:
+    - Docker Service Restarted
+
+- name: Docker-network sysconfig is copied
+  copy:
+  args:
+    backup: true
+    dest: /etc/sysconfig/docker-network
+    src: docker-network
+    owner: root
+    group: root
+    setype: etc_t
+  notify:
+    - Docker Service Restarted
+
+- name: Docker Service Enabled
+  service:
+  args:
+    name: docker
+    enabled: true

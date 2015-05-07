@@ -1,0 +1,6 @@
+---
+- name: System is un-registered and un-subscribed
+  redhat_subscription:
+  args:
+    state: absent
+  when: rhsm.unsubscribe

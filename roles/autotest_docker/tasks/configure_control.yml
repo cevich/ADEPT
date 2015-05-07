@@ -1,0 +1,61 @@
+---
+- name: Control timeout set
+  lineinfile:
+  args:
+    backup: true
+    backrefs: true
+    dest: "{{ autotest_docker_path }}/control"
+    follow: True
+    line: "\\1 {{ autotest_docker.timeout }}"
+    regexp: "^(TIMEOUT\\s*=\\s*).*$"
+
+- name: Config_custom_control string is set
+  set_fact:
+    config_custom_control: "{{ autotest_docker_path }}/config_custom/control.ini"
+
+- name: Custom control file status is known
+  stat:
+  args:
+    path: "{{ config_custom_control }}"
+  register: config_custom_control
+
+- name: Control needed flag is set true
+  set_fact:
+    control_needed: true
+  when: not config_custom_control.stat.exists
+
+- name: Control needed flag is set false
+  set_fact:
+    control_needed: false
+  when: control_needed is not defined
+
+- name: Copy control
+  command: cp config_defaults/control.ini config_custom/control.ini
+  args:
+    chdir: "{{ autotest_docker_path }}"
+  when: control_needed
+
+- name: Control is configured
+  ini_file:
+  args:
+    backup: true
+    dest: "{{ autotest_docker_path }}/config_custom/control.ini"
+    option: include
+    section: Control
+    value: '{{ autotest_docker.include | join(",") }}'
+  when: control_needed and
+        autotest_docker.include is defined and
+        autotest_docker.include != None
+
+- name: Control bugzilla checking is disabled
+  ini_file:
+  args:
+    backup: true
+    dest: "{{ autotest_docker_path }}/config_custom/control.ini"
+    option: url
+    section: Bugzilla
+    value: ''
+  when: control_needed and
+        autotest_docker.enable_bugzilla is defined and
+        autotest_docker.enable_bugzilla != None and
+        not autotest_docker.enable_bugzilla

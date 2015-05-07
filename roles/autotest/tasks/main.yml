@@ -1,0 +1,8 @@
+---
+- name: Autotest is installed
+  command: /usr/bin/docker run
+           {{ docker.build_args | join(' ') }}
+           {{ docker.build_fqin }}
+           git clone {{ autotest.repo }} /host/{{ autotest.path }}
+  args:
+    creates: "{{ autotest.path }}/client/autotest-local"

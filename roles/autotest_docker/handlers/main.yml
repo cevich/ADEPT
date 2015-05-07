@@ -1,0 +1,14 @@
+---
+- name: Collect autotest results tarball
+  fetch:
+  args:
+    dest: results
+    src: "/tmp/results.tbz"
+    fail_on_missing: true
+
+- name: Collect autotest results junit
+  fetch:
+  args:
+    dest: results
+    src: "/tmp/results.junit"
+    fail_on_missing: true

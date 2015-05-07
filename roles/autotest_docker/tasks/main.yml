@@ -1,0 +1,123 @@
+---
+- include: setup_autotest_docker_path.yml
+
+- include: install_autotest_docker.yml
+
+- name: Installed docker autotest version command was run
+  command: "{{ autotest_docker.current_version_cmd }}"
+  args:
+    chdir: "{{ autotest_docker_path }}"
+  register: result
+  changed_when: False
+
+- name: Installed docker autotest version is known
+  set_fact:
+    autotest_docker_version: "{{ result.stdout }}"
+  changed_when: False
+
+- name: Required autotest version command was run
+  command: "{{ autotest_docker.autotest_version_cmd }}"
+  args:
+    chdir: "{{ autotest_docker_path }}"
+  register: result
+  changed_when: False
+
+- name: Required autotest version is checked out
+  command: /usr/bin/docker run
+           {{ docker.build_args | join(' ') }}
+           --workdir /host/{{ autotest.path }}
+           {{ docker.build_fqin }}
+           git reset --hard {{ result.stdout }}
+
+# fix vim syntax highlighting
+# '
+
+- name: Custom configuration is cleared
+  file:
+  args:
+    path: "{{ autotest_docker_path }}/config_custom"
+    state: absent
+
+- name: Custom configuration directory exists
+  file:
+  args:
+    path: "{{ autotest_docker_path }}/config_custom"
+    state: directory
+
+- include: test_image_fqin.yml
+
+- name: Resolve autotest_docker templates
+  template:
+  args:
+    backup: "{{ item.backup | default(omit) }}"
+    dest: "{{ autotest_docker_path }}/{{ item.dest | default(omit) }}"
+    follow: "{{ item.follow | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+    src: "{{ item.src | default(omit) }}"
+    validate: "{{ item.validate | default(omit) }}"
+  with_items: autotest_docker.templates
+  when: autotest_docker.templates is defined and
+        autotest_docker.templates != None
+
+- include: configure_defaults.yml
+
+- include: configure_control.yml
+
+- name: Results directory is empty
+  file:
+  args:
+    path: "{{ autotest.path }}/client/results"
+    state: absent
+  when: autotest_docker.execute
+
+- name: Junit results don't exist
+  file:
+  args:
+    path: "/tmp/results.junit"
+    state: absent
+  when: autotest_docker.execute
+
+- name: Tarball results don't exist
+  file:
+  args:
+    path: "/tmp/results.tbz"
+    state: absent
+  when: autotest_docker.execute
+
+- name: Docker autotest execution variable is shown
+  debug: var=autotest_docker
+  when: autotest_docker.execute
+
+- name: Execute Docker autotest
+  command: "{{ autotest.path }}/client/autotest-local {{ autotest_docker_path }}/control"
+  register: autotest_execution
+  # This should be autotest_docker.timeout, but can't use var here :(
+  async: 14401
+  poll: 30
+  when: autotest_docker.execute
+
+- name: Convert Results to junit
+  shell: tools/results2junit.py results/default > /tmp/results.junit
+  args:
+    chdir: "{{ autotest.path }}/client"
+  register: results2junit
+  notify: Collect autotest results junit
+  when: autotest_docker.execute and
+        autotest_execution is defined and
+        autotest_execution|success
+
+- name: Create tarball of results
+  command: tar cjf /tmp/results.tbz results
+  args:
+    chdir: "{{ autotest.path }}/client"
+  register: resultstarball
+  notify: Collect autotest results tarball
+  when:  autotest_docker.execute and
+         autotest_execution is defined and
+         autotest_execution|success

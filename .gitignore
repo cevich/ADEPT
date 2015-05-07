@@ -1,3 +1,7 @@
 .*~
 *~
 .*.swp
+ansible.cfg
+hosts
+host_vars
+results
