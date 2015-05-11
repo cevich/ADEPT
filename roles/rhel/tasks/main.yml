@@ -1,6 +1,4 @@
 ---
-- include_vars: rhsm.yml
-
 - name: Repo. disable list is defined
   set_fact:
     yum_disable_repos: "*-eus-*,*-htb-*,*-ha-*,*-rt-*,*-lb-*,*-rs-*,*-sap-*,*beta*"
