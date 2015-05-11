@@ -1,6 +1,4 @@
 ---
-- include_vars: rhsm.yml
-
 - name: System is registered and subscribed
   redhat_subscription:
   args:

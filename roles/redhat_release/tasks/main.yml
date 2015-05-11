@@ -29,18 +29,33 @@
   set_fact: is_rhelah=true release_name=rhelah
   when: redhat_release | match('.*Atomic Host.*')
 
+- group_by: key=rhelah
+  when: is_rhelah
+
 - name: A RHEL Server redhat_release is processed
   set_fact: is_rhel=true release_name=rhel
   when: not is_rhelah and
         redhat_release | match('.*Red Hat Enterprise Linux.*')
 
+- group_by: key=rhel
+  when: is_rhel
+
+- group_by: key=subscribed
+  when: is_rhelah or is_rhel
+
 - name: A CentOS redhat_release is processed
   set_fact: is_centos=true release_name=centos
   when: redhat_release | match('.*CentOS.*')
 
+- group_by: key=centos
+  when: is_centos
+
 - name: A Fedora redhat_release is processed
   set_fact: is_fedora=true release_name=fedora
   when: redhat_release | match('.*Fedora.*')
+
+- group_by: key=fedora
+  when: is_fedora
 
 #- debug:
 #    msg: "is_rhel={{ is_rhel }}; is_rhelah={{ is_rhelah }}; is_centos={{ is_centos }}; is_fedora={{ is_fedora }}; release_name={{ release_name }}"

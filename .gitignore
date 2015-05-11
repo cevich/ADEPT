@@ -2,6 +2,7 @@
 *~
 .*.swp
 ansible.cfg
-hosts
-host_vars
-results
+host_vars/*
+!host_vars/.empty
+results/*
+!results/.empty

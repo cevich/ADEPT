@@ -3,7 +3,7 @@
   roles:
     - redhat_release
 
-- hosts: rhel:rhelah
+- hosts: subscribed
   roles:
     - subscribed
 
@@ -29,6 +29,6 @@
 
 - include: autotested.yml
 
-- hosts: rhel:rhelah
+- hosts: subscribed
   roles:
     - unsubscribed

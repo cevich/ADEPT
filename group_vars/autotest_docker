@@ -1,5 +1,10 @@
 ---
 
+# These variables apply to all hosts in the autotest_docker group
+# as defaults.  To modify variables for a specific host, copy this
+# file into the host_vars directory, named as the dns name
+# of the host.
+
 autotest:
     # Git repository where autotest should be cloned
     # from.  This can point upstream, to a fork or
@@ -60,6 +65,11 @@ autotest_docker:
 
     # Enable or disable checking of bugzilla entries for tests to skip
     enable_bugzilla: false
+
+    # The variables below allow flexibility to dynamicly determine
+    # what docker repositories, container names and versions to
+    # act upon.  More than likely they do not need to be modified
+    # from default values unless you know what you're doing.
 
     # Command to use for retrieving current Docker Autotest version
     current_version_cmd: atomic/config_value.py DEFAULTS config_version config_defaults/defaults.ini config_custom/defaults.ini
