@@ -1,6 +1,5 @@
 ---
 - hosts: autotest_docker
+  gather_facts: no
   roles:
-    - docker
-    - autotest
     - autotest_docker

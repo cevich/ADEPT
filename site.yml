@@ -1,34 +1,9 @@
 ---
-- hosts: all
-  roles:
-    - redhat_release
-
-- hosts: subscribed
-  roles:
-    - subscribed
-
-- hosts: rhel:centos
-  roles:
-    - epel
-
-- hosts: rhel
-  roles:
-    - rhel
-
-- hosts: rhelah
-  roles:
-    - rhelah
-
-- hosts: centos
-  roles:
-    - centos
-
-- hosts: fedora
-  roles:
-    - fedora
-
+- include: redhat_release.yml
 - include: autotested.yml
-
+# Dynamicly defined by redhat_release role
+# bypassed by setting rhsm.unsubscribe=false
 - hosts: subscribed
+  gather_facts: no
   roles:
     - unsubscribed

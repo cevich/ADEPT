@@ -50,6 +50,9 @@
 - group_by: key=centos
   when: is_centos
 
+- group_by: key=epel
+  when: is_rhel or is_centos
+
 - name: A Fedora redhat_release is processed
   set_fact: is_fedora=true release_name=fedora
   when: redhat_release | match('.*Fedora.*')

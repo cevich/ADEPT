@@ -1,5 +1,4 @@
 ---
 dependencies:
-    - role: redhat_release
     - role: docker
     - role: autotest

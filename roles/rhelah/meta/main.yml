@@ -1,4 +1,0 @@
----
-dependencies:
-    - role: redhat_release
-    - role: subscribed
