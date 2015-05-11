@@ -1,0 +1,4 @@
+---
+dependencies:
+    - role: redhat_release
+    - role: docker
