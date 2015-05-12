@@ -1,0 +1,8 @@
+---
+needs_reboot: false
+
+# Maximum time to wait for system to become unavailable (in seconds)
+shutdown_timeout: 400
+
+# Maximum time to wait for system to become available (in seconds)
+bootup_timeout: 400

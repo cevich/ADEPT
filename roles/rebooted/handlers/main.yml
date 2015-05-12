@@ -1,0 +1,9 @@
+---
+- name: Remote commands can execute
+  command: /usr/bin/true
+  register: result
+  ignore_errors: true
+  retries: 10
+  delay: 10
+  until: result|success
+  changed_when: false

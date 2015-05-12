@@ -43,4 +43,12 @@
      name: "*"
      state: latest
      disablerepo: "{{ yum_disable_repos }}"
+  register:
+    system_updated
   when: rhsm.updated
+
+- name: The needs_reboot flag is set
+  set_fact:
+    needs_reboot: true
+  when: rhsm.updated and system_updated.changed and
+        (system_updated.results | search(".*Package\s+(kernel|glibc).*will be updated"))

@@ -1,6 +1,8 @@
 ---
 - hosts: all
   gather_facts: true
+  vars:
+    needs_reboot: false
   roles:
     - redhat_release
     # These groups are defined dynamicly from
@@ -12,3 +14,4 @@
     - { role: centos, when: is_centos }
     - { role: fedora, when: is_fedora }
     - { role: epel, when: is_rhel or is_centos }
+    - { role: rebooted, when: needs_reboot }
