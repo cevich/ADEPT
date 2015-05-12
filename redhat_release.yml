@@ -1,14 +1,14 @@
 ---
 - hosts: all
+  gather_facts: true
   roles:
     - redhat_release
     # These groups are defined dynamicly from
     # redhat_release role (above), conditionally
-    # assigned here to increase parallelism and
-    # and prevent unnecessary dependency following
-    - { role: subscribed, when: "'subscribed' in group_names" }
-    - { role: rhel, when: "'rhel' in group_names" }
-    - { role: rhelah, when: "'rhelah' in group_names" }
-    - { role: centos, when: "'centos' in group_names" }
-    - { role: fedora, when: "'fedora' in group_names" }
-    - { role: epel, when: "'epel' in group_names" }
+    # assigned here to increase parallelism
+    - { role: subscribed, when: is_rhel or is_rhelah }
+    - { role: rhel, when: is_rhel }
+    - { role: rhelah, when: is_rhelah }
+    - { role: centos, when: is_centos }
+    - { role: fedora, when: is_fedora }
+    - { role: epel, when: is_rhel or is_centos }

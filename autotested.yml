@@ -1,5 +1,5 @@
 ---
 - hosts: autotest_docker
-  gather_facts: no
+  gather_facts: false
   roles:
     - autotest_docker
