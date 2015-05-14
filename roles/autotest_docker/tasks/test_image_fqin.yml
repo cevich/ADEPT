@@ -49,7 +49,7 @@
   ignore_errors: True
   args:
     warn: no
-  changed_when: docker_inspect_result|failed
+  changed_when: false
   when: test_image_fqin is defined
 
 - name: Build Test Image
