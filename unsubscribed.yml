@@ -1,0 +1,5 @@
+---
+# Bypass with rhsm.unsubscribe=false
+- hosts: rhel:rhelah
+  roles:
+    - unsubscribed
