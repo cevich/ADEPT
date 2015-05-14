@@ -1,6 +1,0 @@
----
-- name: Docker Service Restarted
-  service:
-  args:
-    name: docker
-    state: restarted

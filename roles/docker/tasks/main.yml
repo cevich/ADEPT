@@ -8,8 +8,6 @@
     owner: root
     group: root
     setype: etc_t
-  notify:
-    - Docker Service Restarted
 
 - name: Docker-network sysconfig is copied
   copy:
@@ -20,11 +18,15 @@
     owner: root
     group: root
     setype: etc_t
-  notify:
-    - Docker Service Restarted
 
 - name: Docker Service Enabled
   service:
   args:
     name: docker
     enabled: true
+
+- name: Docker Service Restarted
+  service:
+  args:
+    name: docker
+    state: restarted

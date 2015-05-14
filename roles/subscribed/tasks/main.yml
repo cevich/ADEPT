@@ -6,3 +6,4 @@
     username: "{{ rhsm.username }}"
     password: "{{ rhsm.password }}"
     state: present
+  when: is_rhel or is_rhelah
