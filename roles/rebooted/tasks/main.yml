@@ -1,29 +1,46 @@
 ---
-# Fire-and-forget mode, independent of command exit-status
-- name: Reboot System
-  shell: '( /usr/bin/sleep 1s && /usr/sbin/reboot ) &'
-  ignore_errors: true
-  async: 0
-  poll: 0
-  changed_when: true
 
-# Locally, check port every 13 seconds (DNS timeout x2)
+# This works properly eventhough the other ssh channels are shutdown
+- name: Reboot System
+  shell: "shutdown -r 1 &"
+  changed_when: true
+  ignore_errors: true
+
+- name: Wait for scheduled reboot
+  pause:
+  args:
+    minutes: 1
+
 - name: Server's ssh port is unavailable
   local_action: wait_for
-                host={{ ansible_nodename | default(ansible_fqdn) }}
+                host={{ inventory_hostname | default(ansible_hostname) }}
                 port=22
                 state=stopped
                 connect_timeout=13
-                timeout={{ shutdown_timeout }}
-  # Don't use sudo on local_action
+                timeout=30
   sudo: false
 
 - name: Server's ssh port is available
   local_action: wait_for
-                host={{ ansible_nodename | default(ansible_fqdn) }}
+                host={{ ansible_hostname | default(ansible_fqdn) }}
+                delay=20
                 port=22
                 state=started
                 connect_timeout=13
                 timeout={{ bootup_timeout }}
-  notify: Remote commands can execute
   sudo: false
+
+- name: Uptime command output is known
+  command: /usr/bin/uptime --pretty
+  register: result
+  changed_when: false
+
+- name: Uptime output is filtered into integer minutes
+  set_fact:
+    uptime_seconds: "{{ result.stdout | regex_replace('^up(?:\\s+\\d+\\s+days,)?(?:\\s+\\d+\\s+hours,)?\\s+(\\d+)\\s+minutes.*$', '\\\\1') | int() * 60 }}"
+
+- name: Uptime seconds is less than shutdown and bootup timeout
+  fail:
+  args:
+    msg: "System uptime {{ uptime_seconds }}s is longer than reboot timeout {{ bootup_timeout }}s"
+  when: "{{ uptime_seconds }} > {{ bootup_timeout }}"

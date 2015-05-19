@@ -4,7 +4,7 @@
     - redhat_release
 
 # These groups are defined dynamicly from
-# redhat_release role (above)
+# redhat_release role, based on release_name value (above)
 
 - hosts: rhel:rhelah
   roles:
@@ -29,3 +29,7 @@
 - hosts: fedora
   roles:
     - fedora
+
+- hosts: all
+  roles:
+    - { role: rebooted, when: needs_reboot }
