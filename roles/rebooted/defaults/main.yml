@@ -1,0 +1,5 @@
+---
+needs_reboot: false
+
+# Maximum time to wait for system to become available (in seconds)
+bootup_timeout: 600

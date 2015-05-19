@@ -5,42 +5,28 @@
 
 - name: Repo. enable list is defined
   set_fact:
-    yum_enable_repos: "*-optional-rpms,*-extras-rpms"
-
-- name: Docker package is installed
-  yum:
-  args:
-    name: docker
-    state: present
-    disablerepo: "{{ yum_disable_repos }}"
-    enablerepo: "{{ yum_enable_repos }}"
-
-- name: Package python-bugzilla is installed
-  yum:
-  args:
-    name: python-bugzilla
-    state: present
-    disablerepo: "{{ yum_disable_repos }}"
-
-- name: Atomic package is installed
-  yum:
-  args:
-    name: atomic
-    state: present
-    disablerepo: "{{ yum_disable_repos }}"
-    enablerepo: "{{ yum_enable_repos }}"
+    yum_enable_repos: "*-optional-rpms,*-extras-rpms,*7-server-rpms,*7-server-eus-rpms,*epel*,base,extras,updates"
 
 - name: Support packages are installed
   yum:
   args:
-    name: procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-sphinx,python-bugzilla,which,pylint,make,python-pep8,python-sphinxcontrib-httpdomain
+    name: docker,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-sphinx,python-bugzilla,which,pylint,make,python-pep8,python-sphinxcontrib-httpdomain
     state: present
     disablerepo: "{{ yum_disable_repos }}"
+    enablerepo: "{{ yum_enable_repos }}"
+  register: support_installed
+  notify:
+    - The needs_reboot flag is set because of install
 
 - name: System is fully updated
   yum:
   args:
-     name: "*"
-     state: latest
-     disablerepo: "{{ yum_disable_repos }}"
-  when: rhsm.updated
+    name: "*"
+    state: latest
+    disablerepo: "{{ yum_disable_repos }}"
+    enablerepo: "{{ yum_enable_repos }}"
+  register:
+    system_updated
+  notify:
+    - The needs_reboot flag is set because of update
+  when: update_system

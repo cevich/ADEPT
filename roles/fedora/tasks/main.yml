@@ -1,18 +1,20 @@
 ---
-- name: Docker package is installed
+- name: Support packages are installed
   yum:
   args:
-    name: docker-io
+    name: docker-io,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-sphinx,python-bugzilla,which,pylint,make,python-pep8,python-sphinxcontrib-httpdomain
     state: present
+  register: support_installed
+  notify:
+    - The needs_reboot flag is set because of install
 
-- name: Package python-bugzilla is installed
+- name: System is fully updated
   yum:
   args:
-    name: python-bugzilla
-    state: present
-
-- name: Atomic package is installed
-  yum:
-  args:
-    name: atomic
-    state: present
+     name: "*"
+     state: latest
+  register:
+    system_updated
+  notify:
+    - The needs_reboot flag is set because of update
+  when: update_system

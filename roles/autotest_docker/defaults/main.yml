@@ -1,0 +1,89 @@
+---
+docker:
+    # Fully-qualified image name of build container to use
+    # for building/installing autotest and autotest_docker.
+    # This prevents needing additional packages/software on
+    # the test host which could affect testing.
+    build_fqin: registry.access.redhat.com/rhel7/rhel-tools:latest
+
+    # List of additional arguments to pass when running
+    # build/installation steps.  Install destination root
+    # is assumed to be /host
+    build_args:
+        - --interactive
+        - --rm
+        - --privileged
+        - --net=host
+        - --ipc=host
+        - --pid=host
+        - --env DESTROOT=/host
+        - --volume /run:/run
+        - --volume /var/log:/var/log
+        - --volume /:/host
+
+autotest_docker:
+
+    # Git repository where autotest_docker should be cloned
+    # retrieved from.  This can point upstream, to a fork
+    # or custom repo. with additional/modified content.
+    repo: https://github.com/autotest/autotest-docker.git
+
+    # Version number or branch name to use. Empty to use
+    # repo HEAD.
+    version:
+
+    # Many tests rely on a default image for testing. Specify
+    # either _all_ components of the fully-qualified-image-name.
+    # or no components to use defaults from docker autotest.
+    test_image:
+        name:
+        tag:
+        host:
+        user:
+        # Build this image from url, tagged as above name.
+        # Leave empty to pull test image instead.
+        build_url:
+
+    # Ultimate timeout in seconds for all subtests to run
+    # (in seconds).
+    timeout: 14401
+
+    # List of subtests to run, empty to use defaults in repo.
+    # (runs _all_ tests).
+    include:
+      - docker_cli/version
+      - docker_cli/dockerhelp
+
+    # List of template arg dictionaries use, empty for none
+    # e.g. - dest: "config_custom/tests.ini"
+    #        src: "tests.ini.j2"
+    templates:
+
+    # List of fqins to protect from removal during all tests
+    preserve_fqins:
+
+    # List of container names to protect from removal during all tests
+    preserve_cnames:
+
+    # Set to false to disable executing autotest on this host
+    execute: true
+
+    # Enable or disable checking of bugzilla entries for tests to skip
+    enable_bugzilla: false
+
+    # The variables below allow flexibility to dynamicly determine
+    # what docker repositories, container names and versions to
+    # act upon.  More than likely they do not need to be modified
+    # from default values unless you know what you're doing.
+
+    # Command to use for retrieving current Docker Autotest version
+    current_version_cmd: atomic/config_value.py DEFAULTS config_version config_defaults/defaults.ini config_custom/defaults.ini
+
+    # Command to use for retrieving required Autotest version
+    autotest_version_cmd: atomic/config_value.py DEFAULTS autotest_version config_defaults/defaults.ini config_custom/defaults.ini
+
+    # Command to use for retrieving preserve_fqins value
+    preserve_fqins_cmd: atomic/config_value.py DEFAULTS preserve_fqins config_defaults/defaults.ini config_custom/defaults.ini
+
+    # Command to use for retrieving preserve_cnames value
+    preserve_cnames_cmd: atomic/config_value.py DEFAULTS preserve_cnames config_defaults/defaults.ini config_custom/defaults.ini

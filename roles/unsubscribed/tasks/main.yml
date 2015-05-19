@@ -3,4 +3,5 @@
   redhat_subscription:
   args:
     state: absent
-  when: rhsm.unsubscribe
+  when: (is_rhel or is_rhelah) and
+        rhsm.unsubscribe

@@ -1,0 +1,10 @@
+---
+- name: The needs_reboot flag is set because of install
+  set_fact:
+    needs_reboot: true
+  when: support_installed.results[0] | search(".*Package\s+(kernel|glibc|firmware).*")
+
+- name: The needs_reboot flag is set because of update
+  set_fact:
+    needs_reboot: true
+  when: system_updated.results[0] | search(".*Package\s+(kernel|glibc|firmware).*")

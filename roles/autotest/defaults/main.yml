@@ -1,4 +1,21 @@
 ---
+
+# These variables apply to all hosts in the autotest_docker group
+# as defaults.  To modify variables for a specific host, copy this
+# file into the host_vars directory, named as the dns name
+# of the host.
+
+autotest:
+    # Git repository where autotest should be cloned
+    # from.  This can point upstream, to a fork or
+    # custom repo.  However, it must provide the version
+    # specified by autotest_docker.version shown by
+    # running client/shared/version.py
+    repo: https://github.com/autotest/autotest.git
+
+    # Path where autotest will be installed.
+    path: /usr/local/autotest
+
 docker:
     # Fully-qualified image name of build container to use
     # for building/installing autotest and autotest_docker.
@@ -20,9 +37,3 @@ docker:
         - --volume /run:/run
         - --volume /var/log:/var/log
         - --volume /:/host
-
-update_system: true
-
-# This is set after package/software update when certain
-# packages are changed and a system reboot is needed.
-needs_reboot: false

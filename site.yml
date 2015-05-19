@@ -1,9 +1,4 @@
 ---
 - include: redhat_release.yml
 - include: autotested.yml
-# Dynamicly defined by redhat_release role
-# bypassed by setting rhsm.unsubscribe=false
-- hosts: subscribed
-  gather_facts: no
-  roles:
-    - unsubscribed
+- include: unsubscribed.yml

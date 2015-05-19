@@ -1,0 +1,6 @@
+---
+- hosts: all
+  vars:
+    needs_reboot: true
+  roles:
+    - rebooted
