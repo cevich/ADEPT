@@ -1,11 +1,16 @@
 ---
 
 # This works properly eventhough the other ssh channels are shutdown
+# and flagged as an error.  Issueing reboot command directly, or background
+# executing a script doesn't work reliably with different ansible versions.
 - name: Reboot System
   shell: "shutdown -r 1 &"
   changed_when: true
   ignore_errors: true
 
+# This is required since shutdown cannot be scheduled any shoter than one
+# minute (above), and there may be DNS timeouts while checking for port
+# accessability (below).
 - name: Wait for scheduled reboot
   pause:
   args:
@@ -30,6 +35,8 @@
                 timeout={{ bootup_timeout }}
   sudo: false
 
+# Make sure host was rebooted dispite ignoring errors on reboot command
+# and possibly hitting some quirks with wait_for.
 - name: Uptime command output is known
   command: /usr/bin/uptime --pretty
   register: result
@@ -37,9 +44,9 @@
 
 - name: Uptime output is filtered into integer minutes
   set_fact:
-    uptime_seconds: "{{ result.stdout | regex_replace('^up(?:\\s+\\d+\\s+days,)?(?:\\s+\\d+\\s+hours,)?\\s+(\\d+)\\s+minutes.*$', '\\\\1') | int() * 60 }}"
+    uptime_seconds: "{{ result.stdout | regex_replace('^up(?:\\s+\\d+\\s+days?,)?(?:\\s+\\d+\\s+hours?,)?\\s+(\\d+)\\s+minutes?.*$', '\\\\1') | int() * 60 }}"
 
-- name: Uptime seconds is less than shutdown and bootup timeout
+- name: Uptime seconds is less than bootup timeout
   fail:
   args:
     msg: "System uptime {{ uptime_seconds }}s is longer than reboot timeout {{ bootup_timeout }}s"
