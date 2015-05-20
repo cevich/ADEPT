@@ -6,4 +6,7 @@ fedora.example.com
 
 # List all hosts on which docker autotest will be installed/executed
 [autotest_docker]
-*
+rhel.example.com
+rhelah.example.com
+centos.example.com
+fedora.example.com
