@@ -1,22 +1,27 @@
-.. Autotest Docker Enabled Product Testing (ADEPT) documentation master file, created by
-   sphinx-quickstart on Wed May 20 12:50:14 2015.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+:tocdepth: 2
 
-Welcome to Autotest Docker Enabled Product Testing (ADEPT)'s documentation!
-===========================================================================
+.. include:: ../../README.rst
+   :end-before: The quickstart section begins next
 
-Contents:
+.. sectnum::
 
 .. toctree::
-   :maxdepth: 2
+   :hidden:
 
+Introduction
+=============
 
+Both Autotest_ and `Docker Autotest`_ represent excellent and comprehensive testing
+frameworks. However, they are lacking in modern system configuration and orchestration
+capabilities. Especially, those required by Continuous Integration systems such as
+Jenkins_.
 
-Indices and tables
-==================
+This project aims to fill in that gap, between when a system is provisioned, and test
+results are collected.  It will manage and configure the target systems up to and
+through execution of  `Docker Autotest`_.  The supported target platforms are all
+Red Hat based, though due to Autotest_'s low dependency count, could be easily extended.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. _Jenkins: https://jenkins-ci.org/
 
+.. include:: ../../README.rst
+   :start-after: The quickstart section begins next
