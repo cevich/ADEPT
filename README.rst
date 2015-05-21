@@ -42,5 +42,5 @@ Quickstart
 Latest Documentation
 ======================
 
-For the latest, most up to date documentation Please visit
+For the latest, most up to date documentation please visit
 http://autotest-docker-enabled-product-testing.readthedocs.org

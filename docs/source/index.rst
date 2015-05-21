@@ -25,3 +25,33 @@ Red Hat based, though due to Autotest_'s low dependency count, could be easily e
 
 .. include:: ../../README.rst
    :start-after: The quickstart section begins next
+
+Functional Overview
+====================
+
+Assuming some familiarity with Ansible_, all major operations are contained within
+roles.  Target system state is interrogated prior to executing any task.  If found
+already in the desired state, that task will be skipped.  It is perfectly normal
+for the vast majority of tasks to be skipped.  Especially when the playbook is
+run repeatedly against the same set of hosts.
+
+Playbook Includes
+------------------
+
+The ``site.yml`` file operates in three stages.  The first gathers system information,
+assigning all test systems into groups based on their canonical release name
+(rhel, rhelah, centos, fedora, etc.).  It then configures each system with roles
+specific to their release group.
+
+The second stage installs and configures both Autotest_ and `Docker Autotest`_.
+This includes applying any custom tasks or configuration templates and/or configuring
+a reasonable set of discovered test defaults.  Next Autotest is executed and when
+finished, the results are gathered and collected onto the host executing the playbook.
+
+The third and final stage performs any required cleanup work on the target hosts.
+This may include un-subscribing them if so configured (disabled by default).
+
+Stage Details
+--------------
+
+**TODO**
