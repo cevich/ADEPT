@@ -228,7 +228,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'autotestdockerenabledproducttestingadept', u'Autotest Docker Enabled Product Testing (ADEPT) Documentation',
+    ('index', 'adept', u'Autotest Docker Enabled Product Testing (ADEPT) Documentation',
      [u'Chris Evich'], 1)
 ]
 
@@ -242,9 +242,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'AutotestDockerEnabledProductTestingADEPT', u'Autotest Docker Enabled Product Testing (ADEPT) Documentation',
-   u'Chris Evich', 'AutotestDockerEnabledProductTestingADEPT', 'One line description of project.',
-   'Miscellaneous'),
+  ('index', 'AutotestDockerEnabledProductTestingADEPT', u'Autotest Docker Enabled Product Testing',
+   u'Chris Evich', 'AutotestDockerEnabledProductTesting', 'ADEPT',
+   'Documentation'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -261,4 +261,5 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {'python': ('http://docs.python.org/', None),
+                       'dat': ('http://docker-autotest.readthedocs.org/en/latest', None)}
