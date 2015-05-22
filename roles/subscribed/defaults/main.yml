@@ -6,5 +6,3 @@ rhsm:
     password: "{{ lookup('file', '~/rhn_password') | default(omit) }}"
     # Set true to unsubscribe system at end of testing
     unsubscribe: false
-    # Set true to update all packages
-    updated: false

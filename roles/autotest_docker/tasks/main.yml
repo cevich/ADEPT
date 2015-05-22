@@ -46,6 +46,7 @@
 
 - include: test_image_fqin.yml
 
+# Hook for inclusion of additional configuration templates/files
 - name: Resolve autotest_docker templates
   template:
   args:
@@ -65,6 +66,7 @@
   when: autotest_docker.templates is defined and
         autotest_docker.templates != None
 
+# Hook for inclusion of additional pre-execution tasks
 - name: Additional tasks are included
   include: "{{ item }}"
   with_items: autotest_docker.tasks

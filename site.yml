@@ -1,4 +1,4 @@
 ---
 - include: redhat_release.yml
 - include: autotested.yml
-- include: unsubscribed.yml
+- include: cleanup.yml
