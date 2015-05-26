@@ -25,6 +25,11 @@
                 timeout=30
   sudo: false
 
+- name: Allow time to complete shutdown
+  pause:
+  args:
+    minutes: 1
+
 - name: Server's ssh port is available
   local_action: wait_for
                 host={{ ansible_hostname | default(ansible_fqdn) }}
