@@ -98,13 +98,16 @@ keys are explained below:
    basic-sanity subtests are run.  If this list is empty, then all available
    subtests will run.
 
-*  Both ``templates`` and ``tasks`` are lists containing relative or absolute
-   paths to files for inclusion.  If either result in presence of any of the
+*  ``templates`` is a list of dictionaries containing arguments to the `template
+   ansible module`_.  If once rendered on each host, result in the presence of
+   any
    :ref:`Docker Autotest Configuration <dat:configuration>`
    files ``config_custom/control.ini``,
    ``config_custom/defaults.ini``, and/or ``config_custom/tests.ini``,
    then the role will not attempt to compose those files from automatically
    discovered values.
+
+.. _`template ansible module`: http://docs.ansible.com/template_module.html#options
 
 
 ``cleanup``

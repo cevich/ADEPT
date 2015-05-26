@@ -55,11 +55,6 @@ autotest_docker:
     #        src: "tests.ini.j2"
     templates:
 
-    # If non-empty, a list include files with additional tasks
-    # to run before executing docker autotest, but after templates
-    # are resolved (above)
-    tasks:
-
     # List of fqins to protect from removal during all tests
     preserve_fqins:
 

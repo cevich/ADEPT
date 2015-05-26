@@ -66,13 +66,6 @@
   when: autotest_docker.templates is defined and
         autotest_docker.templates != None
 
-# Hook for inclusion of additional pre-execution tasks
-- name: Additional tasks are included
-  include: "{{ item }}"
-  with_items: autotest_docker.tasks
-  when: autotest_docker.tasks is defined and
-        autotest_docker.tasks != None
-
 - include: configure_defaults.yml
 
 - include: configure_control.yml

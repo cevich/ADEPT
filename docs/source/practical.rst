@@ -9,7 +9,7 @@ either execute identical testing on all hosts, or differentiated across
 different groups and or individual hosts.  Using this feature requires
 an understanding of `Ansible's variable scoping rules`_.
 
-The optional include file lists for *templates* and *tasks* may produce
+The optional list of *templates* may produce
 special files on test hosts under the ``config_custom`` subdirectory
 of Docker Autotest.  Specifically, these filenames are treated specially
 by the *autotested* role:
