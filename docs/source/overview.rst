@@ -35,8 +35,8 @@ Playbook Details
 ------------------
 
 
-redhat_release
-~~~~~~~~~~~~~~~~
+``redhat_release``
+~~~~~~~~~~~~~~~~~~~
 
 The primary function of this playbook is to uniformly parse the ``/etc/redhat-release``
 file on every host.  Dynamic Ansible_ groups are then assigned based on the file's
@@ -58,8 +58,8 @@ cleanup_ stage (below).
 
 .. _ansible: http://docs.ansible.com/index.html
 
-autotested
-~~~~~~~~~~~
+``autotested``
+~~~~~~~~~~~~~~~~
 
 This playbook only operates on hosts assigned to the autotest_docker group (from
 the ansible inventory).  This group is not dynamic and must be specified
@@ -99,22 +99,18 @@ keys are explained below:
    subtests will run.
 
 *  Both ``templates`` and ``tasks`` are lists containing relative or absolute
-   paths to files for inclusion.  They are rendered or run on remote systems
-   just prior to performing automated setup of Docker Autotest's
-   ``control.ini`` :ref:`(docs) <dat:control configuration>`
-   ``defaults.ini`` :ref:`(docs) <dat:default configuration options>`
-   and
-   ``tests.ini`` :ref:`(docs) <dat:subtest modules>`.
-   If any included *templates* or *tasks* produce
-   those files (on the test system) they will not be overriden.  Otherwise
-   and by default they will be automaticly composed.
-
-.. note::  All test configurations containing unmodified
-   ``__example__`` keys :ref:`(docs) <dat:example values>`
-   will be copied into ``tests.ini``.
+   paths to files for inclusion.  If either result in presence of any of the
+   :ref:`Docker Autotest Configuration <dat:configuration>`
+   files ``config_custom/control.ini``,
+   ``config_custom/defaults.ini``, and/or ``config_custom/tests.ini``,
+   then the role will not attempt to compose those files from automatically
+   discovered values.
 
 
-cleanup
-~~~~~~~~
+``cleanup``
+~~~~~~~~~~~~
 
-TODO
+This role is reserved for any post-testing cleanup operations if needed.  The
+final step here is the optional assignment of the *unsubscribed* role.  Disabled
+by default by ``rhsm.unsubscribe``, this role does exactly what it's name would
+suggest.
