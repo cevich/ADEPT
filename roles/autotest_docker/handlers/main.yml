@@ -11,4 +11,4 @@
   args:
     dest: results
     src: "/tmp/results.junit"
-    fail_on_missing: true
+    fail_on_missing: false

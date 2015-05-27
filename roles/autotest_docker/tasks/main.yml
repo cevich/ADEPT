@@ -127,16 +127,6 @@
   poll: 30
   when: autotest_docker.execute
 
-- name: Convert Results to junit
-  shell: tools/results2junit.py results/default > /tmp/results.junit
-  args:
-    chdir: "{{ autotest.path }}/client"
-  register: results2junit
-  notify: Collect autotest results junit
-  when: autotest_docker.execute and
-        autotest_execution is defined and
-        autotest_execution|success
-
 - name: Create tarball of results
   command: tar cjf /tmp/results.tbz results
   args:
@@ -146,3 +136,15 @@
   when:  autotest_docker.execute and
          autotest_execution is defined and
          autotest_execution|success
+
+- name: Convert Results to junit
+  shell: tools/results2junit.py results/default > /tmp/results.junit
+  args:
+    chdir: "{{ autotest.path }}/client"
+  register: results2junit
+  notify: Collect autotest results junit
+  # This thing is really easy to break
+  ignore_errors: true
+  when: autotest_docker.execute and
+        autotest_execution is defined and
+        autotest_execution|success
