@@ -98,6 +98,18 @@ keys are explained below:
    basic-sanity subtests are run.  If this list is empty, then all available
    subtests will run.
 
+.. _copies_templates:
+
+*  ``copies`` is a list of dictionaries containing arguments to the `copy
+   ansible module`_.  This is primarily intended for copying additional
+   subtests and their configurations.  **All ``dest`` arguments will be prefixed
+   with the path where docker autotest is installed.**  Placing/overwrites any of the
+   :ref:`Docker Autotest Configuration <dat:configuration>`
+   files ``config_custom/control.ini``,
+   ``config_custom/defaults.ini``, and/or ``config_custom/tests.ini``,
+   then the role will not attempt to compose those files from automatically
+   discovered values.
+
 *  ``templates`` is a list of dictionaries containing arguments to the `template
    ansible module`_.  If once rendered on each host, result in the presence of
    any
@@ -108,6 +120,7 @@ keys are explained below:
    discovered values.
 
 .. _`template ansible module`: http://docs.ansible.com/template_module.html#options
+.. _`copy ansible module`: http://docs.ansible.com/copy_module.html
 
 
 ``cleanup``

@@ -49,6 +49,11 @@ autotest_docker:
       - docker_cli/version
       - docker_cli/dockerhelp
 
+    # List of copy arg dictionaries use, empty for none
+    # e.g. - dest: "{{ autotest_docker_path }}/subtests/internal"
+    #        src: "subtests/internal"
+    #        follow: true
+    copies:
 
     # List of template arg dictionaries use, empty for none
     # e.g. - dest: "config_custom/tests.ini"

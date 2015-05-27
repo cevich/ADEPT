@@ -9,7 +9,7 @@ either execute identical testing on all hosts, or differentiated across
 different groups and or individual hosts.  Using this feature requires
 an understanding of `Ansible's variable scoping rules`_.
 
-The optional list of *templates* may produce
+The optional list of *templates* or *copies* may produce
 special files on test hosts under the ``config_custom`` subdirectory
 of Docker Autotest.  Specifically, these filenames are treated specially
 by the *autotested* role:
@@ -62,3 +62,6 @@ is handled specially by Docker Autotest.  Their names are customizable within
 
 *  ``<docker autotest directory>/posttests`` are the opposite of ``pretests``,
    running after all other modules above.
+
+The most convenient way of placing/replacing custom subtests and/or their configurations
+is to use the :ref:`copies and templates variables <copies_templates>`
