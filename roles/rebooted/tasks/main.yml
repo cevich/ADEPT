@@ -22,7 +22,7 @@
                 port=22
                 state=stopped
                 connect_timeout=13
-                timeout=30
+                timeout={{ shutdown_time }}
   sudo: false
 
 - name: Allow time to complete shutdown
@@ -33,7 +33,7 @@
 - name: Server's ssh port is available
   local_action: wait_for
                 host={{ ansible_hostname | default(ansible_fqdn) }}
-                delay=20
+                delay=30
                 port=22
                 state=started
                 connect_timeout=13
@@ -47,12 +47,11 @@
   register: result
   changed_when: false
 
-- name: Uptime output is filtered into integer minutes
+- name: Uptime output is filtered into integer minutes, converted to seconds
   set_fact:
     uptime_seconds: "{{ result.stdout | regex_replace('^up(?:\\s+\\d+\\s+days?,)?(?:\\s+\\d+\\s+hours?,)?\\s+(\\d+)\\s+minutes?.*$', '\\\\1') | int() * 60 }}"
 
-- name: Uptime seconds is less than bootup timeout
-  fail:
+- fail:
   args:
     msg: "System uptime {{ uptime_seconds }}s is longer than reboot timeout {{ bootup_timeout }}s"
-  when: "{{ uptime_seconds }} > {{ bootup_timeout }}"
+  when: "{{ uptime_seconds }} > {{ bootup_timeout + shutdown_time }}"
