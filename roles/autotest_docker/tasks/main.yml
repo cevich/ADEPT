@@ -125,6 +125,9 @@
   # This should be autotest_docker.timeout, but can't use var here :(
   async: 14401
   poll: 30
+  notify:
+    - Collect autotest client info log
+    - Collect autotest client debug log
   when: autotest_docker.execute
 
 - name: Create tarball of results
