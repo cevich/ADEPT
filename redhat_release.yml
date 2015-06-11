@@ -6,7 +6,7 @@
 # These groups are defined dynamicly from
 # redhat_release role, based on release_name value (above)
 
-- hosts: rhel:rhelah
+- hosts: subscribed
   roles:
     - subscribed
 

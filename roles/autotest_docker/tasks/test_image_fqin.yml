@@ -4,43 +4,48 @@
     test_image_host: ''
   when: autotest_docker.test_image is defined and
         autotest_docker.test_image.host is defined and
-        autotest_docker.test_image.host == None
+        (autotest_docker.test_image.host == None or
+         autotest_docker.test_image.host == "")
 
 - name: Test image host is defined
   set_fact:
-    test_image_host: "{{ autotest_docker.test_image.host }}"
+    test_image_host: "{{ autotest_docker.test_image.host }}/"
   when: test_image_host is not defined
 
 - name: Test image user is optional
   set_fact:
     test_image_user: ''
   when: autotest_docker.test_image is defined and
+        test_image_host != "" and
         autotest_docker.test_image.user is defined and
-        autotest_docker.test_image.user == None
+        (autotest_docker.test_image.user == None or
+         autotest_docker.test_image.user == "")
 
 - name: Test image user is defined
   set_fact:
-    test_image_user: "{{ autotest_docker.test_image.user }}"
-  when: test_image_user is not defined
+    test_image_user: "{{ autotest_docker.test_image.user }}/"
+  when: test_image_host != "" and test_image_user is not defined
 
 - name: Test image tag is optional
   set_fact:
-    test_image_tag: 'latest'
+    test_image_tag: ':latest'
   when: autotest_docker.test_image is defined and
         autotest_docker.test_image.tag is defined and
-        autotest_docker.test_image.tag == None
+        (autotest_docker.test_image.tag == None or
+         autotest_docker.test_image.tag == "")
 
 - name: Test image tag is defined
   set_fact:
-    test_image_tag: "{{ autotest_docker.test_image.tag }}"
+    test_image_tag: ":{{ autotest_docker.test_image.tag }}"
   when: test_image_tag is not defined
 
 - name: Docker Autotest test image known in fqin format
   set_fact:
-    test_image_fqin: "{{ test_image_host }}/{{ test_image_user }}/{{ autotest_docker.test_image.name }}:{{ test_image_tag }}"
+    test_image_fqin: "{{ test_image_host }}{{ test_image_user }}{{ autotest_docker.test_image.name }}{{ test_image_tag }}"
   when: autotest_docker.test_image is defined and
         autotest_docker.test_image.name is defined and
-        autotest_docker.test_image.name != None
+        (autotest_docker.test_image.name != None or
+         autotest_docker.test_image.name == "")
 
 - name: Docker Autotest test image was previously built
   command: /usr/bin/docker inspect --format \{\{.Created\}\}
@@ -63,6 +68,7 @@
            {{ autotest_docker.test_image.build_url }}
   when: test_image_fqin is defined and
         autotest_docker.test_image is defined and
-        autotest_docker.test_image.build_url is defined and
-        autotest_docker.test_image.build_url != None and
-        docker_inspect_result|failed
+        docker_inspect_result|failed and
+        (autotest_docker.test_image.build_url is defined and
+         autotest_docker.test_image.build_url != None and
+         autotest_docker.test_image.build_url != "")

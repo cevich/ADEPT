@@ -44,6 +44,14 @@
 
 - group_by: key={{ release_name }}
 
+- name: Subscribed is defined in a variable
+  set_fact:
+    subscribed_name: "subscribed"
+  when: is_rhelah or is_rhel
+
+- group_by: key={{ subscribed_name }}
+  when: is_rhelah or is_rhel
+
 - debug:
     msg: "is_rhel={{ is_rhel }}; is_rhelah={{ is_rhelah }}; is_centos={{ is_centos }}; is_fedora={{ is_fedora }}; release_name={{ release_name }}; group_names={{ group_names }}"
 
