@@ -7,6 +7,6 @@ host_vars/*
 results/*
 !results/.empty
 docs/build
-group_vars/autotest_docker
+group_vars/autotested
 group_vars/subscribed
 hosts

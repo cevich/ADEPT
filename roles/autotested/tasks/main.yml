@@ -1,8 +1,5 @@
 ---
 
-- name: Docker autotest execution variable is shown
-- debug: var=autotest_docker
-
 - include: setup_autotest_docker_path.yml
 
 - include: install_autotest_docker.yml
