@@ -1,4 +1,7 @@
 ---
+
+- debug: msg="autotest_docker={{ autotest_docker | to_nice_yaml }};"
+
 - include: setup_autotest_docker_path.yml
 
 - include: install_autotest_docker.yml
