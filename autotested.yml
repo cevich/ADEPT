@@ -1,4 +1,4 @@
 ---
-- hosts: autotest_docker
+- hosts: autotested
   roles:
-    - autotest_docker
+    - autotested
