@@ -1,6 +1,7 @@
 ---
 
-- debug: msg="autotest_docker={{ autotest_docker | to_nice_yaml }};"
+- name: Docker autotest execution variable is shown
+- debug: var=autotest_docker
 
 - include: setup_autotest_docker_path.yml
 
