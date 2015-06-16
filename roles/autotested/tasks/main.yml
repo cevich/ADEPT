@@ -49,7 +49,7 @@
 
 
 # Hook for inclusion of additional files
-- name: Copy autotest_docker copies
+- name: Copy files from autotest_docker.copies list
   copy:
   args:
     backup: "{{ item.backup | default(omit) }}"
