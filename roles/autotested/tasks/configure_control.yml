@@ -8,6 +8,8 @@
     follow: True
     line: "\\1 {{ autotest_docker.timeout }}"
     regexp: "^(TIMEOUT\\s*=\\s*).*$"
+  when: autotest_docker.timeout is defined and
+        autotest_docker.timeout is number
 
 - name: Config_custom_control string is set
   set_fact:
