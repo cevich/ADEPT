@@ -35,7 +35,7 @@ Quickstart
 #. ``git clone https://github.com/cevich/autotest-docker-enabled-product-testing.git adept``
 #. Copy ``hosts.sample`` to ``hosts`` and edit to list all DNS host names as
    indicated in the file's comments.
-#. Copy ``group_vars/autotest_docker.sample`` to ``group_vars/autotest_docker``.
+#. Copy ``group_vars/autotested.sample`` to ``group_vars/autotested``.
 #. Copy ``group_vars/subscribed.sample`` to ``group_vars/subscribed``.  Either provide
    your subscription-manager credentials directly, or (default) in the files
    ``~/rhn_username`` and ``~/rhn_password``.
