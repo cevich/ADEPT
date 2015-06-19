@@ -1,9 +1,23 @@
 ---
-- name: System is registered and subscribed
+
+# Can't use a variable for 'ignore_errors', instead use
+# a conditional for the same affect
+- name: System is registered and subscribed but ignores errors
   redhat_subscription:
   args:
     autosubscribe: yes
     username: "{{ rhsm.username }}"
     password: "{{ rhsm.password }}"
     state: present
-  when: is_rhel or is_rhelah
+  ignore_errors: true
+  when: rhsm.tolerant and (is_rhel or is_rhelah)
+
+- name: System is registered and subscribed but does not ignore errors
+  redhat_subscription:
+  args:
+    autosubscribe: yes
+    username: "{{ rhsm.username }}"
+    password: "{{ rhsm.password }}"
+    state: present
+  ignore_errors: false
+  when: not rhsm.tolerant and (is_rhel or is_rhelah)
