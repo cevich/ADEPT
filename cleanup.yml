@@ -2,4 +2,4 @@
 # Bypass with rhsm.unsubscribe=false
 - hosts: subscribed
   roles:
-    - { role: unsubscribed, when: rhsm.unsubscribe }
+    - unsubscribed
