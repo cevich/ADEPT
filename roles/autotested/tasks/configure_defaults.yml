@@ -68,7 +68,6 @@
 - name: Defaults docker_repo_name is configured
   ini_file:
   args:
-    backup: true
     dest: "{{ config_custom_defaults }}"
     option: docker_repo_name
     section: DEFAULTS
@@ -81,7 +80,6 @@
 - name: Defaults docker_repo_tag is configured
   ini_file:
   args:
-    backup: true
     dest: "{{ config_custom_defaults }}"
     option: docker_repo_tag
     section: DEFAULTS
@@ -94,7 +92,6 @@
 - name: Defaults docker_registry_host is configured
   ini_file:
   args:
-    backup: true
     dest: "{{ config_custom_defaults }}"
     option: docker_registry_host
     section: DEFAULTS
@@ -107,7 +104,6 @@
 - name: Defaults docker_registry_user is configured
   ini_file:
   args:
-    backup: true
     dest: "{{ config_custom_defaults }}"
     option: docker_registry_user
     section: DEFAULTS
@@ -136,7 +132,6 @@
 - name: Default image preserve CSV value is configured
   ini_file:
   args:
-    backup: true
     dest: "{{ config_custom_defaults }}"
     option: preserve_fqins
     section: DEFAULTS
@@ -164,7 +159,6 @@
 - name: Default container preserve CSV value is configured
   ini_file:
   args:
-    backup: true
     dest: "{{ config_custom_defaults }}"
     option: preserve_cnames
     section: DEFAULTS

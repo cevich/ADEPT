@@ -2,7 +2,6 @@
 - name: Control timeout set
   lineinfile:
   args:
-    backup: true
     backrefs: true
     dest: "{{ autotest_docker_path }}/control"
     follow: True
@@ -40,7 +39,6 @@
 - name: Control is configured
   ini_file:
   args:
-    backup: true
     dest: "{{ autotest_docker_path }}/config_custom/control.ini"
     option: include
     section: Control
@@ -52,7 +50,6 @@
 - name: Control bugzilla checking is disabled
   ini_file:
   args:
-    backup: true
     dest: "{{ autotest_docker_path }}/config_custom/control.ini"
     option: url
     section: Bugzilla

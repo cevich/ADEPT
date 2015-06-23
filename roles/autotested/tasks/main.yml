@@ -52,7 +52,6 @@
 - name: Copy files from autotest_docker.copies list
   copy:
   args:
-    backup: "{{ item.backup | default(omit) }}"
     content: "{{ item.content | default(omit) }}"
     dest: "{{ autotest_docker_path }}/{{ item.dest | default(omit) }}"
     directory_mode: "{{ item.directory_mode | default(omit) }}"
@@ -75,7 +74,6 @@
 - name: Resolve autotest_docker templates
   template:
   args:
-    backup: "{{ item.backup | default(omit) }}"
     dest: "{{ autotest_docker_path }}/{{ item.dest | default(omit) }}"
     follow: "{{ item.follow | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
