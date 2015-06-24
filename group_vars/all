@@ -21,6 +21,7 @@ docker:
         - --volume /var/log:/var/log
         - --volume /:/host
 
+# Set this true if test systems should be fully updated
 update_system: true
 
 # This is set after package/software update when certain
