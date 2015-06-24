@@ -5,3 +5,5 @@
   notify: The needs_reboot flag is set because of install or package update
   when: update_system
   changed_when: atomic_host_upgrade.stdout | search('pgrade prepared for next boot')
+
+- include: ../../common/site_scripts.yml.inc

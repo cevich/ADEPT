@@ -30,3 +30,5 @@
   notify:
     - The needs_reboot flag is set because of install or package update
   when: update_system
+
+- include: ../../common/site_scripts.yml.inc
