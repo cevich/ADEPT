@@ -16,6 +16,8 @@
   args:
     creates: "{{ item.creates | default(omit) }}"
     removes: "{{ item.removes | default(omit) }}"
+    chdir: "{{ item.chdir | default(omit) }}"
+    executable: "{{ item.executable | default(omit) }}"
   register: site_scripts_results
   when: item.filename != None and
         item.filename != ""
