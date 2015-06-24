@@ -1,2 +1,2 @@
 ---
-- include: ../../rhel/handlers/main.yml
+- include: ../../common/reboot_handler.yml.inc

@@ -23,7 +23,3 @@ docker:
 
 # Set this true if test systems should be fully updated
 update_system: true
-
-# This is set after package/software update when certain
-# packages are changed and a system reboot is needed.
-needs_reboot: false

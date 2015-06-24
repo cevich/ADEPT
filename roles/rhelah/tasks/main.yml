@@ -2,6 +2,6 @@
 - name: Atomic host is updated to latest tree
   command: atomic host upgrade
   register: atomic_host_upgrade
-  notify: The needs_reboot flag is set because of update
+  notify: The needs_reboot flag is set because of install or package update
   when: update_system
   changed_when: atomic_host_upgrade.stdout | search('pgrade prepared for next boot')

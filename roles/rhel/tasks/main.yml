@@ -16,7 +16,7 @@
     enablerepo: "{{ yum_enable_repos }}"
   register: support_installed
   notify:
-    - The needs_reboot flag is set because of install
+    - The needs_reboot flag is set because of install or package update
 
 - name: System is fully updated
   yum:
@@ -28,5 +28,5 @@
   register:
     system_updated
   notify:
-    - The needs_reboot flag is set because of update
+    - The needs_reboot flag is set because of install or package update
   when: update_system

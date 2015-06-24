@@ -8,3 +8,5 @@ rhsm:
     unsubscribe: false
     # Set true to update all packages
     updated: false
+
+needs_reboot: false
