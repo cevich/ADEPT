@@ -1,1 +1,34 @@
-../../rhel/tasks/main.yml
+---
+- name: Repo. disable list is defined
+  set_fact:
+    yum_disable_repos: "*beta*,*debug*,*test*,*source*"
+
+- name: Repo. enable list is defined
+  set_fact:
+    yum_enable_repos: "epel,base,extras,updates"
+
+- name: Support packages are installed
+  yum:
+  args:
+    name: docker,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-sphinx,python-bugzilla,which,pylint,make,python-pep8,python-sphinxcontrib-httpdomain
+    state: present
+    disablerepo: "{{ yum_disable_repos }}"
+    enablerepo: "{{ yum_enable_repos }}"
+  register: support_installed
+  notify:
+    - The needs_reboot flag is set because of install or package update
+
+- name: System is fully updated
+  yum:
+  args:
+    name: "*"
+    state: latest
+    disablerepo: "{{ yum_disable_repos }}"
+    enablerepo: "{{ yum_enable_repos }}"
+  register:
+    system_updated
+  notify:
+    - The needs_reboot flag is set because of install or package update
+  when: update_system
+
+- include: ../../common/site_scripts.yml.inc

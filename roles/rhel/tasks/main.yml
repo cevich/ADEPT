@@ -1,11 +1,11 @@
 ---
 - name: Repo. disable list is defined
   set_fact:
-    yum_disable_repos: "*-eus-*,*-htb-*,*-ha-*,*-rt-*,*-lb-*,*-rs-*,*-sap-*,*beta*"
+    yum_disable_repos: "*-eus-*,*-htb-*,*-ha-*,*-rt-*,*-lb-*,*-rs-*,*-sap-*,*beta*,*debug*,*test*,*source*"
 
 - name: Repo. enable list is defined
   set_fact:
-    yum_enable_repos: "*-optional-rpms,*-extras-rpms,*7-server-rpms,*7-server-eus-rpms,*epel*,base,extras,updates"
+    yum_enable_repos: "*-optional-rpms,*-extras-rpms,*7-server-rpms,*7-server-eus-rpms,epel"
 
 - name: Support packages are installed
   yum:
