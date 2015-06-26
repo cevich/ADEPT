@@ -8,23 +8,6 @@
   changed_when: true
   ignore_errors: true
 
-# This is required since shutdown cannot be scheduled any shoter than one
-# minute (above), and there may be DNS timeouts while checking for port
-# accessability (below).
-- name: Wait for scheduled reboot
-  pause:
-  args:
-    minutes: 1
-
-- name: Server's ssh port is unavailable
-  local_action: wait_for
-                host={{ inventory_hostname | default(ansible_hostname) }}
-                port=22
-                state=stopped
-                connect_timeout=13
-                timeout={{ shutdown_timeout }}
-  sudo: false
-
 - name: Allow time to complete shutdown
   pause:
   args:
