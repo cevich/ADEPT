@@ -1,5 +1,2 @@
 ---
-# Unconditional flag set, tasks chcked if upgrade happened
-- name: The needs_reboot flag is set because of update
-  set_fact:
-    needs_reboot: true
+- include: ../../common/reboot_handler.yml.inc

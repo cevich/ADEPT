@@ -1,12 +1,13 @@
 ---
+
 - name: Support packages are installed
   yum:
   args:
-    name: docker-io,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-sphinx,python-bugzilla,which,pylint,make,python-pep8,python-sphinxcontrib-httpdomain
+    name: docker-io*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-sphinx,python-bugzilla,which,pylint,make,python-pep8,python-sphinxcontrib-httpdomain
     state: present
   register: support_installed
   notify:
-    - The needs_reboot flag is set because of install
+    - The needs_reboot flag is set because of install or package update
 
 - name: System is fully updated
   yum:
@@ -16,5 +17,7 @@
   register:
     system_updated
   notify:
-    - The needs_reboot flag is set because of update
+    - The needs_reboot flag is set because of install or package update
   when: update_system
+
+- include: ../../common/site_scripts.yml.inc

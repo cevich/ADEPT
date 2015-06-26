@@ -1,10 +1,16 @@
 ---
-# Red Hat Subscription Manager activation credentials for test resources.
-# Pull from file-contents by default, omit to bypass activation.
-rhsm:
-    username: "{{ lookup('file', '~/rhn_username') | default(omit) }}"
-    password: "{{ lookup('file', '~/rhn_password') | default(omit) }}"
-    # Set true to unsubscribe system at end of testing
-    unsubscribe: false
-    # Set true to update all packages
-    updated: false
+# List of copy & command arguments
+site_scripts:
+    # Just the filename, no path.  Ansible will search roles/files/ first
+    # then files/
+    - filename:
+      # Source path to directory to copy filename from
+      srcpath:
+      # Options to the 'command' module, blank if not used.
+      # destination directory, and directory to run script from
+      chdir:
+      creates:
+      removes:
+      executable:
+
+needs_reboot: false

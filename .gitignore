@@ -6,7 +6,13 @@ host_vars/*
 !host_vars/.empty
 results/*
 !results/.empty
+!roles/files/.empty
+roles/files/*
 docs/build
 group_vars/autotested
 group_vars/subscribed
+group_vars/rhel
+group_vars/rhelah
+group_vars/centos
+group_vars/fedora
 hosts
