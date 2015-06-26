@@ -10,7 +10,7 @@
 - name: Support packages are installed
   yum:
   args:
-    name: docker,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-sphinx,python-bugzilla,which,pylint,make,python-pep8,python-sphinxcontrib-httpdomain
+    name: docker*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-sphinx,python-bugzilla,which,pylint,make,python-pep8,python-sphinxcontrib-httpdomain
     state: present
     disablerepo: "{{ yum_disable_repos }}"
     enablerepo: "{{ yum_enable_repos }}"
