@@ -23,3 +23,6 @@ docker:
 
 # Set this true if test systems should be fully updated
 update_system: true
+
+# Gathering facts after first redhat_released role runs from site.yml
+post_rhr_gather: false
