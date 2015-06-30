@@ -1,40 +1,55 @@
 ---
 
-# This works properly eventhough the other ssh channels are shutdown
+# Note: Ansible 1.9.x has bug w/ 'shutdown now' b/c ssh channel DC.
+#
+# This method works properly eventhough the other ssh channels are shutdown
 # and flagged as an error.  Issueing reboot command directly, or background
 # executing a script doesn't work reliably with different ansible versions.
-- name: Reboot System
-  shell: "shutdown -r 1 &"
-  changed_when: true
-  ignore_errors: true
+#
+#- name: Reboot System
+#  shell: "shutdown -r 1 &"
+#  changed_when: true
+#  ignore_errors: true
+#
+#- name: Server's ssh port is available
+#  local_action: wait_for
+#                host={{ ansible_hostname | default(ansible_fqdn) }}
+#                delay={{ shutdown_timeout }}
+#                port=22
+#                state=started
+#                # Double DNS timeout + 1 extra second
+#                connect_timeout=13
+#                timeout={{ bootup_timeout }}
+#  sudo: false
 
-- name: Allow time to complete shutdown
-  pause:
-  args:
-    minutes: 1
-
-- name: Server's ssh port is available
-  local_action: wait_for
-                host={{ ansible_hostname | default(ansible_fqdn) }}
-                delay=30
-                port=22
-                state=started
-                connect_timeout=13
-                timeout={{ bootup_timeout }}
-  sudo: false
-
-# Make sure host was rebooted dispite ignoring errors on reboot command
-# and possibly hitting some quirks with wait_for.
-- name: Uptime command output is known
-  command: /usr/bin/uptime --pretty
-  register: result
+- name: Pre-reboot uptime in seconds is known
+  shell: cat /proc/uptime | cut -d " " -f 1 | cut -d "." -f 1
+  register: pre_result
   changed_when: false
 
-- name: Uptime output is filtered into integer minutes, converted to seconds
-  set_fact:
-    uptime_seconds: "{{ result.stdout | regex_replace('^up(?:\\s+\\d+\\s+days?,)?(?:\\s+\\d+\\s+hours?,)?\\s+(\\d+)\\s+minutes?.*$', '\\\\1') | int() * 60 }}"
+- debug: msg="Pre-reboot uptime is {{ pre_result.stdout }}s and shutdown_timeout is {{ shutdown_timeout }}s"
+
+# Note: For ansible 1.8.x this works well
+- name: Reboot System
+  command: shutdown -r now "Atomic host updated"
+  async: 0
+  poll: 0
+  ignore_errors: true
+
+- name: System has booted back up
+  local_action: wait_for host={{ inventory_hostname }}
+                delay={{ shutdown_timeout }}
+                timeout={{ bootup_timeout }}
+
+# Because 'shutdown -r' (above) has ignore_errors: true, system may not
+# have actually rebooted.  Verify it has by examining uptime duration
+# and comparing to minimum shutdown_timeout delay.
+- name: Post-reboot uptime in seconds is known
+  shell: cat /proc/uptime | cut -d " " -f 1 | cut -d "." -f 1
+  register: post_result
+  changed_when: false
 
 - fail:
   args:
-    msg: "System uptime {{ uptime_seconds }}s is longer than reboot timeout {{ bootup_timeout }}s"
-  when: "{{ uptime_seconds }} > {{ bootup_timeout + shutdown_timeout }}"
+    msg: "Post-reboot uptime {{ post_result.stdout }}s longer than pre-reboot uptime {{ pre_result.stdout }}s"
+  when: "{{ post_result.stdout | int }} >= {{ pre_result.stdout | int }}"

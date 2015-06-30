@@ -1,5 +1,6 @@
 ---
 # Bypass with rhsm.unsubscribe=false
 - hosts: subscribed
+  gather_facts: post_rhr_gather
   roles:
     - unsubscribed
