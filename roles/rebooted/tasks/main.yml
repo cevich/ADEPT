@@ -27,7 +27,7 @@
   register: pre_result
   changed_when: false
 
-- debug: msg="Pre-reboot uptime is {{ pre_result.stdout }}s and shutdown_timeout is {{ shutdown_timeout }}s"
+- debug: msg="Pre-reboot uptime is {{ pre_result.stdout }}s"
 
 # Note: For ansible 1.8.x this works well
 - name: Reboot System
@@ -38,6 +38,7 @@
 
 - name: System has booted back up
   local_action: wait_for host={{ inventory_hostname }}
+                port=22
                 delay={{ shutdown_timeout }}
                 timeout={{ bootup_timeout }}
 
@@ -48,6 +49,8 @@
   shell: cat /proc/uptime | cut -d " " -f 1 | cut -d "." -f 1
   register: post_result
   changed_when: false
+
+- debug: msg="Post-reboot uptime is {{ post_result.stdout }}s"
 
 - fail:
   args:
