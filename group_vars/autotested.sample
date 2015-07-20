@@ -78,13 +78,13 @@ autotest_docker:
     # from default values unless you know what you're doing.
 
     # Command to use for retrieving current Docker Autotest version
-    current_version_cmd: atomic/config_value.py DEFAULTS config_version config_defaults/defaults.ini config_custom/defaults.ini
+    current_version_cmd: ./config_value.py DEFAULTS config_version config_defaults/defaults.ini config_custom/defaults.ini
 
     # Command to use for retrieving required Autotest version
-    autotest_version_cmd: atomic/config_value.py DEFAULTS autotest_version config_defaults/defaults.ini config_custom/defaults.ini
+    autotest_version_cmd: ./config_value.py DEFAULTS autotest_version config_defaults/defaults.ini config_custom/defaults.ini
 
     # Command to use for retrieving preserve_fqins value
-    preserve_fqins_cmd: atomic/config_value.py DEFAULTS preserve_fqins config_defaults/defaults.ini config_custom/defaults.ini
+    preserve_fqins_cmd: ./config_value.py DEFAULTS preserve_fqins config_defaults/defaults.ini config_custom/defaults.ini
 
     # Command to use for retrieving preserve_cnames value
-    preserve_cnames_cmd: atomic/config_value.py DEFAULTS preserve_cnames config_defaults/defaults.ini config_custom/defaults.ini
+    preserve_cnames_cmd: ./config_value.py DEFAULTS preserve_cnames config_defaults/defaults.ini config_custom/defaults.ini
