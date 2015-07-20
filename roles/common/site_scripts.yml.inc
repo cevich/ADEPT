@@ -12,7 +12,8 @@
   with_items: site_scripts
 
 - name: Site scripts are executed
-  command: "{{ item.chdir | default('/root') }}/{{ item.filename }}"
+  command: "{{ item.chdir | default('/root') }}/{{ item.filename }} \
+            {{ item.args | default(omit) }}"
   args:
     creates: "{{ item.creates | default(omit) }}"
     removes: "{{ item.removes | default(omit) }}"
