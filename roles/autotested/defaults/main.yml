@@ -5,27 +5,15 @@
 # file into the host_vars directory, named as the dns name
 # of the host.
 
-autotest:
-    # Git repository where autotest should be cloned
-    # from.  This can point upstream, to a fork or
-    # custom repo.  However, it must provide the version
-    # specified by autotest_docker.version shown by
-    # running client/shared/version.py
-    repo: https://github.com/autotest/autotest.git
-
-    # Path where autotest will be installed.
-    path: /usr/local/autotest
-
 autotest_docker:
 
-    # Git repository where autotest_docker should be cloned
-    # retrieved from.  This can point upstream, to a fork
-    # or custom repo. with additional/modified content.
-    repo: https://github.com/autotest/autotest-docker.git
+    # Remote directory where Autotest is installed
+    autotest_dir: "/usr/local/autotest"
 
-    # Version number or branch name to use. Empty to use
-    # repo HEAD.
-    version:
+    # Directory containing subdirectories 'autotest' and
+    # 'autotest-docker' which hold cached copied of those
+    # repos. for deployment to test systems.
+    cache_dir: "../"
 
     # Many tests rely on a default image for testing. Specify
     # either _all_ components of the fully-qualified-image-name.
@@ -41,14 +29,23 @@ autotest_docker:
 
     # Ultimate timeout in seconds for all subtests to run
     # (in seconds).
-    timeout: 14401
+    timeout: 300
 
-    # List of subtests to run, empty to use defaults in repo.
-    # (runs _all_ tests).
+    # List of subtests to include, empty to use defaults
+    # (runs _all_ specified by subthings, below).
     include:
+
+    # List of pre/intra/post/sub-tests to exclude,
+    # empty for none.
+    exclude:
+
+    # List of pre/intra/post/sub-tests to run (in order),
+    # empty to run everything.
+    subthings:
       - docker_cli/version
       - docker_cli/dockerhelp
 
+    # List of subtests to exclude, empty to use defaults
 
     # List of template arg dictionaries use, empty for none
     # e.g. - dest: "config_custom/tests.ini"
@@ -72,14 +69,8 @@ autotest_docker:
     # act upon.  More than likely they do not need to be modified
     # from default values unless you know what you're doing.
 
-    # Command to use for retrieving current Docker Autotest version
-    current_version_cmd: atomic/config_value.py DEFAULTS config_version config_defaults/defaults.ini config_custom/defaults.ini
-
-    # Command to use for retrieving required Autotest version
-    autotest_version_cmd: atomic/config_value.py DEFAULTS autotest_version config_defaults/defaults.ini config_custom/defaults.ini
-
     # Command to use for retrieving preserve_fqins value
-    preserve_fqins_cmd: atomic/config_value.py DEFAULTS preserve_fqins config_defaults/defaults.ini config_custom/defaults.ini
+    preserve_fqins_cmd: ./config_value.py DEFAULTS preserve_fqins config_defaults/defaults.ini config_custom/defaults.ini
 
     # Command to use for retrieving preserve_cnames value
-    preserve_cnames_cmd: atomic/config_value.py DEFAULTS preserve_cnames config_defaults/defaults.ini config_custom/defaults.ini
+    preserve_cnames_cmd: ./config_value.py DEFAULTS preserve_cnames config_defaults/defaults.ini config_custom/defaults.ini

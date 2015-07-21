@@ -3,7 +3,7 @@
   fetch:
   args:
     dest: "results/{{ inventory_hostname }}/"
-    src: "{{ autotest.path }}/client/results/default/debug/client.INFO"
+    src: "{{ autotest_docker.autotest_dir }}/client/results/default/debug/client.INFO"
     fail_on_missing: true
     flat: true
 
@@ -11,7 +11,7 @@
   fetch:
   args:
     dest: "results/{{ inventory_hostname }}/"
-    src: "{{ autotest.path }}/client/results/default/debug/client.DEBUG"
+    src: "{{ autotest_docker.autotest_dir }}/client/results/default/debug/client.DEBUG"
     fail_on_missing: true
     flat: true
 
@@ -20,6 +20,14 @@
   args:
     dest: "results/{{ inventory_hostname }}/"
     src: "/tmp/results.tbz"
+    fail_on_missing: true
+    flat: true
+
+- name: Collect Docker Autotest config tarball
+  fetch:
+  args:
+    dest: "results/{{ inventory_hostname }}/"
+    src: "/tmp/config.tbz"
     fail_on_missing: true
     flat: true
 

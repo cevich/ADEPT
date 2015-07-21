@@ -1,26 +1,4 @@
 ---
-docker:
-    # Fully-qualified image name of build container to use
-    # for building/installing autotest and autotest_docker.
-    # This prevents needing additional packages/software on
-    # the test host which could affect testing.
-    build_fqin: registry.access.redhat.com/rhel7/rhel-tools:latest
-
-    # List of additional arguments to pass when running
-    # build/installation steps.  Install destination root
-    # is assumed to be /host
-    build_args:
-        - --interactive
-        - --rm
-        - --privileged
-        - --net=host
-        - --ipc=host
-        - --pid=host
-        - --env DESTROOT=/host
-        - --volume /run:/run
-        - --volume /var/log:/var/log
-        - --volume /:/host
-
 # Set this true if test systems should be fully updated
 update_system: true
 
