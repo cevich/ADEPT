@@ -2,7 +2,7 @@
 needs_reboot: false
 
 # Minimum time to wait for from reboot command, until ssh becomes unavailable
-shutdown_timeout: 90
+shutdown_timeout: 10
 
 # Maximum time to wait for system to become available again (in seconds)
 bootup_timeout: 600
