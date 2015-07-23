@@ -26,3 +26,9 @@
 
 - debug: var=site_script_results
   when: site_script_results is defined
+
+- name: Set reboot flag when site scripts were executed
+  set_fact:
+    needs_reboot: true
+  when: item | changed
+  with_items: site_scripts_results.results
