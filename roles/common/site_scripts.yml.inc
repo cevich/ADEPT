@@ -12,7 +12,8 @@
   with_items: site_scripts
 
 - name: Site scripts are executed
-  command: "{{ item.chdir | default('/root') }}/{{ item.filename }}"
+  command: "{{ item.chdir | default('/root') }}/{{ item.filename }} \
+            {{ item.args | default(omit) }}"
   args:
     creates: "{{ item.creates | default(omit) }}"
     removes: "{{ item.removes | default(omit) }}"
@@ -25,3 +26,9 @@
 
 - debug: var=site_script_results
   when: site_script_results is defined
+
+- name: Set reboot flag when site scripts were executed
+  set_fact:
+    needs_reboot: true
+  when: item | changed
+  with_items: site_scripts_results.results

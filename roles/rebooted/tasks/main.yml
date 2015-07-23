@@ -1,27 +1,5 @@
 ---
 
-# Note: Ansible 1.9.x has bug w/ 'shutdown now' b/c ssh channel DC.
-#
-# This method works properly eventhough the other ssh channels are shutdown
-# and flagged as an error.  Issueing reboot command directly, or background
-# executing a script doesn't work reliably with different ansible versions.
-#
-#- name: Reboot System
-#  shell: "shutdown -r 1 &"
-#  changed_when: true
-#  ignore_errors: true
-#
-#- name: Server's ssh port is available
-#  local_action: wait_for
-#                host={{ ansible_hostname | default(ansible_fqdn) }}
-#                delay={{ shutdown_timeout }}
-#                port=22
-#                state=started
-#                # Double DNS timeout + 1 extra second
-#                connect_timeout=13
-#                timeout={{ bootup_timeout }}
-#  sudo: false
-
 - name: Pre-reboot uptime in seconds is known
   shell: cat /proc/uptime | cut -d " " -f 1 | cut -d "." -f 1
   register: pre_result
@@ -29,17 +7,21 @@
 
 - debug: msg="Pre-reboot uptime is {{ pre_result.stdout }}s"
 
-# Note: For ansible 1.8.x this works well
 - name: Reboot System
-  command: shutdown -r now "Atomic host updated"
+  shell: "shutdown -r 1 &"
   async: 0
   poll: 0
+  changed_when: true
   ignore_errors: true
+
+- name: Pause for Shutdown/Reboot
+  pause:
+    seconds: "{{ shutdown_timeout }}"
+  delegate_to: 127.0.0.1
 
 - name: System has booted back up
   local_action: wait_for host={{ inventory_hostname }}
                 port=22
-                delay={{ shutdown_timeout }}
                 timeout={{ bootup_timeout }}
 
 # Because 'shutdown -r' (above) has ignore_errors: true, system may not

@@ -1,37 +1,23 @@
 ---
 
-- include: setup_autotest_docker_path.yml
-
-- include: install_autotest_docker.yml
-
-- name: Installed docker autotest version command was run
-  command: "{{ autotest_docker.current_version_cmd }}"
-  args:
-    chdir: "{{ autotest_docker_path }}"
-  register: result
-  changed_when: False
-
-- name: Installed docker autotest version is known
+- name: Base directory of Docker Autotest is defined
   set_fact:
-    autotest_docker_version: "{{ result.stdout }}"
-  changed_when: False
+    autotest_docker_path: "{{ autotest_docker.autotest_dir }}/client/tests/docker"
 
-- name: Required autotest version command was run
-  command: "{{ autotest_docker.autotest_version_cmd }}"
-  args:
-    chdir: "{{ autotest_docker_path }}"
-  register: result
-  changed_when: False
+- name: Autotest directory is removed
+  file:
+    path: "{{ autotest_docker.autotest_dir }}"
+    state: absent
 
-- name: Required autotest version is checked out
-  command: /usr/bin/docker run
-           {{ docker.build_args | join(' ') }}
-           --workdir /host/{{ autotest.path }}
-           {{ docker.build_fqin }}
-           git reset --hard {{ result.stdout }}
+- name: Cached Autotest is copied
+  synchronize:
+    dest: "{{ autotest_docker.autotest_dir }}"
+    src: "{{ autotest_docker.cache_dir }}/autotest/"
 
-# fix vim syntax highlighting
-# '
+- name: Cached Docker Autotest is copied
+  synchronize:
+    dest: "{{ autotest_docker_path }}"
+    src: "{{ autotest_docker.cache_dir }}/autotest-docker/"
 
 - name: Custom configuration is cleared
   file:
@@ -46,7 +32,6 @@
     state: directory
 
 - include: test_image_fqin.yml
-
 
 # Hook for inclusion of additional files
 - name: Copy files from autotest_docker.copies list
@@ -96,7 +81,7 @@
 - name: Results directory is empty
   file:
   args:
-    path: "{{ autotest.path }}/client/results"
+    path: "{{ autotest_docker.autotest_dir }}/client/results"
     state: absent
   when: autotest_docker.execute
 
@@ -119,11 +104,11 @@
   when: autotest_docker.execute
 
 - name: Execute Docker autotest
-  command: "{{ autotest.path }}/client/autotest-local {{ autotest_docker_path }}/control"
+  command: "{{ autotest_docker.autotest_dir }}/client/autotest-local {{ autotest_docker_path }}/control"
   register: autotest_execution
   # This should be autotest_docker.timeout, but can't use var here :(
   async: 14401
-  poll: 30
+  poll: 60
   notify:
     - Collect autotest client info log
     - Collect autotest client debug log
@@ -132,9 +117,19 @@
 - name: Create tarball of results
   command: tar cjf /tmp/results.tbz results
   args:
-    chdir: "{{ autotest.path }}/client"
+    chdir: "{{ autotest_docker.autotest_dir }}/client"
   register: resultstarball
   notify: Collect autotest results tarball
+  when:  autotest_docker.execute and
+         autotest_execution is defined and
+         autotest_execution|success
+
+- name: Create tarball of custom configuration
+  command: tar cjf /tmp/config.tbz config_custom
+  args:
+    chdir: "{{ autotest_docker_path }}"
+  register: resultstarball
+  notify: Collect Docker Autotest config tarball
   when:  autotest_docker.execute and
          autotest_execution is defined and
          autotest_execution|success
@@ -142,7 +137,7 @@
 - name: Convert Results to junit
   shell: tools/results2junit.py results/default > /tmp/results.junit
   args:
-    chdir: "{{ autotest.path }}/client"
+    chdir: "{{ autotest_docker.autotest_dir }}/client"
   register: results2junit
   notify: Collect autotest results junit
   # This thing is really easy to break

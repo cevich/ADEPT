@@ -36,7 +36,7 @@
     chdir: "{{ autotest_docker_path }}"
   when: control_needed
 
-- name: Control is configured
+- name: Control is configured for included tests
   ini_file:
   args:
     dest: "{{ autotest_docker_path }}/config_custom/control.ini"
@@ -46,6 +46,29 @@
   when: control_needed and
         autotest_docker.include is defined and
         autotest_docker.include != None
+
+- name: Control is configured for excluded tests
+  ini_file:
+  args:
+    dest: "{{ autotest_docker_path }}/config_custom/control.ini"
+    option: exclude
+    section: Control
+    value: '{{ autotest_docker.exclude | join(",") }}'
+  when: control_needed and
+        autotest_docker.exclude is defined and
+        autotest_docker.exclude != None
+
+
+- name: Control is configured for pre/intra/post/sub-tests to run
+  ini_file:
+  args:
+    dest: "{{ autotest_docker_path }}/config_custom/control.ini"
+    option: subthings
+    section: Control
+    value: '{{ autotest_docker.subthings | join(",") }}'
+  when: control_needed and
+        autotest_docker.subthings is defined and
+        autotest_docker.subthings != None
 
 - name: Control bugzilla checking is disabled
   ini_file:

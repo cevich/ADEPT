@@ -56,6 +56,21 @@ the files ``~/rhn_username`` and ``~/rhn_password``.  The ``unsubscribe`` boolea
 signals whether or not to unsubscribe and de-register the system during the final
 cleanup_ stage (below).
 
+Lastly, roles are included based on membership to the group defined in the
+``redhat_release`` variable.  All of these include support for executing site-specific
+scripts from a list:
+
+::
+
+    site_scripts:
+        - filename: something
+          chdir: /where/to/put/it/
+          creates: /optional/path/to/something
+          removes: /optional/path/to/something
+          executable: /bin/ksh --if_you_need_it
+          args: --what ever -y ou --need
+        - ...
+
 .. _ansible: http://docs.ansible.com/index.html
 
 ``autotested``
