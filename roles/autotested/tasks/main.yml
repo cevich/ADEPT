@@ -14,6 +14,11 @@
     dest: "{{ autotest_docker.autotest_dir }}"
     src: "{{ autotest_docker.cache_dir }}/autotest/"
 
+- name: Untracked RELEASE-VERSION is removed
+  file:
+    path: "{{ autotest_docker.autotest_dir }}/RELEASE-VERSION"
+    state: absent
+
 - name: Cached Docker Autotest is copied
   synchronize:
     dest: "{{ autotest_docker_path }}"
