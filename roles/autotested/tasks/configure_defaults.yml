@@ -56,6 +56,15 @@
   register: cat_pid_cmd
   when: defaults_needed
 
+- name: Don't check Autotest version
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: autotest_version
+    section: DEFAULTS
+    value: "@!NOVERSIONCHECK!@"
+  when: defaults_needed
+
 - name: Defaults daemon_options is configured
   ini_file:
   args:
