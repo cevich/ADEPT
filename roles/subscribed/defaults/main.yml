@@ -6,5 +6,7 @@ rhsm:
     password: "{{ lookup('file', '~/rhn_password') | default(omit) }}"
     # Set true to unsubscribe system at end of testing
     unsubscribe: false
-    # Set true to ignore subscription failures
-    tolerant: false
+
+# Set the number of acceptable subscription failures
+rhsm_retries: '5'
+rhsm_delay: '30'
