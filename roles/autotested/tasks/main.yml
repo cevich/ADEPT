@@ -1,5 +1,11 @@
 ---
 
+- name: Docker Service Restarted
+  service:
+  args:
+    name: docker
+    state: restarted
+
 - name: Base directory of Docker Autotest is defined
   set_fact:
     autotest_docker_path: "{{ autotest_docker.autotest_dir }}/client/tests/docker"

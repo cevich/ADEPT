@@ -9,18 +9,18 @@ DOCKER_CERT_PATH=/etc/docker
 # pull use the ADD_REGISTRY option to list a set of registries, each prepended
 # with --add-registry flag. The first registry added will be the first registry
 # searched.
-ADD_REGISTRY='--add-registry registry.access.redhat.com --add-registry docker-registry.usersys.redhat.com'
+ADD_REGISTRY={{ docker_add_registry | default() }}
 
 # If you want to block registries from being used, uncomment the BLOCK_REGISTRY
 # option and give it a set of registries, each prepended with --block-registry
 # flag. For example adding docker.io will stop users from downloading images
 # from docker.io
-#BLOCK_REGISTRY='--block-registry docker.io'
+BLOCK_REGISTRY={{ docker_block_registry | default() }}
 
 # If you have a registry secured with https but do not have proper certs
 # distributed, you can tell docker to not look for full authorization by
 # adding the registry to the INSECURE_REGISTRY line and uncommenting it.
-INSECURE_REGISTRY='--insecure-registry docker-registry.usersys.redhat.com'
+INSECURE_REGISTRY={{ docker_insecure_registry | default() }}
 
 # On an SELinux system, if you remove the --selinux-enabled option, you
 # also need to turn on the docker_transition_unconfined boolean.

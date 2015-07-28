@@ -1,32 +1,18 @@
 ---
 - name: Docker sysconfig is copied
-  copy:
+  template:
   args:
-    backup: true
     dest: /etc/sysconfig/docker
-    src: docker
-    owner: root
-    group: root
-    setype: etc_t
+    src: docker.j2
 
 - name: Docker-network sysconfig is copied
-  copy:
+  template:
   args:
-    backup: true
     dest: /etc/sysconfig/docker-network
-    src: docker-network
-    owner: root
-    group: root
-    setype: etc_t
+    src: docker-network.j2
 
 - name: Docker Service Enabled
   service:
   args:
     name: docker
     enabled: true
-
-- name: Docker Service Restarted
-  service:
-  args:
-    name: docker
-    state: restarted
