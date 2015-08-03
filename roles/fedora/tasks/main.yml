@@ -3,7 +3,7 @@
 - name: Support packages are installed
   yum:
   args:
-    name: docker-io*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-sphinx,python-bugzilla,which,pylint,make,python-pep8,python-sphinxcontrib-httpdomain
+    name: docker-io*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-bugzilla,which
     state: present
   register: support_installed
   notify:
