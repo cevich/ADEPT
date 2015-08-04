@@ -1,21 +1,11 @@
 ---
 
-# Can't use a variable for 'ignore_errors', instead use
-# a conditional for the same affect
-- name: System is un-registered and un-subscribed but ignores errors
-  redhat_subscription:
-  args:
-    state: absent
-  ignore_errors: true
-  when: rhsm.tolerant and
-        (is_rhel or is_rhelah) and
-        rhsm.unsubscribe
-
 - name: System is un-registered and un-subscribed but does not ignores errors
   redhat_subscription:
   args:
     state: absent
-  ignore_errors: false
-  when: not rhsm.tolerant and
-        (is_rhel or is_rhelah) and
-        rhsm.unsubscribe
+  register: result
+  until: result | success
+  retries: rhsm_retries
+  delay: rhsm_delay
+  when: (is_rhel or is_rhelah) and rhsm.unsubscribe
