@@ -6,6 +6,6 @@
     state: absent
   register: result
   until: result | success
-  retries: rhsm_retries
-  delay: rhsm_delay
+  retries: "{{ rhsm_retries }}"
+  delay: "{{ rhsm_delay }}"
   when: (is_rhel or is_rhelah) and rhsm.unsubscribe
