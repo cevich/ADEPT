@@ -134,7 +134,7 @@
   ignore_errors: true
 
 - debug: var=item
-  with_items: "{{ results.stdout_lines }}"
+  with_items: results.stdout_lines
   when: results|success
 
 - name: Create tarball of results
