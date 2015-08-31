@@ -1,19 +1,13 @@
 ---
-- name: Repo. disable list is defined
-  set_fact:
-    yum_disable_repos: "*-eus-*,*-htb-*,*-ha-*,*-rt-*,*-lb-*,*-rs-*,*-sap-*,*beta*,*debug*,*test*,*source*,*-big-*"
-
-- name: Repo. enable list is defined
-  set_fact:
-    yum_enable_repos: "rhel-7-server-optional-rpms,rhel-7-server-extras-rpms,rhel-7-server-rpms,rhel-7-server-eus*,epel"
+- name: All repositories are disabled
+  command: /usr/sbin/subscription-manager repos --disable=*
 
 - name: Support packages are installed
   yum:
   args:
     name: docker*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-bugzilla,which
     state: present
-    disablerepo: "{{ yum_disable_repos }}"
-    enablerepo: "{{ yum_enable_repos }}"
+    enablerepo: "{{ enabled_repos }}"
   register: support_installed
   notify:
     - The needs_reboot flag is set because of install or package update
@@ -23,8 +17,7 @@
   args:
     name: "*"
     state: latest
-    disablerepo: "{{ yum_disable_repos }}"
-    enablerepo: "{{ yum_enable_repos }}"
+    enablerepo: "{{ enabled_repos }}"
   register:
     system_updated
   notify:
