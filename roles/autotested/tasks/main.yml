@@ -133,10 +133,6 @@
   notify: Collect autotest results text
   ignore_errors: true
 
-- debug: var=item
-  with_items: results.stdout_lines
-  when: results|success
-
 - name: Create tarball of results
   command: tar cjf /tmp/results.tbz results
   args:
