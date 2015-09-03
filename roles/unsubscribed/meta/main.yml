@@ -1,4 +1,3 @@
 ---
 dependencies:
-    - redhat_release
     - subscribed
