@@ -1,3 +1,0 @@
----
-dependencies:
-    - { role: redhat_release, when: release_name is not defined }

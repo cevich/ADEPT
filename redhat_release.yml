@@ -1,20 +1,9 @@
 ---
-- hosts: all
-  roles:
-    - redhat_release
-
-# These groups are defined dynamicly from
-# redhat_release role, based on release_name value (above)
 
 - hosts: subscribed
   gather_facts: post_rhr_gather
   roles:
     - subscribed
-
-- hosts: rhel:centos
-  gather_facts: post_rhr_gather
-  roles:
-    - epel
 
 - hosts: rhel
   gather_facts: post_rhr_gather
