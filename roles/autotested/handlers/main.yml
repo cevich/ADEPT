@@ -44,3 +44,10 @@
     dest: "results/{{ inventory_hostname }}/"
     src: "/tmp/results.junit"
     flat: true
+
+- name: Collect rpmqa text
+  fetch:
+  args:
+    dest: "results/{{ inventory_hostname }}/"
+    src: "/tmp/rpmqa.txt"
+    flat: true
