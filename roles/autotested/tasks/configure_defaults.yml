@@ -74,6 +74,17 @@
     value: "{{ cat_pid_cmd.stdout }}"
   when: defaults_needed
 
+- name: Defaults docker_timeout is configured
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: docker_timeout
+    section: DEFAULTS
+    value: "{{ autotest_docker.docker_timeout }}"
+  when: defaults_needed and
+        autotest_docker.docker_timeout is defined and
+        autotest_docker.docker_timeout != None
+
 - name: Defaults docker_repo_name is configured
   ini_file:
   args:

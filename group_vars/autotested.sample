@@ -29,6 +29,10 @@ autotest_docker:
     # (in seconds).
     timeout: 300
 
+    # Default timeout for individual docker commands, unless overriden
+    # by specific tests.
+    docker_timeout: 300
+
     # List of subtests to include, empty to use defaults
     # (runs _all_ specified by subthings, below).
     include:

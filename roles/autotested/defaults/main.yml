@@ -10,9 +10,7 @@ autotest_docker:
     # Remote directory where Autotest is installed
     autotest_dir: "/usr/local/autotest"
 
-    # Directory containing subdirectories 'autotest' and
-    # 'autotest-docker' which hold cached copied of those
-    # repos. for deployment to test systems.
+    # Directory containing cached autotest tree including docker autotest
     cache_dir: "../"
 
     # Many tests rely on a default image for testing. Specify
@@ -30,6 +28,10 @@ autotest_docker:
     # Ultimate timeout in seconds for all subtests to run
     # (in seconds).
     timeout: 300
+
+    # Default timeout for individual docker commands, unless overriden
+    # by specific tests.
+    docker_timeout: 300
 
     # List of subtests to include, empty to use defaults
     # (runs _all_ specified by subthings, below).
