@@ -72,3 +72,22 @@
         (autotest_docker.test_image.build_url is defined and
          autotest_docker.test_image.build_url != None and
          autotest_docker.test_image.build_url != "")
+
+- name: Test image has been pulled
+  command: /usr/bin/docker pull
+           {{ test_image_fqin }}
+  when: test_image_fqin is defined and
+        autotest_docker.test_image is defined and
+        docker_inspect_result|failed and
+        (autotest_docker.test_image.build_url is not defined or
+         autotest_docker.test_image.build_url == None or
+         autotest_docker.test_image.build_url == "")
+
+- name: Docker images output is captured
+  command: /usr/bin/docker images --all
+  register: docker_images_output
+  ignore_errors: True
+  changed_when: false
+
+- debug: var=docker_images_output
+  when: docker_images_output is defined

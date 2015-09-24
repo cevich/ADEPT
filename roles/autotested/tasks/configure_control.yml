@@ -1,4 +1,7 @@
 ---
+- debug: var=autotest_docker.timeout
+  when: autotest_docker.timeout is defined
+
 - name: Control timeout set
   lineinfile:
   args:
@@ -7,8 +10,7 @@
     follow: True
     line: "\\1 {{ autotest_docker.timeout }}"
     regexp: "^(TIMEOUT\\s*=\\s*).*$"
-  when: autotest_docker.timeout is defined and
-        autotest_docker.timeout is number
+  when: autotest_docker.timeout is defined
 
 - name: Config_custom_control string is set
   set_fact:
