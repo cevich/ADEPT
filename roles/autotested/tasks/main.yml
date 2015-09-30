@@ -125,14 +125,6 @@
     - Collect autotest client debug log
   when: autotest_docker.execute
 
-- name: Collect results table for printing
-  shell: tools/scan_results.py
-  args:
-    chdir: "{{ autotest_docker.autotest_dir }}/client"
-  register: results
-  notify: Collect autotest results text
-  ignore_errors: true
-
 - name: Create tarball of results
   command: tar cjf /tmp/results.tbz results
   args:
