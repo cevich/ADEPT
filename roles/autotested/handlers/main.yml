@@ -6,7 +6,6 @@
     src: "{{ autotest_docker.autotest_dir }}/client/results/default/debug/client.INFO"
     fail_on_missing: true
     flat: true
-  ignore_errors: true
 
 - name: Collect autotest client debug log
   fetch:
@@ -15,7 +14,6 @@
     src: "{{ autotest_docker.autotest_dir }}/client/results/default/debug/client.DEBUG"
     fail_on_missing: true
     flat: true
-  ignore_errors: true
 
 - name: Collect autotest results tarball
   fetch:
@@ -24,7 +22,6 @@
     src: "/tmp/results.tbz"
     fail_on_missing: true
     flat: true
-  ignore_errors: true
 
 - name: Collect Docker Autotest config tarball
   fetch:
@@ -33,7 +30,6 @@
     src: "/tmp/config.tbz"
     fail_on_missing: true
     flat: true
-  ignore_errors: true
 
 - name: Collect autotest results text
   fetch:
