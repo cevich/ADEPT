@@ -120,9 +120,6 @@
   # This should be autotest_docker.timeout, but can't use var here :(
   async: 14401
   poll: 60
-  notify:
-    - Collect autotest client info log
-    - Collect autotest client debug log
   when: autotest_docker.execute
 
 - name: Collect results table for printing
@@ -138,7 +135,6 @@
   args:
     chdir: "{{ autotest_docker.autotest_dir }}/client"
   register: resultstarball
-  notify: Collect autotest results tarball
   when:  autotest_docker.execute and
          autotest_execution is defined and
          autotest_execution|success
@@ -148,7 +144,6 @@
   args:
     chdir: "{{ autotest_docker_path }}"
   register: resultstarball
-  notify: Collect Docker Autotest config tarball
   when:  autotest_docker.execute and
          autotest_execution is defined and
          autotest_execution|success
@@ -157,24 +152,24 @@
   shell: tools/scan_results.py > /tmp/results.txt
   args:
     chdir: "{{ autotest_docker.autotest_dir }}/client"
-  notify: Collect autotest results text
   # This thing is really easy to break
   ignore_errors: true
 
+- name: Create list of installed rpms
+  shell: rpm -qa > /tmp/rpmqa.txt
+  # This could break
+  ignore_errors: true
+
+# Sometimes this breaks if a test fails in the "wrong" way.
 - name: Convert Results to junit
   shell: tools/results2junit.py results/default > /tmp/results.junit
   args:
     chdir: "{{ autotest_docker.autotest_dir }}/client"
   register: results2junit
-  notify: Collect autotest results junit
   # This thing is also really easy to break
   ignore_errors: true
   when: autotest_docker.execute and
         autotest_execution is defined and
         autotest_execution|success
 
-- name: Create list of installed rpms
-  shell: rpm -qa > /tmp/rpmqa.txt
-  notify: Collect rpmqa text
-  # This could break
-  ignore_errors: true
+- include: collect_results.yml

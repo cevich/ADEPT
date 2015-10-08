@@ -1,4 +1,5 @@
 ---
+
 - name: Collect autotest client info log
   fetch:
   args:
