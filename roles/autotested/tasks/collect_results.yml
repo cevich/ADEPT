@@ -1,5 +1,12 @@
 ---
 
+- name: Ensure results directory exists
+  file:
+  args:
+    path: "results/{{ inventory_hostname }}/"
+    state: directory
+  delegate_to: 127.0.0.1
+
 - name: Collect autotest client info log
   fetch:
   args:
