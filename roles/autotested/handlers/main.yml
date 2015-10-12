@@ -2,7 +2,7 @@
 - name: Collect autotest client info log
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}"
+    dest: "results/{{ inventory_hostname }}/"
     src: "{{ autotest_docker.autotest_dir }}/client/results/default/debug/client.INFO"
     fail_on_missing: true
     flat: true
@@ -11,7 +11,7 @@
 - name: Collect autotest client debug log
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}"
+    dest: "results/{{ inventory_hostname }}/"
     src: "{{ autotest_docker.autotest_dir }}/client/results/default/debug/client.DEBUG"
     fail_on_missing: true
     flat: true
@@ -20,7 +20,7 @@
 - name: Collect autotest results tarball
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}"
+    dest: "results/{{ inventory_hostname }}/"
     src: "/tmp/results.tbz"
     fail_on_missing: true
     flat: true
@@ -29,7 +29,7 @@
 - name: Collect Docker Autotest config tarball
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}"
+    dest: "results/{{ inventory_hostname }}/"
     src: "/tmp/config.tbz"
     fail_on_missing: true
     flat: true
@@ -38,20 +38,20 @@
 - name: Collect autotest results text
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}"
+    dest: "results/{{ inventory_hostname }}/"
     src: "/tmp/results.txt"
     flat: true
 
 - name: Collect autotest results junit
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}"
+    dest: "results/{{ inventory_hostname }}/"
     src: "/tmp/results.junit"
     flat: true
 
 - name: Collect rpmqa text
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}"
+    dest: "results/{{ inventory_hostname }}/"
     src: "/tmp/rpmqa.txt"
     flat: true
