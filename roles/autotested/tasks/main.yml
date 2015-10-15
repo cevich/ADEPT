@@ -127,7 +127,6 @@
   args:
     chdir: "{{ autotest_docker.autotest_dir }}/client"
   register: results
-  notify: Collect autotest results text
   ignore_errors: true
 
 - name: Create tarball of results
