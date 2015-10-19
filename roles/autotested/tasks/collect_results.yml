@@ -1,6 +1,26 @@
 ---
 
-- name: Ensure results directory exists
+# Some system environments cause the fetch modle to fail with a checksum
+# mismatch error if certain characters are present in the destination
+# directory name.  This only affects the fetch module, and doesn't seem
+# linked to the ansible version.  To work around this, a temporary
+# directory is used to hold the results, before moving to the playbook directory.
+
+- name: Local temporary directory exists
+  command: mktemp -d
+  register: mktemp_result
+  notify:
+    - "Clean up temporary results directory"
+  delegate_to: 127.0.0.1
+
+- name: Ensure results sub-directory exists
+  file:
+  args:
+    path: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/"
+    state: directory
+  delegate_to: 127.0.0.1
+
+- name: Ensure final results directory exists
   file:
   args:
     path: "results/{{ inventory_hostname }}/"
@@ -10,7 +30,7 @@
 - name: Collect autotest client info log
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}/"
+    dest: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/"
     src: "{{ autotest_docker.autotest_dir }}/client/results/default/debug/client.INFO"
     fail_on_missing: true
     flat: true
@@ -18,7 +38,7 @@
 - name: Collect autotest client debug log
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}/"
+    dest: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/"
     src: "{{ autotest_docker.autotest_dir }}/client/results/default/debug/client.DEBUG"
     fail_on_missing: true
     flat: true
@@ -26,7 +46,7 @@
 - name: Collect autotest results tarball
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}/"
+    dest: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/"
     src: "/tmp/results.tbz"
     fail_on_missing: true
     flat: true
@@ -34,7 +54,7 @@
 - name: Collect Docker Autotest config tarball
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}/"
+    dest: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/"
     src: "/tmp/config.tbz"
     fail_on_missing: true
     flat: true
@@ -42,20 +62,28 @@
 - name: Collect autotest results text
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}/"
+    dest: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/"
     src: "/tmp/results.txt"
     flat: true
 
 - name: Collect autotest results junit
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}/"
+    dest: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/"
     src: "/tmp/results.junit"
     flat: true
 
 - name: Collect rpmqa text
   fetch:
   args:
-    dest: "results/{{ inventory_hostname }}/"
+    dest: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/"
     src: "/tmp/rpmqa.txt"
     flat: true
+
+- name: Move temporary results into final results
+  copy:
+  args:
+    dest: "./"
+    src: "{{ mktemp_result.stdout }}/results"
+    force: true
+  delegate_to: 127.0.0.1

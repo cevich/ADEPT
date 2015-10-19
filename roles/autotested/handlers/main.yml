@@ -1,0 +1,9 @@
+---
+
+- name: Clean up temporary results directory
+  file:
+  args:
+    path: "{{ mktemp_result.stdout }}"
+    state: "absent"
+  ignore_errors: true
+  delegate_to: 127.0.0.1
