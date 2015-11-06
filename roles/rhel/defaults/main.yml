@@ -1,4 +1,9 @@
 ---
+
+enabled_repos: epel,rhel-7-server-rpms,rhel-7-server-extras-rpms,rhel-7-server-optional-rpms,rhel-7-server-supplementary-rpms,rhel-atomic-host-rpms
+
+install_rpms: docker*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-bugzilla,which,cloud-utils-growpart
+
 # List of copy & command arguments
 site_scripts:
     # Just the filename, no path.  Ansible will search roles/files/ first

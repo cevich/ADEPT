@@ -5,7 +5,7 @@
 - name: Support packages are installed
   yum:
   args:
-    name: docker*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-bugzilla,which
+    name: "{{ install_rpms }}"
     state: present
     enablerepo: "{{ enabled_repos }}"
   register: support_installed
