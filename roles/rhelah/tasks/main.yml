@@ -1,4 +1,7 @@
 ---
+
+- include: ../../common/site_scripts.yml.inc
+
 - name: Atomic host is updated to latest tree
   command: atomic host upgrade
   register: atomic_host_upgrade
@@ -6,4 +9,3 @@
   when: update_system
   changed_when: atomic_host_upgrade.stdout | search('pgrade prepared for next boot')
 
-- include: ../../common/site_scripts.yml.inc

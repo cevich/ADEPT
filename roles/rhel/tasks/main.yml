@@ -2,10 +2,12 @@
 - name: All repositories are disabled
   command: /usr/sbin/subscription-manager repos --disable=*
 
+- include: ../../common/site_scripts.yml.inc
+
 - name: Support packages are installed
   yum:
   args:
-    name: docker*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-bugzilla,which
+    name: "{{ install_rpms }}"
     state: present
     enablerepo: "{{ enabled_repos }}"
   register: support_installed
@@ -23,5 +25,3 @@
   notify:
     - The needs_reboot flag is set because of install or package update
   when: update_system
-
-- include: ../../common/site_scripts.yml.inc
