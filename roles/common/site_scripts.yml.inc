@@ -24,7 +24,7 @@
         item.filename != ""
   with_items: site_scripts
 
-- debug: var=site_script_results
+- debug: var=site_script_results.results
   when: site_script_results is defined
 
 - name: Set reboot flag when site scripts were executed
