@@ -1,0 +1,26 @@
+---
+
+- name: Convert Results to text-table
+  shell: tools/scan_results.py > {{ autotest_docker.autotest_dir }}/client/results/default/results.txt
+  args:
+    chdir: "{{ autotest_docker.autotest_dir }}/client"
+  # This thing is really easy to break
+  ignore_errors: true
+
+- name: Create list of installed rpms
+  shell: rpm -qa > {{ autotest_docker.autotest_dir }}/client/results/default/rpmqa.txt
+  # This could break
+  ignore_errors: true
+
+# Sometimes this breaks if a test fails in the "wrong" way.
+- name: Convert Results to junit
+  shell: tools/results2junit.py results/default > {{ autotest_docker.autotest_dir }}/client/results/default/results.junit
+  args:
+    chdir: "{{ autotest_docker.autotest_dir }}/client"
+  register: results2junit
+  # This thing is also really easy to break
+  ignore_errors: true
+  when: autotest_docker.execute and
+        autotest_execution is defined and
+        autotest_execution|success
+
