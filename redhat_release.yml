@@ -25,6 +25,11 @@
   roles:
     - fedora
 
+- hosts: fedoratomic
+  gather_facts: post_rhr_gather
+  roles:
+    - fedoratomic
+
 - hosts: all
   gather_facts: post_rhr_gather
   roles:
