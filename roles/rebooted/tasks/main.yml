@@ -8,8 +8,8 @@
 - debug: msg="Pre-reboot uptime is {{ pre_result.stdout }}s"
 
 - name: Reboot System
-  shell: "shutdown -r 1 &"
-  async: 0
+  shell: "sleep 3 && shutdown -r 1"
+  async: 1
   poll: 0
   changed_when: true
   ignore_errors: true
