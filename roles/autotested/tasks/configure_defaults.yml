@@ -155,7 +155,7 @@
     dest: "{{ config_custom_defaults }}"
     option: preserve_fqins
     section: DEFAULTS
-    value: "{{ preserve_fqins }}"
+    value: "{{ preserve_fqins | regex_replace(',,', ',') }}"
   when: defaults_needed and
         autotest_docker.preserve_fqins is defined and
         autotest_docker.preserve_fqins != None
@@ -182,7 +182,7 @@
     dest: "{{ config_custom_defaults }}"
     option: preserve_cnames
     section: DEFAULTS
-    value: "{{ preserve_cnames }}"
+    value: "{{ preserve_cnames | regex_replace(',,', ',') }}"
   when: defaults_needed and
         autotest_docker.preserve_cnames is defined and
         autotest_docker.preserve_cnames != None
