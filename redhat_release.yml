@@ -1,36 +1,29 @@
 ---
 
 - hosts: subscribed
-  gather_facts: post_rhr_gather
   roles:
     - subscribed
 
 - hosts: rhel
-  gather_facts: post_rhr_gather
   roles:
     - rhel
 
 - hosts: rhelah
-  gather_facts: post_rhr_gather
   roles:
     - rhelah
 
 - hosts: centos
-  gather_facts: post_rhr_gather
   roles:
     - centos
 
 - hosts: fedora
-  gather_facts: post_rhr_gather
   roles:
     - fedora
 
 - hosts: fedoratomic
-  gather_facts: post_rhr_gather
   roles:
     - fedoratomic
 
 - hosts: all
-  gather_facts: post_rhr_gather
   roles:
     - { role: rebooted, when: needs_reboot }
