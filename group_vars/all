@@ -1,9 +1,4 @@
 ---
-# Only these repositories (CSV) will be enabled when yum command is used
-enabled_repos: "rhel-7-server-optional-rpms,rhel-7-server-extras-rpms,rhel-7-server-rpms,rhel-7-server-eus*,epel"
 
 # Set this true if test systems should be fully updated
 update_system: true
-
-# Gathering facts after first redhat_released role runs from site.yml
-post_rhr_gather: false

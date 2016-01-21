@@ -1,29 +1,45 @@
 ---
 
-- name: All repositories are disabled
-  command: /usr/sbin/subscription-manager repos --disable=*
-
 - include: ../../common/site_scripts.yml.inc
 
-- name: Support packages are installed
+- name: Support packages are installed with yum
   yum:
-  args:
-    name: docker-io*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-bugzilla,which
+    name: "{{ install_rpms }}"
     state: present
     enablerepo: "{{ enabled_repos }}"
   register: support_installed
   notify:
     - The needs_reboot flag is set because of install or package update
+  when: ansible_distribution_major_version < 22
 
-- name: System is fully updated
+- name: Support packages are installed with dnf
+  dnf:
+    name: "{{ install_rpms }}"
+    state: present
+    enablerepo: "{{ enabled_repos }}"
+  register: support_installed
+  notify:
+    - The needs_reboot flag is set because of install or package update
+  when: ansible_distribution_major_version > 21
+
+- name: System is fully updated with yum
   yum:
-  args:
-     name: "*"
-     state: latest
-     enablerepo: "{{ enabled_repos }}"
+    name: "*"
+    state: latest
+    enablerepo: "{{ enabled_repos }}"
   register:
     system_updated
   notify:
     - The needs_reboot flag is set because of install or package update
-  when: update_system
+  when: update_system and ansible_distribution_major_version < 22
 
+- name: System is fully updated with dnf
+  dnf:
+    name: "*"
+    state: latest
+    enablerepo: "{{ enabled_repos }}"
+  register:
+    system_updated
+  notify:
+    - The needs_reboot flag is set because of install or package update
+  when: update_system and ansible_distribution_major_version > 21
