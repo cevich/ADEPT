@@ -134,7 +134,7 @@
         autotest_docker.test_image.user != None
 
 - name: Default image preserve CSV value is known
-  command: "{{ autotest_docker.preserve_fqins_cmd }}"
+  shell: "{{ autotest_docker.preserve_fqins_cmd }}"
   args:
     chdir: "{{ autotest_docker_path }}"
   register: preserve_fqins_cmd
@@ -161,7 +161,7 @@
         autotest_docker.preserve_fqins != None
 
 - name: Default container preserve CSV value is known
-  command: "{{ autotest_docker.preserve_cnames_cmd }}"
+  shell: "{{ autotest_docker.preserve_cnames_cmd }}"
   args:
     chdir: "{{ autotest_docker_path }}"
   register: preserve_cnames_cmd
