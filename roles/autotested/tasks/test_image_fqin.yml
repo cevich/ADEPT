@@ -16,7 +16,6 @@
   set_fact:
     _test_image_user: ''
   when: autotest_docker.test_image is defined and
-        _test_image_host != "" and
         autotest_docker.test_image.user is defined and
         (autotest_docker.test_image.user == None or
          autotest_docker.test_image.user == "")
@@ -24,11 +23,11 @@
 - name: Test image user is defined
   set_fact:
     _test_image_user: "{{ autotest_docker.test_image.user }}/"
-  when: _test_image_host != "" and _test_image_user is not defined
+  when: _test_image_user is not defined
 
 - name: Test image tag is optional
   set_fact:
-    _test_image_tag: ':latest'
+    _test_image_tag: ''
   when: autotest_docker.test_image is defined and
         autotest_docker.test_image.tag is defined and
         (autotest_docker.test_image.tag == None or
@@ -47,6 +46,7 @@
         (autotest_docker.test_image.name != None or
          autotest_docker.test_image.name == "")
 
+# Image matching above name already exists on system, do not pull
 - name: Docker Autotest test image was previously built
   command: /usr/bin/docker inspect --format \{\{.Created\}\}
            {{ test_image_fqin }}
@@ -57,6 +57,7 @@
   changed_when: false
   when: test_image_fqin is defined
 
+# Allows building a custom testing image from Dockerfile @ URL
 - name: Build Test Image
   command: /usr/bin/docker run
            {{ docker.build_args }}
@@ -73,6 +74,7 @@
          autotest_docker.test_image.build_url != None and
          autotest_docker.test_image.build_url != "")
 
+# Do NOT pull if test image is already on system
 - name: Test image has been pulled
   command: /usr/bin/docker pull
            {{ test_image_fqin }}
@@ -83,6 +85,7 @@
          autotest_docker.test_image.build_url == None or
          autotest_docker.test_image.build_url == "")
 
+# For debugging
 - name: Docker images output is captured
   command: /usr/bin/docker images --all
   register: docker_images_output
