@@ -1,7 +1,4 @@
 ---
-- name: All repositories are disabled
-  command: /usr/sbin/subscription-manager repos --disable=*
-
 - include: ../../common/site_scripts.yml.inc
 
 - name: Support packages are installed
@@ -9,7 +6,6 @@
   args:
     name: "{{ install_rpms }}"
     state: present
-    enablerepo: "{{ enabled_repos }}"
   register: support_installed
   notify:
     - The needs_reboot flag is set because of install or package update
@@ -19,7 +15,6 @@
   args:
     name: "*"
     state: latest
-    enablerepo: "{{ enabled_repos }}"
   register:
     system_updated
   notify:
