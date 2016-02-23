@@ -1,12 +1,5 @@
 ---
 
-- name: Pre-reboot uptime in seconds is known
-  shell: cat /proc/uptime | cut -d " " -f 1 | cut -d "." -f 1
-  register: pre_result
-  changed_when: false
-
-- debug: msg="Pre-reboot uptime is {{ pre_result.stdout }}s"
-
 - name: Reboot System
   shell: "sleep 3 && shutdown -r 1"
   async: 1
@@ -14,7 +7,19 @@
   changed_when: true
   ignore_errors: true
 
-- name: Pause for Shutdown/Reboot
+- name: Minimum shutdown delay is 1-minute
+  pause:
+    seconds: 50
+  delegate_to: 127.0.0.1
+
+- name: Pre-reboot uptime in seconds is known just before reboot
+  shell: cat /proc/uptime | cut -d " " -f 1 | cut -d "." -f 1
+  register: pre_result
+  changed_when: false
+
+- debug: msg="Pre-reboot uptime is {{ pre_result.stdout }}s"
+
+- name: Pause for remainder of Shutdown/Reboot for port 22 to close
   pause:
     seconds: "{{ shutdown_timeout }}"
   delegate_to: 127.0.0.1
