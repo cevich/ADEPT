@@ -19,6 +19,8 @@
   synchronize:
     dest: "{{ autotest_docker.autotest_dir }}"
     src: "{{ autotest_docker.cache_dir }}/autotest/"
+    rsync_opts:
+        - "--exclude=.git"
 
 - name: Untracked RELEASE-VERSION is removed
   file:
@@ -29,6 +31,8 @@
   synchronize:
     dest: "{{ autotest_docker_path }}"
     src: "{{ autotest_docker.cache_dir }}/autotest-docker/"
+    rsync_opts:
+        - "--exclude=.git"
 
 - name: Custom configuration is cleared
   file:
