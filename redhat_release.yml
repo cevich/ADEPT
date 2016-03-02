@@ -7,6 +7,7 @@
 - hosts: rhel
   roles:
     - rhel
+    - se_enabled
 
 - hosts: rhelah
   roles:
@@ -15,10 +16,12 @@
 - hosts: centos
   roles:
     - centos
+    - se_enabled
 
 - hosts: fedora
   roles:
     - fedora
+    - se_enabled
 
 - hosts: fedoratomic
   roles:

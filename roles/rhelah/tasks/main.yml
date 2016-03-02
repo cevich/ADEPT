@@ -8,4 +8,9 @@
   notify: The needs_reboot flag is set because of install or package update
   when: update_system
   changed_when: atomic_host_upgrade.stdout | search('pgrade prepared for next boot')
+  ignore_errors: true
 
+- name: Workaround BZ1313540 - fail if rc != 0 or rc != 77
+  fail:
+    msg: "atomic host upgrade failed with unknown error"
+  when: atomic_host_upgrade.rc != 0 and atomic_host_upgrade.rc != 77
