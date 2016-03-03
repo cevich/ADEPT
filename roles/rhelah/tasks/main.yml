@@ -10,7 +10,7 @@
   changed_when: atomic_host_upgrade.stdout | search('pgrade prepared for next boot')
   ignore_errors: true
 
-- name: Workaround BZ1313540 - fail if rc != 0 or rc != 77
+- name: Workaround BZ1313540
   fail:
-    msg: "atomic host upgrade failed with unknown error"
+    msg: "atomic host upgrade failed with unknown error: {{ atomic_host_upgrade }}"
   when: atomic_host_upgrade.rc != 0 and atomic_host_upgrade.rc != 77
