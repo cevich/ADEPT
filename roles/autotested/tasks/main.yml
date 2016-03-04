@@ -115,7 +115,9 @@
   when: autotest_docker.execute
 
 - name: Execute Docker autotest
-  command: "{{ autotest_docker.autotest_dir }}/client/autotest-local {{ autotest_docker_path }}/control"
+  shell: "export AUTOTEST_PATH={{ autotest_docker.autotest_dir }} && $AUTOTEST_PATH/client/autotest-local {{ autotest_docker_path }}/control"
+  args:
+    chdir: "{{ autotest_docker_path }}"
   register: autotest_execution
   # This should be autotest_docker.timeout, but can't use var here :(
   async: 14401

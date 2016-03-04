@@ -8,7 +8,7 @@
 autotest_docker:
 
     # Remote directory where Autotest is installed
-    autotest_dir: "/usr/local/autotest"
+    autotest_dir: "/var/lib/autotest"
 
     # Directory containing cached autotest tree including docker autotest
     cache_dir: "../"
