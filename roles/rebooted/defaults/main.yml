@@ -1,8 +1,8 @@
 ---
 needs_reboot: false
 
-# Additional time to wait after 50-seconds delay into 1-minute shutdown
-shutdown_timeout: 20
+# Additional time to wait after 45-seconds delay into 1-minute shutdown
+shutdown_timeout: 16
 
 # Maximum time to wait for system to become available again (in seconds)
 bootup_timeout: 600
