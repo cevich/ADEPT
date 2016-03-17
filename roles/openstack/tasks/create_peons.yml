@@ -1,0 +1,84 @@
+---
+
+# Depends:
+#   - peon
+#   - openstack
+
+- debug:
+    msg: "Working on peon: {{ peon.uuid }}"
+
+- name: private security group is used when sec_mode is True
+  set_fact:
+    _secgrps: '{{ openstack.private_sec_groups }}'
+  when: peon.private
+
+- name: public security group is used when sec_mode is False
+  set_fact:
+    _secgrps: '{{ openstack.public_sec_groups }}'
+  when: _secgrp is undefined
+
+- name: metadata is defined
+  set_fact:
+    metadata:
+        hostname: '{{ peon.uuid }}'
+        groups: '{{ peon.groups | join(",") }}'
+
+- name: peon from peon_set is provisioned
+  os_server:
+    cloud: default
+    # This must be large enough for the image being used
+    flavor: "m1.medium"
+    image: '{{ openstack.image_map[peon.name][peon.version] }}'
+    name: '{{ peon.uuid }}'
+    #key_name: '{{ openstack.key_name }}'
+    security_groups: '{{ _secgrps }}'
+    auto_ip: False
+    userdata: |
+        {{ "#cloud-config" }}
+        {{ openstack.userdata | to_nice_yaml }}
+    meta: "{{ metadata }}"
+    timeout: 300
+    wait: True
+  register: _created
+
+- name: peon eventually has IP addresses
+  os_floating_ip:
+    network: '{{ openstack.public_network }}'
+    cloud: default
+    reuse: True
+    server: '{{ peon.uuid }}'
+    state: present
+    wait: True
+    timeout: 300
+  when: _created.openstack is defined and
+        _created.openstack.public_v4 is undefined or
+        _created.openstack.public_v4|trim == ""
+
+- block:
+
+    - name: volume created for peon
+      os_volume:
+        cloud: default
+        display_name: '{{ peon.uuid }}'
+        size: '{{ peon.volume | int }}'
+        state: present
+        timeout: 300
+        wait: True
+
+    - name: volume attached to peon
+      os_server_volume:
+        cloud: default
+        server: '{{ peon.uuid }}'
+        state: present
+        volume: '{{ peon.uuid }}'
+        wait: True
+      # No way to check availability of volume, retry until successful
+      register: _vol_att
+      ignore_errors: True
+      until: _vol_att | succeeded
+      retries: 120
+      delay: 1
+
+  when: peon.volume is defined and
+        peon.volume != None and
+        peon.volume != ''

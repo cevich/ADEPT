@@ -1,0 +1,8 @@
+---
+
+- include: roles/common/tasks/workspace.yml
+- include: roles/common/tasks/adept_path.yml
+- include: roles/common/tasks/adept_optional.yml
+
+- debug:
+    msg: 'Workspace: {{ workspace | default("ERROR!") }}  Yaml: {{ adept_path | default("ERROR!") }}  Context: {{ adept_context | default("ERROR!") }}  Optional: {{ adept_optional | default("") }}'

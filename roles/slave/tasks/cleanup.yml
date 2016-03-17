@@ -1,0 +1,16 @@
+---
+
+- block:
+    - name: workspace/*_facts.yml files are removed
+      file:
+        path: '{{ item }}'
+        state: absent
+      with_lines: "/usr/bin/find {{ workspace }} -name '*_facts.yml'"
+  when: cleanup_facts
+
+# This is here, b/c systems may not exist to apply peon role
+- name: workspace/peon_set.yml is removed
+  file:
+    path: '{{ workspace }}/peon_set.yml'
+    state: absent
+  when: cleanup_peon_set

@@ -1,21 +1,45 @@
 ---
+# vim-syntax: yaml
 
-enabled_repos: epel,rhel-7-server-rpms,rhel-7-server-extras-rpms,rhel-7-server-optional-rpms,rhel-7-server-supplementary-rpms,rhel-atomic-host-rpms
+disk_device: "/dev/vdb"
+parted_cmds: "unit % mklabel msdos mkpart primary 0 100 set 1 LVM on"
 
-install_rpms: docker*,atomic,procps,tar,findutils,bzip2,gdb,bridge-utils,nfs-utils,git,glibc-devel,python-bugzilla,which,cloud-utils-growpart
+lvg_ops:
+    - vg: docker_vg
+      force: yes
+      pvs: '{{ disk_device }}1'
+      state: present
 
-# List of copy & command arguments
-site_scripts:
-    # Just the filename, no path.  Ansible will search roles/files/ first
-    # then files/
-    - filename:
-      # Source path to directory to copy filename from
-      srcpath:
-      # Options to the 'command' module, blank if not used.
-      # destination directory, and directory to run script from
-      chdir:
-      creates:
-      removes:
-      executable:
-
-needs_reboot: false
+use_dnf: False
+installed_enablerepo:
+    - epel
+    - rhel-7-server-rpms
+    - rhel-7-server-extras-rpms
+    - rhel-7-server-optional-rpms
+    - rhel-7-server-supplementary-rpms
+installed_rpms:
+    - docker
+    - atomic
+    - docker-selinux
+    - procps
+    - tar
+    - lvm2
+    - findutils
+    - bzip2
+    - gdb
+    - bridge-utils
+    - nfs-utils
+    - git
+    - glibc-devel
+    - python-bugzilla
+    - which
+    - cloud-utils-growpart
+    - python-nose
+    - python-unittest2
+    - python2-mock
+    - python-docutils
+    - python-sphinx
+    - python-sphinxcontrib-httpdomain
+    - python-sphinx_rtd_theme
+    - selinux-policy-targeted
+    - libselinux-python

@@ -1,0 +1,5 @@
+.dockerignore
+*.pyc
+*.swp
+.git*
+.travis.yml

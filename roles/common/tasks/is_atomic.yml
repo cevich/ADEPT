@@ -1,0 +1,26 @@
+---
+
+# Registers:
+#   is_atomic
+
+- name: Current is_atomic value is buffered
+  set_fact:
+    _is_atomic: '{{ is_atomic | default(False) }}'
+
+- name: The ostree ostree admin status command succeeds on Atomic
+  command: ostree admin status
+  register: ostree
+  ignore_errors: True
+  when: is_atomic is undefined
+
+- name: is_atomic is set to false
+  set_fact:
+    is_atomic: False
+  when: is_atomic is undefined and ostree | failed
+  changed_when: is_atomic != _is_atomic
+
+- name: is_atomic is set to true
+  set_fact:
+    is_atomic: True
+  when: is_atomic is undefined and ostree | success
+  changed_when: is_atomic != _is_atomic

@@ -1,0 +1,39 @@
+---
+
+- hosts: peons:&subscribed:&{{ adept_job }}
+  roles:
+    - subscribed
+
+- hosts: peons:&partitioned:&{{ adept_job }}
+  roles:
+    - partitioned
+
+- hosts: peons:&rebooted:&{{ adept_job }}
+  roles:
+    - rebooted
+
+- hosts: peons:&lvm:&{{ adept_job }}
+  roles:
+    - lvm
+
+- include: os-types.yml
+
+- hosts: peons:&installed:&{{ adept_job }}
+  roles:
+    - installed
+
+- hosts: peons:&updated:&{{ adept_job }}
+  roles:
+    - updated
+
+- hosts: peons:&atomic_upgrade:&{{ adept_job }}
+  roles:
+    - atomic_upgrade
+
+- hosts: peons:rebooted:&{{ adept_job }}
+  roles:
+    - rebooted
+
+- hosts: peons:&{{ adept_job }}
+  roles:
+    - peon

@@ -1,0 +1,47 @@
+---
+
+# Depends:
+#   - openstack.auth
+#   - openstack.image_map
+#   - openstack.net
+#   - openstack.net
+#   - openstack.sec
+#   - adept_context
+#   - image_map
+# Registers:
+#   - service_catalog
+#   - openstack_servers
+#   - peon_set
+
+- include: roles/common/tasks/workspace_file.yml
+  vars:
+    workspace_file: "peon_facts.yml"
+
+- name: peon_facts.yml file is loaded
+  set_fact:
+    peon_facts: '{{ lookup("file", filepath) | from_yaml }}'
+  when: exists
+
+- block:
+
+    #- debug:
+    #    msg: "Going to create peon {{ peon.uuid }}"
+    #  with_items: "{{ peon_set }}"
+    #  loop_control:
+    #    loop_var: peon
+
+    # Does not wait for 'ACTIVE' state
+    - include: roles/openstack/tasks/create_peons.yml
+      with_items: "{{ peon_set }}"
+      loop_control:
+        loop_var: peon
+
+    # Waits for 'ACTIVE' state + defines peon_facts
+    - include: roles/openstack/tasks/facts.yml
+
+  rescue:
+    - include: roles/openstack/tasks/cleanup.yml
+      vars:
+        cleanup_peon_facts: False
+        cleanup_clouds_yaml: False
+  when: peon_facts is undefined

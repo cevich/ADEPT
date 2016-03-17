@@ -1,5 +1,0 @@
----
-
-needs_reboot: false
-se-policy: targeted
-se-state: enforcing

@@ -1,0 +1,17 @@
+---
+
+- hosts: peons:&centos:&{{ adept_job }}
+  roles:
+    - centos
+
+- hosts: peons:&centosatomic:&{{ adept_job }}
+  roles:
+    - centosatomic
+
+- hosts: peons:&rhel:&{{ adept_job }}
+  roles:
+    - rhel
+
+- hosts: peons:&rhelatomic:&{{ adept_job }}
+  roles:
+    - rhelatomic

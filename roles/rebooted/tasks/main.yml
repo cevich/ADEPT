@@ -1,38 +1,43 @@
 ---
 
-- name: Reboot System
-  shell: "sleep 3 && shutdown -r 1"
-  async: 1
-  poll: 0
-  changed_when: true
-  ignore_errors: true
+# Depends:
+#   - needs_reboot
+#   - shutdown_timeout
+#   - bootup_timeout
+# Registers:
+#   - needs_reboot
 
-- name: Pre-reboot uptime in seconds is known just before reboot
-  shell: sleep 48s && cat /proc/uptime | cut -d " " -f 1 | cut -d "." -f 1
-  register: pre_result
+- block:
 
-- debug: msg="Pre-reboot uptime is {{ pre_result.stdout }}s"
+    - name: Reboot System
+      shell: sleep 2 && shutdown -r now
+      async: 1
+      poll: 0
+      ignore_errors: true
+      changed_when: True
 
-- name: Pause for remainder of Shutdown/Reboot for port 22 to close
-  pause:
-    seconds: "{{ shutdown_timeout }}"
-  delegate_to: 127.0.0.1
+    # TODO figure out why this doesn't work
+    - name: System started shutting down
+      wait_for:
+        host: '{{ ansible_ssh_host | default(inventory_hostname) }}'
+        state: stopped
+        timeout: '{{ shutdown_timeout }}'
+        connect_timeout: 1
+      delegate_to: localhost
 
-- name: System has booted back up
-  local_action: wait_for host={{ inventory_hostname }}
-                port=22
-                timeout={{ bootup_timeout }}
+    - name: System has booted back up
+      wait_for:
+        host: '{{ ansible_host | default(inventory_hostname) }}'
+        port: '{{ ansible_port | default("22") }}'
+        timeout: '{{ bootup_timeout }}'
+        connect_timeout: 1
+      become: False
+      delegate_to: localhost
+      changed_when: True
 
-# Because 'shutdown -r' (above) has ignore_errors: true, system may not
-# have actually rebooted.  Verify it has by examining uptime duration
-# and comparing to minimum shutdown_timeout delay.
-- name: Post-reboot uptime in seconds is known
-  shell: cat /proc/uptime | cut -d " " -f 1 | cut -d "." -f 1
-  register: post_result
+    # This will exit the block
+    - name: needs_reboot flag is set false
+      set_fact:
+        needs_reboot: False
 
-- debug: msg="Post-reboot uptime is {{ post_result.stdout }}s"
-
-- fail:
-  args:
-    msg: "Post-reboot uptime {{ post_result.stdout }}s longer than pre-reboot uptime {{ pre_result.stdout }}s"
-  when: "{{ post_result.stdout | int }} >= {{ pre_result.stdout | int }}"
+  when: needs_reboot

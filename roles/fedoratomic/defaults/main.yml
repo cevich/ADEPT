@@ -1,16 +1,14 @@
 ---
+
 # List of copy & command arguments
 site_scripts:
-    # Just the filename, no path.  Ansible will search roles/files/ first
-    # then files/
-    - filename:
-      # Source path to directory to copy filename from
-      srcpath:
-      # Options to the 'command' module, blank if not used.
-      # destination directory, and directory to run script from
-      chdir:
-      creates:
-      removes:
-      executable:
-
-needs_reboot: false
+    - filename: "nfs_mount.sh"
+      args: "{{ puddle_repo_ip }}"
+      srcpath: "{{ scriptsdir }}"
+      creates: "/root/{{ filename }}_done"
+    - filename: "rh_it_cert.sh"
+      srcpath: "{{ scriptsdir }}"
+      creates: "/root/rh_it_cert.sh_done"
+    - filename: "ssh_testing_key.sh"
+      srcpath: "{{ scriptsdir }}"
+      creates: "/root/{{ filename }}_done"

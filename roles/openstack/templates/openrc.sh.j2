@@ -1,0 +1,8 @@
+{% raw %}
+#!/bin/sh
+
+# Only 'default' cloud is supported for now
+export OS_AUTH_URL="{% endraw %}{{ openstack.clouds.default.auth.auth_url }}{% raw %}"
+export OS_TENANT_NAME="{% endraw %}{{ openstack.clouds.default.auth.tenant_name }}{% raw %}"
+export OS_USERNAME="{% endraw %}{{ openstack.clouds.default.auth.username }}{% raw %}"
+export OS_PASSWORD="{% endraw %}{{ openstack.clouds.default.auth.password }}"

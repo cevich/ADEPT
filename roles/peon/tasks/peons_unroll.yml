@@ -1,0 +1,70 @@
+---
+
+# Depends:
+#   - outer_item
+#   - adept_job
+# Registers:
+#   - _peon
+#   - inner_item
+
+- block:
+    - name: peon's defaults are located
+      set_fact:
+        _defaults: '{{ outer_item.defaults | default("defaults") }}'
+
+    - name: peon's defaults are referenced by shorter name
+      set_fact:
+        _pd: '{{ peon_defaults[_defaults] |
+                 default(peon_defaults["defaults"]) }}'
+
+    - name: peon's defaults are mapped from master defaults
+      set_fact:
+        # Avoid need to hard-code all possible key's
+        _pd: '{{ _pd | combine(
+                      {item.key: _pd[item.key] | default(item.value)}) }}'
+      with_dict: '{{ peon_defaults.defaults }}'
+
+    - name: peon's buffer is initialized
+      set_fact:
+        _peon: '{{ outer_item }}'
+
+    - name: peon's buffer populated by default attributes when omitted
+      set_fact:
+        # Avoid need to hard-code all possible key's
+        _peon: "{{ _peon | combine(
+                    {item.key: _peon[item.key] |
+                               default(item.value)})
+                }}"
+      with_dict: '{{ _pd }}'
+
+- name: axis list is initially empty
+  set_fact:
+    # workaround failure on with_cartesian even when matrix_attributes == []
+    _axes: [[], []]
+
+- block:
+
+    - name: peon matrix axes populated
+      set_fact:
+        # A list of lists of dictionaries
+        _axes: "{{ _axes + [_peon[item]] }}"
+      when: _peon[item] is defined
+      with_items: "{{ matrix_attributes }}"
+
+    - name: peon matrix product is computed
+      include: roles/peon/tasks/peons_matrix.yml
+      # inner_item will be one item from each list in _axes
+      with_cartesian: "{{ _axes }}"
+      loop_control:
+        loop_var: inner_item
+
+  when: matrix_attributes is defined and matrix_attributes != []
+
+- block:
+
+  - name: peons are defined w/o a matrix
+    include: roles/peon/tasks/peons_matrix.yml
+    vars:
+        inner_item: []
+
+  when: matrix_attributes is undefined or matrix_attributes == []

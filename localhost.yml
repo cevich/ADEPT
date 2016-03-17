@@ -1,0 +1,6 @@
+---
+
+# No problem if this runs more than once
+- hosts: localhost
+  roles:
+    - slave

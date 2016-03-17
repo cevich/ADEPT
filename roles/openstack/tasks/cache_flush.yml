@@ -1,0 +1,15 @@
+---
+
+# Depends:
+#   ignore_errors: (optional) boolean
+
+- include: roles/common/tasks/adept_path.yml
+
+- include: roles/common/tasks/workspace.yml
+
+- name: openstack dynamic inventory cache is flushed
+  shell: "{{ workspace }}/inventory/openstack.py --list --refresh &> /dev/null"
+  always_run: yes
+  tags:
+    - always
+  ignore_errors: '{{ ignore_errors | default(False, True) }}'

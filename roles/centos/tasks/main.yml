@@ -1,22 +1,9 @@
 ---
-- include: ../../common/site_scripts.yml.inc
 
-- name: Support packages are installed
-  yum:
-  args:
-    name: "{{ install_rpms }}"
-    state: present
-  register: support_installed
-  notify:
-    - The needs_reboot flag is set because of install or package update
-
-- name: System is fully updated
-  yum:
-  args:
-    name: "*"
-    state: latest
-  register:
-    system_updated
-  notify:
-    - The needs_reboot flag is set because of install or package update
-  when: update_system
+- name: epel repository is installed
+  include: roles/installed/tasks/main.yml
+  vars:
+    installed_rpms:
+        - epel-release
+    installed_enablerepo: []
+    installed_disablerepo: []

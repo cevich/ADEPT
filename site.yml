@@ -1,4 +1,0 @@
----
-- include: redhat_release.yml
-- include: autotested.yml
-- include: cleanup.yml

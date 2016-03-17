@@ -1,11 +1,12 @@
 ---
 
-- name: System is un-registered and un-subscribed but does not ignores errors
+- name: System is  unsubscribed
   redhat_subscription:
   args:
+    username: "{{ rhsm.username }}"
+    password: "{{ rhsm.password }}"
     state: absent
   register: result
   until: result | success
   retries: "{{ rhsm_retries }}"
   delay: "{{ rhsm_delay }}"
-  when: rhsm.unsubscribe

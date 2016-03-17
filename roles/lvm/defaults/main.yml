@@ -1,0 +1,7 @@
+---
+installed_enablerepo: []
+installed_disablerepo: []
+use_dnf: False
+lvg_ops: []
+lvol_ops: []
+is_atomic: False

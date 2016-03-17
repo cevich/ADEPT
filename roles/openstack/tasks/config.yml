@@ -1,0 +1,50 @@
+---
+
+
+# All contexts require this to function
+- block:
+    - include: roles/common/tasks/adept_path.yml
+    - include: roles/common/tasks/workspace.yml
+
+    - name: openstack configuration is deployed to worksapce
+      template:
+       src: clouds.yml.j2
+       dest: "{{ workspace }}/clouds.yml"
+
+    - name: openstack configuration directory exists
+      file:
+        path: '/etc/openstack'
+        state: directory
+
+    - name: openstack openrc.sh file is deployed to workspace
+      template:
+        src: openrc.sh.j2
+        dest: "{{ workspace }}/openrc.sh"
+        mode: 0770
+
+    - name: openstack configuration is linked from worksapce
+      file:
+        force: True
+        path: "/etc/openstack/clouds.yml"
+        src: "{{ workspace }}/clouds.yml"
+        state: link
+
+    - name: openstack dynamic inventory script is deployed
+      copy:
+        src: openstack.py
+        dest: "{{ workspace }}/inventory/"
+        follow: True
+        mode: 0775
+      register: openstack_py
+
+    # Make sure current state is always updated
+    - include: roles/openstack/tasks/cache_flush.yml
+      when: openstack_py | changed
+
+  rescue:
+    # inventory will choke on next run if this exists
+    - file:
+        path: "{{ workspace }}/inventory/openstack.py"
+        state: absent
+    - fail:
+        msg: "Openstack dynamic inventory failing, check credentials/settings"

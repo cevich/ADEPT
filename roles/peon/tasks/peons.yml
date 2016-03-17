@@ -1,0 +1,51 @@
+---
+
+# Depends:
+#   - peon_defaults: Mapping of tag-name to peon-dict default values
+#   - peons: List of peon-dicts, possibly referencing peon_tags
+# Registers:
+#   - peon_set: set of peon dictionaries according to product of matrix_attributes
+
+- fail:
+    msg: "No peons are defined"
+  when: peons is undefined or peons == []
+
+- include: roles/common/tasks/workspace_file.yml
+  vars:
+    workspace_file: 'peon_set.yml'
+
+- name: peon_set.yml file is loaded
+  set_fact:
+    peon_set: '{{ lookup("file", filepath) | from_yaml }}'
+  when: exists
+
+- block:
+    - name: peon set buffer is initially empty
+      set_fact:
+        _peon_set: []
+
+    - include: roles/peon/tasks/peons_unroll.yml
+      with_items: "{{ peons }}"
+      loop_control:
+        loop_var: outer_item
+
+    # TODO Add support for filtering peon_set with map()
+
+    - fail:
+        msg: "Parsing peon dictionary"
+      when: _peon_set is undefined
+
+    - fail:
+        msg: "peon_set is empty"
+      when: _peon_set == []
+
+    - name: Write out matrix product in yaml format to workspace
+      copy:
+          dest: "{{ filepath }}"
+          content: "{{ _peon_set | to_nice_yaml }}"
+
+    # block's condition applies before each task
+    - name: Peon working set is recorded
+      set_fact:
+        peon_set: "{{ _peon_set }}"
+  when: peon_set is undefined

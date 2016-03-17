@@ -1,0 +1,6 @@
+---
+
+# Change these to the proper key as necessary
+- command:
+    filepath: /usr/bin/echo
+    arguments: "\"Environment: $ENV\""

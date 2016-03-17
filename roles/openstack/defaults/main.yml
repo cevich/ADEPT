@@ -1,0 +1,7 @@
+---
+
+# Handy for debugging/development
+cleanup_service_catalog: True
+cleanup_peon_facts: True
+cleanup_clouds_yaml: True
+cleanup_openrc_sh: True

@@ -1,0 +1,15 @@
+---
+
+# Ensure slave is in the right groups
+- include: localhost.yml
+
+# creates peons
+- hosts: openstack
+  roles:
+    - role: openstack
+
+- include: peons.yml
+
+- hosts: autotested:&{{ adept_job }}
+  roles:
+    - role: autotested

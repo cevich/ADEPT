@@ -1,0 +1,34 @@
+---
+
+# Depends:
+#   - update_hostname
+#   - update_ip
+#   - update_extra (optional)
+#   - update_groups (list)
+
+- name: inventory hosts are updated
+  copy:
+    dest: "{{ workspace }}/inventory/{{ update_hostname }}"
+    content: |
+        {{ update_hostname }} ansible_host={{ update_ip }} {{ update_extra | default('') }}
+
+# TODO: Check existing multi-source inventory files for 'x'ecute bit
+#       so a group update (below) doesn't kill it)
+
+- name: inventory groups are updated
+  ini_file:
+    dest: "{{ workspace }}/inventory/{{ item }}"
+    no_extra_spaces: True
+    section: "{{ item|trim }}"
+    option: "{{ update_hostname }} ansible_host"
+    value: "{{ update_ip }} {{ update_extra | default('') }}"
+    state: present
+  when: item != None
+  with_items: '{{ update_groups | default([]) }}'
+
+- name: runtime inventory is updated
+  add_host: >
+    name={{ update_hostname }}
+    groups={{ update_groups | list | join(",") }}
+    ansible_host={{ update_ip }}
+  args: "{{ update_extra | default(omit) }}"

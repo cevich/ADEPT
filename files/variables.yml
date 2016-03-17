@@ -1,0 +1,192 @@
+---
+
+# Example varsfile to be passed to ansible if none found in $WORKSPACE
+
+# Human-consumable value to help distinguish among different runs
+# when more than one person is sharing a cloud instance
+adept_identifier: "{{ _private_adept_identifier | default('ADEPT') }}"
+
+# Indicates the type of provisioning to use, which should match
+# the files/peon_*.yml suffix as well.
+adept_cloud_type: 'openstack'
+
+# When the above is set to 'openstack' this format (dictionary) is used:
+#   image_map: (dict) mapping of peon names to version strings
+#       version string: (string) UUID/Name of image to use
+#   key_name: Name of key-pair to use for cloud-init
+#   public_network: Name/UUID of floating-ip network
+#   public_sec_group: CSV Name/UUIDs of security group when peon.private == False
+#   private_sec_group: CSV Name/UUIDs of security group when peon.private == True
+#   userdata: structure to supply to cloud-init
+#   clouds: os-client-config http://docs.openstack.org/developer/os-client-config/
+#       default:
+#           auth: (dict)
+#               auth_url: (string) from os_server module requirements
+#               username: same as above
+#               password: same as above
+#               tenant_name: string - name or ID of project/tenant
+
+openstack:
+    # Where to get a floating IP from
+    public_network: dad3d076-428c-4cd9-add6-63b9052ab50d
+    # When sec_mode is False
+    public_sec_groups: default
+    # When sec_mode is True
+    private_sec_groups: private
+
+    # Red Hat internal Mapping of image name + version to glance image uuid
+    image_map:
+        centos:
+                "7.2": "9d19a9e8-de8d-44d3-80d9-abcef8099a47"
+        centosatomic:
+                "7.2": "7f185bb6-7d85-491b-8f69-3060c8b75397"
+        rhel:
+                "7.2": "c735f097-077d-4fd0-bd8d-15897b50a0dd"
+
+    # Userdata to supply to cloud-init
+    userdata:
+        # Because I'm self-centered
+        timezone: US/Eastern
+        # Don't add silly 'please login as' to root's .ssh/authorized_keys
+        disable_root: false
+        # Allow password auth in case it's needed
+        ssh_pwauth: True
+        # Import all ssh_authorized_keys (below) into these users
+        ssh_import_id: [root]
+        # public keys to import to users (above)
+        ssh_authorized_keys: "{{ _private_ssh_authorized_keys | list }}"
+        users:
+            # Prevent creating the default, generic user
+            - name: root
+              primary-group: root
+              homdir: /root
+              system: true
+    # Standard os-client-config 'cloud' dictionary as per
+    # http://docs.openstack.org/developer/os-client-config/
+    # Only one named-cloud is supported currently ('default')
+    clouds:
+        default:
+            auth:
+                auth_url: "{{ _private_auth_url }}"
+                username: "{{ _private_username }}"
+                password: "{{ _private_password }}"
+                tenant_name: "{{ _private_tenant_name }}"
+
+# Red Hat Subscription Manager activation credentials for test resources.
+rhsm:
+    username: "{{ _private_rhsm_username }}"
+    password: "{{ _private_rhsm_password }}"
+    # Set true to unsubscribe system at end of testing
+    unsubscribe: true
+
+# Peon value format: (dictionary)
+#   name: Required, partial identifier for VM (combined with adept_identifier)
+#   defaults: Optional, retrieved values from peon_defaults w/ this key
+#   version: Optional, arbitrary version / type string for image mapping
+#   groups: Optional, list of ansible-group lists to join.
+#           One dynamic group, '{{adept_job}}' will always be added.
+#   private: # Use private / security mode when True
+#   volume: # Optional, if non-empty, size (GB) of additional storage attach
+
+# These values will be used as defaults in place of any required/missing
+# values for each peon below.  The item name must match the value from
+# the 'defaults' item in the peon format above.  The special 'defaults'
+# value item, applies when no other match is found.
+peon_defaults:
+
+    # Master defaults, used when named default's item is empty
+    defaults:
+      defaults: 'defaults'
+      version: ''
+      groups:
+        - autotested
+        - peons
+        - lvm
+        - rebooted
+      private: False
+      volume: ""
+
+    centos:
+      volume: "20"
+      version: "7.2"
+      groups:
+        - centos
+        - autotested
+        - peons
+        - installed
+        - updated
+        - lvm
+        - partitioned
+        - rebooted
+
+    centosatomic:
+      version: "7.2"
+      groups:
+        - centosatomic
+        - atomic_upgrade
+        - autotested
+        - peons
+        - rebooted
+
+    rhel:
+      volume: "20"
+      version: "7.2"
+      groups:
+        - rhel
+        - subscribed
+        - autotested
+        - peons
+        - installed
+        - updated
+        - lvm
+        - partitioned
+        - rebooted
+
+    # rhelatomic:
+    #   version: "7.2"
+    #   groups:
+    #     - subscribed
+    #     - rhelatomic
+    #     - atomic_upgrade
+    #     - autotested
+    #     - peons
+    #     - rebooted
+
+# Cloud & tooling agnostic listing of peons to setup for testing.
+# Only expectation is they are ansible accessible.  Each cloud/tooling
+# type will map these values specific to their implementation
+peons:
+    - name: "centos"
+      defaults: "centos"
+
+    - name: "centosatomic"
+      defaults: "centosatomic"
+
+    - name: "rhel"
+      defaults: "rhel"
+
+# List of peon-format attribute names to compute matrix product.
+# Each referenced attribute must contain a list of dictionaries.
+# Each dictionary must define values for the keys: 'key' and 'value'.
+# Where key's value represents the peon attribute to modify,
+# and value's value is the value to set.  The cartesian product
+# (every possible combination) defines the set of peons to create.
+matrix_attributes: []
+
+
+# N/B: These should never need to be changed by hand, they are defined
+# here only for scoping purposes
+
+# machine-consumable value to help distinguish among different runs
+adept_unique: '{{
+                    (lookup("env", "BUILD_TAG") | trim | to_uuid) |
+                    default(lookup("file", "/etc/machine-id") | trim, True)
+               }}'
+
+# Combination of the above, human-consumable identifier and some
+adept_job: '{{
+                adept_identifier | mandatory | lower
+            }}-{{
+                adept_unique | mandatory | lower
+            }}'
+
