@@ -6,7 +6,6 @@
   yum:
     name: "{{ install_rpms }}"
     state: present
-    enablerepo: "{{ enabled_repos }}"
   register: support_installed
   notify:
     - The needs_reboot flag is set because of install or package update
@@ -16,7 +15,6 @@
   dnf:
     name: "{{ install_rpms }}"
     state: present
-    enablerepo: "{{ enabled_repos }}"
   register: support_installed
   notify:
     - The needs_reboot flag is set because of install or package update
@@ -26,7 +24,6 @@
   yum:
     name: "*"
     state: latest
-    enablerepo: "{{ enabled_repos }}"
   register:
     system_updated
   notify:
@@ -37,7 +34,6 @@
   dnf:
     name: "*"
     state: latest
-    enablerepo: "{{ enabled_repos }}"
   register:
     system_updated
   notify:
