@@ -41,12 +41,28 @@ def file_path_name_dir(module):
 
 MYHOSTNAME = gethostname()
 
+def highlight_normal(color_code=32):  # Green
+    """
+    If TERM env. var is not dumb or serial, return two color codes
+    """
+    term = os.environ.get('TERM', 'some_default')
+    if 'dumb' not in term and 'serial' not in term:
+        highlight = '%c[1;%dm' % (27, color_code)  # dec 27 is escape character
+        normal = '%c[0;39m' % 27
+    else:
+        highlight = ''
+        normal = ''
+    return (highlight, normal)
+
 def prefix_divider(ending):
     """
     Return ending, prefixed by the system's hostname and a hash-line
     """
-    return "%s %s\n%s\n" % (MYHOSTNAME, '#' * (72-len(MYHOSTNAME)), ending)
-
+    red, _ = highlight_normal(31)
+    green, normal = highlight_normal()
+    return "%s%s %s%s\n%s%s\n" % (red, MYHOSTNAME,
+                                  green, '#' * (50-len(MYHOSTNAME)),
+                                  normal, ending)
 
 def pretty_output(heading, keyvals):
     """
@@ -57,9 +73,12 @@ def pretty_output(heading, keyvals):
     :returns: Formatted message
     :rval: str
     """
+    cyan, _ = highlight_normal(36)
+    blue, normal = highlight_normal(94)
     lines = ["%s:" % str(heading)]
     for key, val in keyvals.iteritems():
-        lines.append("    %s = '%s'" % (str(key), str(val)))
+        lines.append("    %s%s%s = '%s%s%s'" % (blue, str(key), normal,
+                                                cyan, str(val), normal))
     return prefix_divider("\n".join(lines))
 
 
