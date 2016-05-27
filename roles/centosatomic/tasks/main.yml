@@ -1,6 +1,8 @@
 ---
 
-- include: roles/common/tasks/is_atomic.yml
+# depends:
+#   - is_atomic
+
 - fail:
-    msg: "Host does not appear to be using ostree"
+    msg: "Host does not appear to be an atomic-host"
   when: not is_atomic

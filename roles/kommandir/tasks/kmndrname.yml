@@ -1,0 +1,12 @@
+---
+
+# Depends:
+#   - /etc/hostname
+#   - adept_identifier
+# Registers:
+#   kmndrname
+
+- name: kommandir's name / hostname is defined
+  set_fact:
+    kmndrname: '{{ adept_identifier | lower }}-kommandir-{{
+                lookup("file","/etc/hostname") }}'

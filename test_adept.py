@@ -152,7 +152,8 @@ class TestPylint(TestCaseBase):
               ' --min-public-methods=2'
               ' --no-docstring-rgx="(__.*__)|(_.*)|(__init__)|(__new__)"'
               '')
-    DISABLE = "I0011,R0801,R0904,R0921,R0922,C0301,W0511"
+    DISABLE = ("I0011,R0801,R0904,R0921,R0922,C0301,W0511,"
+               "C0302,W0212,W0201")
     # Sensitive to --msg-template if used
     BADWORDS = ('warning', 'error', 'convention')
 

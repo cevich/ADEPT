@@ -1,0 +1,47 @@
+---
+
+# Depends:
+#   - $WORKSPACE environment variable
+#   - $ADEPT_PATH: environment variable
+#   - $ADEPT_OPTIONAL (optional)
+# Registers:
+#   - workspace: $WORKSPACE contents or /var/lib/workspace (default)
+#   - adept_path: Either $ADEPT_PATH from environment or /var/lib/adept (default)
+#   - adept_optional: $ADEPT_OPTIONAL or undefined (it's optional)
+
+- name: The WORKSPACE env. var is loaded into workspace variable
+  set_fact:
+    workspace: '{{ lookup("env", "WORKSPACE") | default("/var/lib/workspace") }}'
+
+- name: The ADEPT_PATH env. var is loaded into adept_path variable
+  set_fact:
+    adept_path: '{{ lookup("env", "ADEPT_PATH") | default("/var/lib/adept", True) }}'
+  when: adept_path is undefined
+
+- name: The ADEPT_OPTIONAL env. var is buffered
+  set_fact:
+    _adept_optional: '{{ lookup("env", "ADEPT_OPTIONAL") | trim }}'
+  when: adept_optional is undefined
+
+- name: The adept_optional variable is defined from buffer
+  set_fact:
+    adept_optional: '{{ _adept_optional | trim }}'
+  when: _adept_optional is defined and
+        _adept_optional != None and
+        _adept_optional != ''
+
+- name: The ostree ostree admin status command only succeeds on Atomic
+  command: ostree admin status
+  register: _ostree
+  ignore_errors: True
+  when: is_atomic is undefined
+
+- name: is_atomic is set to false
+  set_fact:
+    is_atomic: False
+  when: is_atomic is undefined and _ostree | failed
+
+- name: is_atomic is set to true
+  set_fact:
+    is_atomic: True
+  when: is_atomic is undefined and _ostree | success

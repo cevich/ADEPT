@@ -1,39 +1,48 @@
 ---
 
 - hosts: peons:&subscribed:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - subscribed
 
 - hosts: peons:&partitioned:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - partitioned
 
 - hosts: peons:&rebooted:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - rebooted
 
 - hosts: peons:&lvm:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - lvm
 
 - include: os-types.yml
 
 - hosts: peons:&installed:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - installed
 
 - hosts: peons:&updated:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - updated
 
 - hosts: peons:&atomic_upgrade:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - atomic_upgrade
 
 - hosts: peons:rebooted:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - rebooted
 
 - hosts: peons:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - peon

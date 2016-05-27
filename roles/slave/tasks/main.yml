@@ -1,7 +1,5 @@
 ---
 
-- include: roles/common/tasks/workspace.yml
-
 - name: slave ansible facts written out to workspace
   copy:
     dest: "{{ workspace }}/{{ inventory_hostname }}_{{ adept_context }}_facts.yml"

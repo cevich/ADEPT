@@ -1,0 +1,50 @@
+---
+# vim-syntax: yaml
+
+# N/B: Don't assume Ansible > 1.94
+
+# Path to mount volumedev to hold a workspace for each {{ adept_job }}
+kommandir_workspaces: /mnt/workspaces
+
+# Name of disk device to back {{ kommandir_workspaces }}
+kommandir_volumedev: /dev/vdb
+
+# Partition number on disk device to create
+kommandir_volumeprt: 1
+
+# list of rsync exclusions for sensitive files not to sync with slave
+kommandir_sync_excludes:
+    - '--exclude=**/.git'
+    - '--exclude=**/*private*/**'
+    - '--exclude=/inventory'
+
+# Type of cloud to use to create kommandir
+kommandir_type: openstack
+
+# Specifics for kommandir_type == openstack
+kommandir_openstack:
+    auth_url: "{{ _private_kommandir_auth_url }}"
+    username: "{{ _private_kommandir_username }}"
+    password: "{{ _private_kommandir_password }}"
+    image: "7f185bb6-7d85-491b-8f69-3060c8b75397"
+    tenant_name: "{{ _private_kommandir_tenant_name }}"
+    # Needed for older openstack CLI
+    legacy_floating_ip_pool: "{{ _private_legacy_floating_ip_pool | default(omit) }}"
+    # Userdata to supply to cloud-init
+    userdata:
+        # Because I'm self-centered
+        timezone: US/Eastern
+        # Don't add silly 'please login as' to root's .ssh/authorized_keys
+        disable_root: false
+        # Allow password auth in case it's needed
+        ssh_pwauth: True
+        # Import all ssh_authorized_keys (below) into these users
+        ssh_import_id: [root]
+        # public keys to import to users (above)
+        ssh_authorized_keys: "{{ _private_kommandir_ssh_authorized_keys | list }}"
+        users:
+            # Prevent creating the default, generic user
+            - name: root
+              primary-group: root
+              homdir: /root
+              system: true

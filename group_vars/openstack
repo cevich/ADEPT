@@ -1,0 +1,49 @@
+---
+# vim-syntax: yaml
+
+# Don't clash with the role name
+adept_openstack:
+    # Where to get a floating IP from
+    public_network: dad3d076-428c-4cd9-add6-63b9052ab50d
+    # When sec_mode is False
+    public_sec_groups: default
+    # When sec_mode is True
+    private_sec_groups: private
+
+    # Mapping of image name + version to openstack image uuids
+    image_map:
+        centos:
+                "7.2": "9d19a9e8-de8d-44d3-80d9-abcef8099a47"
+        centosatomic:
+                "7.2": "7f185bb6-7d85-491b-8f69-3060c8b75397"
+        rhel:
+                "7.2": "c735f097-077d-4fd0-bd8d-15897b50a0dd"
+
+    # Userdata to supply to cloud-init
+    userdata:
+        # Because I'm self-centered
+        timezone: US/Eastern
+        # Don't add silly 'please login as' to root's .ssh/authorized_keys
+        disable_root: false
+        # Allow password auth in case it's needed
+        ssh_pwauth: True
+        # Import all ssh_authorized_keys (below) into these users
+        ssh_import_id: [root]
+        # public keys to import to users (above)
+        ssh_authorized_keys: "{{ _private_ssh_authorized_keys | list }}"
+        users:
+            # Prevent creating the default, generic user
+            - name: root
+              primary-group: root
+              homdir: /root
+              system: true
+    # Standard os-client-config 'cloud' dictionary as per
+    # http://docs.openstack.org/developer/os-client-config/
+    # Only one named-cloud is supported currently ('default')
+    clouds:
+        default:
+            auth:
+                auth_url: "{{ _private_auth_url }}"
+                username: "{{ _private_username }}"
+                password: "{{ _private_password }}"
+                tenant_name: "{{ _private_tenant_name }}"

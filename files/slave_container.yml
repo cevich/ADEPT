@@ -1,11 +1,6 @@
 ---
 
-# Change these to the proper key as necessary
-- command:
-    filepath: /usr/bin/cp
-    arguments: |
-        --no-clobber
-        $HOME/.ssh/id_rsa $WORKSPACE/ssh_private_key
+# Depends only on the docker command and this repository
 
 # Runs anywhere w/ only python interpreter, docker, and this repo
 - command:
@@ -14,6 +9,8 @@
     # When True (default), passes called context/optionals through
     pass_context: False
     pass_optional: False
+    # This can be quite noisy, so send output into a file
+    stdoutfile: $WORKSPACE/docker_build.stdout
     # $ADEPT_PATH and $WORKSPACE are automaticly set from called options
     arguments: |
         -c 'set -e;
@@ -55,7 +52,10 @@
     filepath: /usr/bin/bash
     # Impossible to invalidate package update/install layer w/o rebuilding
     arguments: |
-        -c 'set -e;
+        -c '# Do nothing if in verbose mode
+            echo "$ADEPT_OPTIONAL" | grep -q "verbose" && exit 0
+
+            set -e;
 
             # Five-days by default
             MAX=432000;

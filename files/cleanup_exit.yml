@@ -1,0 +1,12 @@
+---
+
+# Allows performing additional actions before testing exit code
+# Assumes exitfile: $WORKSPACE/$ADEPT_CONTEXT.exit from previous node
+
+- command:
+    contexts:
+        - setup
+        - run
+    filepath: /usr/bin/bash
+    arguments: |
+        -c 'exit $(cat "$WORKSPACE/$ADEPT_CONTEXT.exit")'

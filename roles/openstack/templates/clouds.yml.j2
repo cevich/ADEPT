@@ -10,4 +10,4 @@ ansible:
     expand_hostvars: True
 
 clouds:
-    {% endraw %}{{ openstack.clouds | to_nice_yaml | indent(indentfirst=False) }}
+    {% endraw %}{{ adept_openstack.clouds | to_nice_yaml | indent(indentfirst=False) }}

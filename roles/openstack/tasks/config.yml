@@ -1,10 +1,7 @@
 ---
 
-
-# All contexts require this to function
+# many contexts require this to function
 - block:
-    - include: roles/common/tasks/adept_path.yml
-    - include: roles/common/tasks/workspace.yml
 
     - name: openstack configuration is deployed to worksapce
       template:
@@ -16,11 +13,13 @@
         path: '/etc/openstack'
         state: directory
 
-    - name: openstack openrc.sh file is deployed to workspace
-      template:
-        src: openrc.sh.j2
-        dest: "{{ workspace }}/openrc.sh"
-        mode: 0770
+    - include: roles/openstack/tasks/openrcsh.yml
+      vars:
+        destdir: '{{ workspace }}'
+        auth_url: '{{ adept_openstack.clouds.default.auth.auth_url }}'
+        tenant_name: '{{ adept_openstack.clouds.default.auth.tenant_name }}'
+        username: '{{ adept_openstack.clouds.default.auth.username }}'
+        password: '{{ adept_openstack.clouds.default.auth.password }}'
 
     - name: openstack configuration is linked from worksapce
       file:

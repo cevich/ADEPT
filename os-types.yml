@@ -1,17 +1,21 @@
 ---
 
 - hosts: peons:&centos:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - centos
 
 - hosts: peons:&centosatomic:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - centosatomic
 
 - hosts: peons:&rhel:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - rhel
 
 - hosts: peons:&rhelatomic:&{{ adept_job }}
+  any_errors_fatal: true
   roles:
     - rhelatomic

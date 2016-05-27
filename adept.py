@@ -598,15 +598,10 @@ class Playbook(Command):
     ansible_cmd = '/usr/bin/ansible-playbook'
 
     # defaults
-    _ssh_args = ('-o UserKnownHostsFile=/dev/null '
-                 '-o CheckHostIP=no '
-                 '-o StrictHostKeyChecking=no ')
     popen_dargs = {'bufsize': 1,   # line buffered for speed
                    'close_fds': False,
                    'shell': False,
-                   'args': [ansible_cmd,
-                            '--forks', '10',
-                            '--ssh-common-args', _ssh_args],
+                   'args': [ansible_cmd],
                    'executable': ansible_cmd,
                    'stdout': None,
                    'stderr': subprocess.STDOUT}

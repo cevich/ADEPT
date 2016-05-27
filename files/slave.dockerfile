@@ -1,7 +1,9 @@
 FROM docker.io/stackbrew/centos:latest
 MAINTAINER Chris Evich <cevich@redhat.com>
+ENV ANSIBLE_VERSION=stable-2.1
+
 RUN yum install -y epel-release && \
-    yum install -y ansible iproute hostname git && \
+    yum install -y ansible iproute hostname git sed && \
     yum update -y && \
     # Keep every layer as clean (i.e. small) as possible
     yum clean all && \
@@ -65,7 +67,7 @@ RUN yum install -y python-pip python-devel && \
 RUN yum erase -y ansible && \
     rm -rf /etc/ansible && \
     git clone --recurse-submodules \
-              --branch stable-2.1.1 \
+              --branch $ANSIBLE_VERSION \
               --depth 1 \
               --single-branch \
               --progress \

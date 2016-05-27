@@ -1,8 +1,16 @@
 {% raw %}
-#!/bin/sh
+#!/usr/bin/bash
 
 # Only 'default' cloud is supported for now
-export OS_AUTH_URL="{% endraw %}{{ openstack.clouds.default.auth.auth_url }}{% raw %}"
-export OS_TENANT_NAME="{% endraw %}{{ openstack.clouds.default.auth.tenant_name }}{% raw %}"
-export OS_USERNAME="{% endraw %}{{ openstack.clouds.default.auth.username }}{% raw %}"
-export OS_PASSWORD="{% endraw %}{{ openstack.clouds.default.auth.password }}"
+export OS_AUTH_URL="{% endraw %}{{ auth_url }}{% raw %}"
+export OS_TENANT_NAME="{% endraw %}{{ tenant_name }}{% raw %}"
+export OS_USERNAME="{% endraw %}{{ username }}{% raw %}"
+export OS_PASSWORD="{% endraw %}{{ password }}{% raw %}"
+
+SANE=`echo "$@" | tr -d \" | tr -d \'`
+
+if [ -n "$SANE" ] && [ -x "$1" ]
+then
+    $@
+fi
+{% endraw %}

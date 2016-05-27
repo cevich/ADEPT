@@ -1,30 +1,11 @@
 ---
 
-# Main entry-point for slave/ansible operations.  Agnostic
-# to underlying cloud-technology used for the slave itself.
+# Shared slave operations common to all slave and cloud types
 
-# Create/Copy only the bare-minimum of what's needed to bootstrap
-# ansible for a 'localhst' play.
+# TODO: Support including files
 - command:
-    filepath: /usr/bin/mkdir
-    arguments: |
-        --parents
-        $WORKSPACE/inventory
-
-- command:
-    filepath: /usr/bin/cp
-    arguments: |
-        --no-clobber
-        $ADEPT_PATH/files/localhost
-        $WORKSPACE/inventory/localhost
-
-- command:
-    filepath: /usr/bin/cp
-    arguments: |
-        --no-clobber
-        /etc/ansible/ansible.cfg
-        $ADEPT_PATH/files/variables.yml
-        $WORKSPACE/
+    filepath: $ADEPT_PATH/adept.py
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/ansible_bootstrap.yml
 
 # Allow just the slave to set itself up (includes ansible.cfg)
 - playbook:
@@ -57,16 +38,7 @@
     config: $WORKSPACE/ansible.cfg
     exitfile: $WORKSPACE/$ADEPT_CONTEXT.exit
 
-# Ignore cleanup exit-status (it can fail for many reasons)
-# TODO: add basic scripted cleanup checks
+# TODO: Support including files
 - command:
-    contexts:
-        - setup
-        - run
-    filepath: /usr/bin/bash
-    arguments: -c 'exit $(cat $WORKSPACE/$ADEPT_CONTEXT.exit)'
-
-# No reason to leave successful exit files sitting around
-- command:
-    filepath: /usr/bin/rm
-    arguments: -f $WORKSPACE/*.exit
+    filepath: $ADEPT_PATH/adept.py
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/cleanup_exit.yml

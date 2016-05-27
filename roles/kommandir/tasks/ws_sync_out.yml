@@ -1,0 +1,65 @@
+---
+
+# Depends:
+#   - kommandir_workspaces
+#   - kommandir_syc_excludes
+#   - adept_job
+
+# TODO this should be a role dependency
+- include: ../../../roles/common/tasks/workspace.yml
+
+- name: runtime job-specific workspace directory exists
+  file:
+    path: '{{ kommandir_workspaces }}/{{ adept_job }}'
+    state: directory
+
+# Avoides need to decode worskpace/adept_path relationship
+- name: source adept path excluded temporarily
+  set_fact:
+    _ape:
+        - "--exclude={{ adept_path }}"
+
+- name: workspace transfered to kommandir
+  synchronize:
+    compress: True
+    dest: '{{ kommandir_workspaces }}/{{ adept_job }}'
+    links: True
+    perms: True
+    owner: False
+    group: False
+    recursive: True
+    # Don't trust clocks or mod-times
+    checksum: True
+    # Copy contents to dest, not src directory itself
+    src: '{{ workspace }}/'
+    rsync_opts: '{{ kommandir_sync_excludes |
+                    union(_ape)}}'
+  # No reason to list all the files being transfered
+  no_log: True
+
+# Can't assume source adept resides w/in workspace
+- name: runtime job-specific adept directory exists
+  file:
+    path: '{{ kommandir_workspaces }}/{{ adept_job }}/adept'
+    state: directory
+
+- name: adept transfered to kommandir
+  synchronize:
+    compress: True
+    dest: '{{ kommandir_workspaces }}/{{ adept_job }}/adept'
+    links: True
+    perms: True
+    owner: False
+    group: False
+    recursive: True
+    # Don't trust clocks or mod-times
+    checksum: True
+    # Copy contents to dest, not src directory itself
+    src: '{{ adept_path }}/'
+    rsync_opts: '{{ kommandir_sync_excludes }}'
+  # No reason to list all the files being transfered
+  no_log: True
+
+- name: ansible user owns all transfered files
+  command: chown -R {{ ansible_user_id }}.{{ ansible_user_id }} "{{ kommandir_workspaces }}/{{ adept_job }}"
+  when: kommandir_workspaces != '' and adept_job != ''

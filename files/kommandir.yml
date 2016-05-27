@@ -1,0 +1,58 @@
+---
+
+# Main entry-point for a jump-host where a slave container
+# will be run.  Runs anywhere w/ ansible 1.8+, this repo, and
+# kommandir_type specific clients/tools are available
+
+- command:
+    filepath: $ADEPT_PATH/adept.py
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/ansible_bootstrap.yml
+
+# Allow kommandir to run cleanup in slave container before cleaning up itself
+- command:
+    contexts:
+        - cleanup
+    filepath: $ADEPT_PATH/adept.py
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/kommandir_adept.py $ADEPT_OPTIONAL
+    # This can fail for any number of reasons
+    exitfile: /dev/null
+
+# Setup/cleanup the kommander VM itself
+- playbook:
+    contexts:
+        - setup
+        - cleanup
+    filepath: $ADEPT_PATH/kommandir.yml
+    varsfile: $WORKSPACE/variables.yml
+    inventory: $WORKSPACE/inventory
+    config: $WORKSPACE/ansible.cfg
+    # cleanup_exit.yml depends on this exitfile name
+    exitfile: $WORKSPACE/$ADEPT_CONTEXT.exit
+
+# TODO: Support including files
+- command:
+    # Catch setup errors, ignore cleanup errors
+    contexts:
+        - setup
+        - cleanup
+    filepath: $ADEPT_PATH/adept.py
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/cleanup_exit.yml $ADEPT_OPTIONAL
+
+# Setup/Run slave_container from inside kommandir node
+- command:
+    contexts:
+        - setup
+        - run
+    filepath: $ADEPT_PATH/adept.py
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/kommandir_adept.py $ADEPT_OPTIONAL
+
+# Keep controlling host up to date, even if multiple times
+- playbook:
+    contexts:
+        - setup
+        - run
+    filepath: $ADEPT_PATH/kommandir.yml
+    varsfile: $WORKSPACE/variables.yml
+    inventory: $WORKSPACE/inventory
+    config: $WORKSPACE/ansible.cfg
+    limit: syncback

@@ -1,8 +1,7 @@
 ---
 
 # Depends:
-#   - openstack
-#   - openstack_format_version
+#   - /etc/openstack/clouds.yml
 # Registers:
 #   - service_catalog: Written to $WORSKAPCE/service_catalog.yml
 #                      if it doesn't already exist

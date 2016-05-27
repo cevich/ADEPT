@@ -1,13 +1,7 @@
 ---
 
 # Depends:
-#   - openstack.auth
-#   - openstack.image_map
-#   - openstack.net
-#   - openstack.net
-#   - openstack.sec
-#   - adept_context
-#   - image_map
+#   - peon_set
 # Registers:
 #   - service_catalog
 #   - openstack_servers
@@ -42,6 +36,7 @@
   rescue:
     - include: roles/openstack/tasks/cleanup.yml
       vars:
+        # Help out with debugging
         cleanup_peon_facts: False
         cleanup_clouds_yaml: False
   when: peon_facts is undefined

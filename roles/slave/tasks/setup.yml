@@ -13,63 +13,22 @@
     msg: "Required file {{ filepath }} does not exist"
   when: not exists
 
-# Playbook always run with this file, but environment may change
-- block:
-
-    - name: variables file is loaded into buffer
-      set_fact:
-        _variables: '{{ lookup("file", filepath) | from_yaml }}'
-
-    - name: adept_unique is hard-coded in variables to current value
-      set_fact:
-        _variables: '{{ _variables | combine({"adept_unique": adept_unique}) }}'
-
-    - name: adept_job is hard-coded in variables to current value
-      set_fact:
-        _variables: '{{ _variables | combine({"adept_job": adept_job}) }}'
-
-    - name: Updated variables buffer is written to workspace file
-      copy:
-        dest: '{{ filepath }}'
-        content: '{{ _variables | to_nice_yaml }}'
-
-- name: slave ansible config. file location is set
+- name: variables file is loaded into buffer
   set_fact:
-    ansible_cfg: '{{
-                    lookup("env", "ANSIBLE_CONFIG") |
-                    default([workspace, "ansible.cfg"] | join("/")) }}'
+    _variables: '{{ lookup("file", filepath) | from_yaml }}'
 
-- name: slave ansible 'display_skipped_hosts' is disabled
-  ini_file:
-    dest: "{{ ansible_cfg }}"
-    section: defaults
-    option: display_skipped_hosts
-    value: False
-    state: present
+- name: adept_unique is hard-coded in variables to current value
+  set_fact:
+    _variables: '{{ _variables | combine({"adept_unique": adept_unique}) }}'
 
-- name: slave ansible 'retry_files_enabled' is disabled
-  ini_file:
-    dest: "{{ ansible_cfg }}"
-    section: defaults
-    option: retry_files_enabled
-    value: False
-    state: present
+- name: adept_job is hard-coded in variables to current value
+  set_fact:
+    _variables: '{{ _variables | combine({"adept_job": adept_job}) }}'
 
-- name: slave ansible 'nocolor' option is disabled
-  ini_file:
-    dest: "{{ ansible_cfg }}"
-    section: defaults
-    option: nocolor
-    value: False
-    state: present
-
-- name: slave ansible 'force_color' option is enabled
-  ini_file:
-    dest: "{{ ansible_cfg }}"
-    section: defaults
-    option: force_color
-    value: True
-    state: present
+- name: Updated variables buffer is written to workspace file
+  copy:
+    dest: '{{ filepath }}'
+    content: '{{ _variables | to_nice_yaml }}'
 
 - name: slave is member of group from adept_cloud_type variable
   include: roles/common/tasks/update_inventory.yml

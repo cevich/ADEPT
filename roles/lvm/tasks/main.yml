@@ -8,9 +8,7 @@
 # Condition should apply to task, not each iteration
 - block:
 
-    # All atomic hosts are setup w/ LVM by default
-    - include: roles/common/tasks/is_atomic.yml
-
+    # Must happen here, role applied before os-type roles
     - include: roles/installed/tasks/main.yml
       vars:
         installed_rpms:

@@ -1,0 +1,12 @@
+---
+
+# Depends:
+#   kmndrname
+#   kmndrip
+
+- name: Kommandir is added to runtime inventory
+  # Works better this way on newer ansible versions
+  add_host: >
+    name={{ kmndrname }}
+    groups=kommandir
+    ansible_host={{ kmndr_ip }}

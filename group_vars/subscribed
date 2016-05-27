@@ -1,0 +1,7 @@
+---
+# vim-syntax: yaml
+
+# Red Hat Subscription Manager activation credentials for test resources.
+rhsm:
+    username: "{{ _private_rhsm_username }}"
+    password: "{{ _private_rhsm_password }}"
