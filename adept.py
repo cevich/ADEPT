@@ -404,7 +404,7 @@ class Command(ActionBase):
 
     # defaults
     popen_dargs = {'bufsize': 1,   # line buffered for swirly
-                   'close_fds': False,  # No leaking!
+                   'close_fds': False,  # Allow stdio passthrough
                    'shell': False}
 
     # Output file objects or special subprocess tokens
@@ -604,7 +604,8 @@ class Playbook(Command):
                    'args': [ansible_cmd],
                    'executable': ansible_cmd,
                    'stdout': None,
-                   'stderr': subprocess.STDOUT}
+                   'stderr': subprocess.STDOUT,
+                   'universal_newlines': True}
 
     # Variables that only apply to this class
     limit = None
