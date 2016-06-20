@@ -1,0 +1,27 @@
+---
+
+- name: Results sub-directory is defined
+  set_fact:
+    rdir: "{{ workspace }}/results/{{ inventory_hostname }}"
+
+- name: Ensure results sub-directory exists
+  file:
+  args:
+    path: "{{ rdir }}"
+    state: directory
+  delegate_to: localhost
+
+- name: Collect autotest results
+  synchronize:
+    mode: pull
+    src: "{{ autotest_dest_dir }}/client/results/default/"
+    dest: "{{ rdir }}"
+  ignore_errors: true
+
+- name: Collect Docker Autotest customized config
+  synchronize:
+    # The test VM is the SOURCE, and local system is destination
+    mode: pull
+    src: "{{ autotest_docker_path }}/config_custom"
+    dest: "{{ rdir }}"
+  ignore_errors: true

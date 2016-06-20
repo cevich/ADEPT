@@ -1,0 +1,178 @@
+---
+
+- name: Config_custom_defaults string is set
+  set_fact:
+    config_custom_defaults: "{{ autotest_docker_path }}/config_custom/defaults.ini"
+
+- name: Custom defaults file status is known
+  stat:
+  args:
+    path: "{{ config_custom_defaults }}"
+  register: config_custom_defaults_file
+
+- name: Defaults needed flag is set true
+  set_fact:
+    defaults_needed: true
+  when: not config_custom_defaults_file.stat.exists or
+        test_image_fqin is defined
+
+- name: Defaults needed flag is set false
+  set_fact:
+    defaults_needed: false
+  when: defaults_needed is not defined
+
+- name: Copy defaults
+  command: cp config_defaults/defaults.ini config_custom/defaults.ini
+  args:
+    chdir: "{{ autotest_docker_path }}"
+  when: defaults_needed
+
+- name: Docker daemon is active
+  command: systemctl is-active docker
+  when: defaults_needed
+
+- name: Systemctl shows docker MainPID
+  shell: systemctl show docker --property=MainPID | head -1 | cut -d= -f2
+  register: docker_main_pid_cmd
+  when: defaults_needed
+
+- name: Docker daemon cmdline file is defined
+  set_fact:
+    dd_proc_cmdline: /proc/{{ docker_main_pid_cmd.stdout }}/cmdline
+  when: defaults_needed
+
+- name: Docker daemon cmdline file exists
+  stat:
+  args:
+    path: "{{ dd_proc_cmdline }}"
+  register: dd_cmdline
+  when: defaults_needed
+
+# Cat exits 0 even if file doesn't exist
+- fail:
+  when: defaults_needed and not dd_cmdline.stat.exists
+
+- name: Docker daemon options are known
+  shell: cat {{ dd_proc_cmdline }} | tr '\000' ',' | cut -d, -f 2-
+  register: cat_pid_cmd
+  when: defaults_needed
+
+- name: Don't check Autotest version
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: autotest_version
+    section: DEFAULTS
+    value: "@!NOVERSIONCHECK!@"
+  when: defaults_needed
+
+- name: Defaults daemon_options is configured
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: daemon_options
+    section: DEFAULTS
+    value: "{{ cat_pid_cmd.stdout }}"
+  when: defaults_needed
+
+- name: Defaults docker_repo_name is configured
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: docker_repo_name
+    section: DEFAULTS
+    value: "{{ docker_autotest.test_image.name }}"
+  when: defaults_needed and
+        docker_autotest.test_image is defined and
+        docker_autotest.test_image.name is defined and
+        docker_autotest.test_image.name != None
+
+- name: Defaults docker_repo_tag is configured
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: docker_repo_tag
+    section: DEFAULTS
+    value: "{{ docker_autotest.test_image.tag }}"
+  when: defaults_needed and
+        docker_autotest.test_image is defined and
+        docker_autotest.test_image.tag is defined and
+        docker_autotest.test_image.tag != None
+
+- name: Defaults docker_registry_host is configured
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: docker_registry_host
+    section: DEFAULTS
+    value: "{{ docker_autotest.test_image.host }}"
+  when: defaults_needed and
+        docker_autotest.test_image is defined and
+        docker_autotest.test_image.host is defined and
+        docker_autotest.test_image.host != None
+
+- name: Defaults docker_registry_user is configured
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: docker_registry_user
+    section: DEFAULTS
+    value: "{{ docker_autotest.test_image.user }}"
+  when: defaults_needed and
+        docker_autotest.test_image is defined and
+        docker_autotest.test_image.user is defined and
+        docker_autotest.test_image.user != None
+
+- name: Default image preserve CSV value is known
+  shell: "{{ docker_autotest.preserve_fqins_cmd }}"
+  args:
+    chdir: "{{ autotest_docker_path }}"
+  register: preserve_fqins_cmd
+  when: defaults_needed and
+        docker_autotest.preserve_fqins is defined and
+        docker_autotest.preserve_fqins != None
+
+- name: Default image preserve CSV value is formatted
+  set_fact:
+    preserve_fqins: "{{ preserve_fqins_cmd.stdout | regex_replace('\\s*', '') }},{{ docker_autotest.preserve_fqins | join(',') }}"
+  when: defaults_needed and
+        docker_autotest.preserve_fqins is defined and
+        docker_autotest.preserve_fqins != None
+
+- name: Default image preserve CSV value is configured
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: preserve_fqins
+    section: DEFAULTS
+    value: "{{ preserve_fqins | regex_replace(',,', ',') }}"
+  when: defaults_needed and
+        docker_autotest.preserve_fqins is defined and
+        docker_autotest.preserve_fqins != None
+
+- name: Default container preserve CSV value is known
+  shell: "{{ docker_autotest.preserve_cnames_cmd }}"
+  args:
+    chdir: "{{ autotest_docker_path }}"
+  register: preserve_cnames_cmd
+  when: defaults_needed and
+        docker_autotest.preserve_cnames is defined and
+        docker_autotest.preserve_cnames != None
+
+- name: Default container preserve CSV value is formatted
+  set_fact:
+    preserve_cnames: "{{ preserve_cnames_cmd.stdout | regex_replace('\\s*', '') }},{{ docker_autotest.preserve_cnames | join(',') }}"
+  when: defaults_needed and
+        docker_autotest.preserve_cnames is defined and
+        docker_autotest.preserve_cnames != None
+
+- name: Default container preserve CSV value is configured
+  ini_file:
+  args:
+    dest: "{{ config_custom_defaults }}"
+    option: preserve_cnames
+    section: DEFAULTS
+    value: "{{ preserve_cnames | regex_replace(',,', ',') }}"
+  when: defaults_needed and
+        docker_autotest.preserve_cnames is defined and
+        docker_autotest.preserve_cnames != None

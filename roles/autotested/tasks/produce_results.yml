@@ -1,0 +1,24 @@
+---
+
+- name: Convert Results to text-table
+  shell: tools/scan_results.py > {{ docker_autotest.autotest_dir }}/client/results/default/results.txt
+  args:
+    chdir: "{{ docker_autotest.autotest_dir }}/client"
+  # This thing is really easy to break
+  ignore_errors: true
+  when: docker_autotest.execute and
+        autotest_execution is defined and
+        autotest_execution|success
+
+# Sometimes this breaks if a test fails in the "wrong" way.
+- name: Convert Results to junit
+  shell: tools/results2junit.py results/default > {{ docker_autotest.autotest_dir }}/client/results/default/results.junit
+  args:
+    chdir: "{{ docker_autotest.autotest_dir }}/client"
+  register: results2junit
+  # This thing is also really easy to break
+  ignore_errors: true
+  when: docker_autotest.execute and
+        autotest_execution is defined and
+        autotest_execution|success
+

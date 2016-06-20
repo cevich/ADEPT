@@ -1,0 +1,97 @@
+---
+
+- name: Test image host is optional
+  set_fact:
+    _test_image_host: ''
+  when: docker_autotest.test_image is defined and
+        docker_autotest.test_image.host is defined and
+        (docker_autotest.test_image.host == None or
+         docker_autotest.test_image.host == "")
+
+- name: Test image host is defined
+  set_fact:
+    _test_image_host: "{{ docker_autotest.test_image.host }}/"
+  when: _test_image_host is not defined
+
+- name: Test image user is optional
+  set_fact:
+    _test_image_user: ''
+  when: docker_autotest.test_image is defined and
+        docker_autotest.test_image.user is defined and
+        (docker_autotest.test_image.user == None or
+         docker_autotest.test_image.user == "")
+
+- name: Test image user is defined
+  set_fact:
+    _test_image_user: "{{ docker_autotest.test_image.user }}/"
+  when: _test_image_user is not defined
+
+- name: Test image tag is optional
+  set_fact:
+    _test_image_tag: ''
+  when: docker_autotest.test_image is defined and
+        docker_autotest.test_image.tag is defined and
+        (docker_autotest.test_image.tag == None or
+         docker_autotest.test_image.tag == "")
+
+- name: Test image tag is defined
+  set_fact:
+    _test_image_tag: ":{{ docker_autotest.test_image.tag }}"
+  when: _test_image_tag is not defined
+
+- name: Docker Autotest test image known in fqin format
+  set_fact:
+    test_image_fqin: "{{ _test_image_host }}{{ _test_image_user }}{{ docker_autotest.test_image.name }}{{ _test_image_tag }}"
+  when: docker_autotest.test_image is defined and
+        docker_autotest.test_image.name is defined and
+        (docker_autotest.test_image.name != None or
+         docker_autotest.test_image.name == "")
+
+# Image matching above name already exists on system, do not pull
+- name: Docker Autotest test image was previously built
+  command: /usr/bin/docker inspect --format \{\{.Created\}\}
+           {{ test_image_fqin }}
+  register: docker_inspect_result
+  ignore_errors: True
+  args:
+    warn: no
+  changed_when: false
+  when: test_image_fqin is defined
+
+# Allows building a custom testing image from Dockerfile @ URL
+- name: Build Test Image
+  command: /usr/bin/docker run
+           {{ docker.build_args }}
+           {{ docker.build_fqin }}
+           --workdir /host/{{ autotest_docker_path }}
+           /usr/bin/docker build
+           --quiet
+           --tag {{ test_image_fqin }}
+           {{ docker_autotest.test_image.build_url }}
+  when: test_image_fqin is defined and
+        docker_autotest.test_image is defined and
+        docker_inspect_result|failed and
+        (docker_autotest.test_image.build_url is defined and
+         docker_autotest.test_image.build_url != None and
+         docker_autotest.test_image.build_url != "")
+
+# Do NOT pull if test image is already on system
+- name: Test image has been pulled
+  command: /usr/bin/docker pull
+           {{ test_image_fqin }}
+  when: test_image_fqin is defined and
+        docker_autotest.test_image is defined and
+        docker_inspect_result|failed and
+        (docker_autotest.test_image.build_url is not defined or
+         docker_autotest.test_image.build_url == None or
+         docker_autotest.test_image.build_url == "")
+
+# For debugging
+- name: Docker images output is captured
+  command: /usr/bin/docker images --all
+  register: docker_images_output
+  ignore_errors: True
+  changed_when: false
+
+- debug: var=docker_images_output
+  when: docker_images_output is defined
