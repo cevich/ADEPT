@@ -20,8 +20,15 @@
 # environment is not likely under the control of who/whatever is
 # running this playbook.
 
-# Older ansible needs path this way
-- include: ../../../roles/kommandir/tasks/kmndrname.yml
+- name: openrc.sh file is rendered from template
+  # Older ansible needs it this way
+  include: ../../../roles/openstack/tasks/openrcsh.yml
+  vars:
+    destdir: '{{ workspace }}'
+    auth_url: '{{ kommandir_openstack.auth_url }}'
+    tenant_name: '{{ kommandir_openstack.tenant_name }}'
+    username: '{{ kommandir_openstack.username }}'
+    password: '{{ kommandir_openstack.password }}'
 
 - name: ADEPT kommandir VM exists
   nova_compute:
@@ -48,29 +55,9 @@
   set_fact:
     kmndrip: '{{ _kmndrip[0] | trim }}'
 
-- name: the KMNDRIP property is cleared from the workspace/properties file
-  lineinfile:
-    dest: '{{ workspace }}/properties'
-    regexp: '^KMNDRIP=.*'
-    state: absent
-
-# TODO put this in variables.yml
-- name: the KMNDRIP property is set in the workspace/properties file
-  lineinfile:
-    dest: '{{ workspace }}/properties'
-    regexp: '^KMNDRIP=.*'
-    line: 'KMNDRIP={{ kmndrip }}'
-    state: present
-
-- name: openrc.sh file is rendered from template
-  # Older ansible needs it this way
-  include: ../../../roles/openstack/tasks/openrcsh.yml
-  vars:
-    destdir: '{{ workspace }}'
-    auth_url: '{{ kommandir_openstack.auth_url }}'
-    tenant_name: '{{ kommandir_openstack.tenant_name }}'
-    username: '{{ kommandir_openstack.username }}'
-    password: '{{ kommandir_openstack.password }}'
+# Saves needing an extra task to empty the file
+- name: the KMNDRIP file contains kommandir's ip addresss
+  shell: echo "{{ kmndrip }}" > '{{ workspace }}/KMNDRIP'
 
 # Older ansible doesn't have modules for volume manipulation
 # use command-line client "the hard way" to ensure state is idempotent

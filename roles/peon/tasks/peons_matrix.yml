@@ -50,9 +50,7 @@
     # Not unique! Seed comes from adept_job + matrix parameters.
     - name: peon uuid is generated
       set_fact:
-        _uuid: "{{ adept_identifier |
-                    default('ADEPT')
-                }}-{{
+        _uuid: "{{
                     _peon.name
                 }}-{{
                     _peon.version | trim

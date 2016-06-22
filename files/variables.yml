@@ -5,12 +5,7 @@
 # FIXME: The majority of the items here should move under group_vars/...
 # sub-directories.
 
-# Human-consumable value to help distinguish among different runs
-# when more than one person is sharing a cloud instance
-adept_identifier: "{{ _private_adept_identifier | default('ADEPT') }}"
-
-# Indicates the type of provisioning to use, which should match
-# the files/peon_*.yml suffix as well.
+# Indicates the type of cloud to use
 adept_cloud_type: 'openstack'
 
 # When the above is set to 'openstack' this format (dictionary) is used:
@@ -128,15 +123,5 @@ matrix_attributes: []
 # here only for scoping purposes
 
 # machine-consumable value to help distinguish among different runs
-adept_unique: '{{
-                    _private_adept_unique |
-                    default(lookup("file", "/etc/machine-id") | trim, True)
-               }}'
-
-# Combination of the above, human-consumable identifier and some
-adept_job: '{{
-                adept_identifier | mandatory
-            }}-{{
-                adept_unique | mandatory
-            }}'
-
+#
+adept_job: '{{ adept_job | default(lookup("file", "/proc/uptime") | to_uuid) }}'

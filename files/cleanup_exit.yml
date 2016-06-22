@@ -9,4 +9,9 @@
         - run
     filepath: /usr/bin/bash
     arguments: |
-        -c 'exit $(cat "$WORKSPACE/$ADEPT_CONTEXT.exit")'
+        -c 'set -ex;
+            [ -r "$WORKSPACE/$ADEPT_CONTEXT.exit" ] || exit 1;
+            RET=$(cat "$WORKSPACE/$ADEPT_CONTEXT.exit");
+            rm -fv "$WORKSPACE/$ADEPT_CONTEXT.exit";
+            [ -z "$RET" ] || exit $RET;
+            exit 1;'

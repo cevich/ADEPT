@@ -1,9 +1,9 @@
 ---
 
 - name: Convert Results to text-table
-  shell: tools/scan_results.py > {{ docker_autotest.autotest_dir }}/client/results/default/results.txt
+  shell: tools/scan_results.py > {{ autotest_dest_dir }}/client/results/default/results.txt
   args:
-    chdir: "{{ docker_autotest.autotest_dir }}/client"
+    chdir: "{{ autotest_dest_dir }}/client"
   # This thing is really easy to break
   ignore_errors: true
   when: docker_autotest.execute and
@@ -12,9 +12,9 @@
 
 # Sometimes this breaks if a test fails in the "wrong" way.
 - name: Convert Results to junit
-  shell: tools/results2junit.py results/default > {{ docker_autotest.autotest_dir }}/client/results/default/results.junit
+  shell: tools/results2junit.py results/default > {{ autotest_dest_dir }}/client/results/default/results.junit
   args:
-    chdir: "{{ docker_autotest.autotest_dir }}/client"
+    chdir: "{{ autotest_dest_dir }}/client"
   register: results2junit
   # This thing is also really easy to break
   ignore_errors: true

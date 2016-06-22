@@ -8,31 +8,35 @@
 
 - name: Base directory of Docker Autotest is defined
   set_fact:
-    autotest_docker_path: "{{ docker_autotest.autotest_dir }}/client/tests/docker"
+    autotest_docker_path: "{{ autotest_dest_dir }}/client/tests/docker"
 
 - name: Autotest directory is removed
   file:
-    path: "{{ docker_autotest.autotest_dir }}"
+    path: "{{ autotest_dest_dir }}"
     state: absent
 
 - name: Cached Autotest is copied
   synchronize:
-    dest: "{{ docker_autotest.autotest_dir }}"
-    src: "{{ docker_autotest.cache_dir }}/autotest/"
+    dest: "{{ autotest_dest_dir }}"
+    src: "{{ docker_autotest_cache_dir }}/autotest/"
     rsync_opts:
         - "--exclude=.git"
+  # Rarely should need to debug the massive list of files
+  no_log: true
 
 - name: Untracked RELEASE-VERSION is removed
   file:
-    path: "{{ docker_autotest.autotest_dir }}/RELEASE-VERSION"
+    path: "{{ autotest_dest_dir }}/RELEASE-VERSION"
     state: absent
 
 - name: Cached Docker Autotest is copied
   synchronize:
     dest: "{{ autotest_docker_path }}"
-    src: "{{ docker_autotest.cache_dir }}/autotest-docker/"
+    src: "{{ docker_autotest_cache_dir }}/autotest-docker/"
     rsync_opts:
         - "--exclude=.git"
+  # Rarely should need to debug the massive list of files
+  no_log: true
 
 - name: Cached bugzilla module is copied
   synchronize:
@@ -40,6 +44,8 @@
     src: "{{ docker_autotest_cache_dir }}/python-bugzilla/bugzilla"
     rsync_opts:
         - "--exclude=.git"
+  # Rarely should need to debug the massive list of files
+  no_log: true
   when: docker_autotest.enable_bugzilla is defined and
         docker_autotest.enable_bugzilla
 
@@ -83,7 +89,7 @@
 - name: Results directory is empty
   file:
   args:
-    path: "{{ docker_autotest.autotest_dir }}/client/results"
+    path: "{{ autotest_dest_dir }}/client/results"
     state: absent
   when: docker_autotest.execute
 
@@ -99,7 +105,7 @@
   when: docker_autotest.execute
 
 - name: Execute Docker autotest
-  shell: "export AUTOTEST_PATH={{ docker_autotest.autotest_dir }} && $AUTOTEST_PATH/client/autotest-local {{ autotest_docker_path }}/control"
+  shell: "export AUTOTEST_PATH={{ autotest_dest_dir }} && $AUTOTEST_PATH/client/autotest-local {{ autotest_docker_path }}/control"
   args:
     chdir: "{{ autotest_docker_path }}"
   register: autotest_execution

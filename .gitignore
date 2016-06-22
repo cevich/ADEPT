@@ -8,6 +8,5 @@ docs/build
 hosts
 workspace
 files/*private*
-files/openrc.sh
 group_vars/all
 !group_vars/all/.empty

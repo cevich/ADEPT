@@ -1,7 +1,7 @@
 ---
 
 # Depends:
-#   workspaces
+#   kommandir_workspaces
 #   kommandir_volumedev
 #   kommandir_volumeprt
 
@@ -43,12 +43,12 @@
   register: growpart
   # Command fails when partition is not changed
   ignore_errors: True
-  changed_when: "{{ growpart.stdout | search('CHANGED:') }}"
+  changed_when: "{{ growpart.stdout | default('') | search('CHANGED:') }}"
 
 - fail:
     msg: Growing partition failed
   when: growpart | failed and
-        "{{ not (growpart.stdout | search('it cannot be grown') | bool) }}"
+        "{{ not (growpart.stdout | default('') | search('it cannot be grown') | bool) }}"
 
 - name: kommandir volume-group is created
   lvg:

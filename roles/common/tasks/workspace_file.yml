@@ -6,8 +6,6 @@
 #   - filepath
 #   - exists
 
-- include: roles/common/tasks/main.yml
-
 - name: full path to file is formed
   set_fact:
     filepath: "{{ workspace }}/{{ workspace_file }}"

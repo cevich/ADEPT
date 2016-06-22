@@ -3,24 +3,6 @@
 
 # N/B: Don't assume Ansible > 1.94
 
-# Path to mount volumedev to hold a workspace for each {{ adept_job }}
-kommandir_workspaces: /mnt/workspaces
-
-# Name of disk device to back {{ kommandir_workspaces }}
-kommandir_volumedev: /dev/vdb
-
-# Partition number on disk device to create
-kommandir_volumeprt: 1
-
-# list of rsync exclusions for sensitive files not to sync with slave
-kommandir_sync_excludes:
-    - '--exclude=**/.git'
-    - '--exclude=**/*private*/**'
-    - '--exclude=/inventory'
-
-# Type of cloud to use to create kommandir
-kommandir_type: openstack
-
 # Specifics for kommandir_type == openstack
 kommandir_openstack:
     auth_url: "{{ _private_kommandir_auth_url }}"

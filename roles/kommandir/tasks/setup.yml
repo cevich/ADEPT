@@ -1,31 +1,5 @@
 ---
 
-# Skip all partitioning/formatting steps if fs already mounted
-- name: findmnt command is run, ignoring exit code
-  command: findmnt {{ kommandir_workspaces }}
-  register: findmnt
-  ignore_errors: True
-
-- name: Partitioning/formatting/mounting workspaces if findmnt failed
-  include: ../../../roles/kommandir/tasks/setup_workspaces.yml
-  when: findmnt | failed
-
-- name: runtime job-specific workspace directory is created
-  file:
-    path: '{{ kommandir_workspaces }}/{{ adept_job }}'
-    state: directory
-
-# TODO put this in variables.yml
-- name: job-specific path on kommandir is stored in local properties file
-  lineinfile:
-    dest: '{{ hostvars["localhost"].workspace }}/properties'
-    regexp: '^KMNDRWS=.*'
-    line: 'KMNDRWS={{ kommandir_workspaces }}/{{ adept_job }}'
-    state: present
-  delegate_to: localhost
-
-- include: ../../../roles/kommandir/tasks/ws_sync_out.yml
-
 - name: runtime ssh-key is generated
   shell: >
     [ -r "{{ kommandir_workspaces }}/{{ adept_job }}/ssh_private_key" ] || \

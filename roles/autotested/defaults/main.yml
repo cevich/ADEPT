@@ -1,12 +1,13 @@
 ---
 
+# Directory containing 'autotest' and 'autotest-docker' repos.
+docker_autotest_cache_dir: "{{ workspace }}/cache/"
+
+# Remote directory where Autotest will be installed
+autotest_dest_dir: "/var/lib/autotest"
+
+
 docker_autotest:
-
-    # Remote directory where Autotest will be installed
-    autotest_dir: "/var/lib/autotest"
-
-    # Directory containing 'autotest' and 'autotest-docker' repos.
-    cache_dir: "{{ workspace }}/cache/"
 
     # Many tests rely on a default image for testing. Specify
     # either _all_ components of the fully-qualified-image-name.

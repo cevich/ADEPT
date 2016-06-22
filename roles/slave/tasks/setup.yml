@@ -17,10 +17,6 @@
   set_fact:
     _variables: '{{ lookup("file", filepath) | from_yaml }}'
 
-- name: adept_unique is hard-coded in variables to current value
-  set_fact:
-    _variables: '{{ _variables | combine({"adept_unique": adept_unique}) }}'
-
 - name: adept_job is hard-coded in variables to current value
   set_fact:
     _variables: '{{ _variables | combine({"adept_job": adept_job}) }}'

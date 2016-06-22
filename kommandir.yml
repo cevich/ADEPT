@@ -8,10 +8,14 @@
 - hosts: localhost
   any_errors_fatal: true
   vars_files:
+    - "roles/kommandir/defaults/main.yml"
     - "group_vars/kommandir"
   roles:
     - common
+  # TODO: Turn into groups & roles similar to localhost.yml + setup.yml
   tasks:
+    - include: roles/kommandir_name/tasks/main.yml
+
     - include: roles/kommandir/tasks/openstack.yml
       when: kommandir_type == 'openstack' and
             adept_context == 'setup'
