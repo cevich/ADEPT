@@ -38,7 +38,12 @@
     config: $WORKSPACE/ansible.cfg
     exitfile: $WORKSPACE/$ADEPT_CONTEXT.exit
 
-# TODO: Support including files
+# Reveal error if there was one, to aid in debugging
+- command:
+    filepath: $ADEPT_PATH/adept.py
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/highlight_exit.yml
+
+# Only present non-zero exit code in setup/run contexts
 - command:
     filepath: $ADEPT_PATH/adept.py
     arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/cleanup_exit.yml
