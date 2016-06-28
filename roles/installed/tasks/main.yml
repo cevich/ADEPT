@@ -10,14 +10,21 @@
 #   rpms_installed: boolean
 #   needs_reboot: boolean
 
+- debug: var=installed_rpms
+
 - block:
 
     # Allows re-use by 'updated' role
-    - name: installed_rpms defaults to ''
+    - name: installed_rpms value is buffered
       set_fact:
         _installed_rpms: "{{ installed_rpms }}"
-      when: installed_rpms is undefined or installed_rpms == None or
-            installed_rpms == [] or installed_rpms == ""
+      when: installed_rpms is defined and installed_rpms != None and
+            installed_rpms != [] and installed_rpms != ""
+
+    - name: installed_rpms buffer defaults to empty
+      set_fact:
+        _installed_rpms: ""
+      when: _installed_rpms is undefined
 
     # Allows re-use by 'updated' role
     - name: state defaults to "present"

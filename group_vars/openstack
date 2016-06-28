@@ -1,6 +1,22 @@
 ---
 # vim-syntax: yaml
 
+# When adept_cloud_type == 'openstack' this format (dictionary) is used:
+#   image_map: (dict) mapping of peon names to version strings
+#       version string: (string) UUID/Name of image to use
+#   key_name: Name of key-pair to use for cloud-init
+#   public_network: Name/UUID of floating-ip network
+#   public_sec_group: CSV Name/UUIDs of security group when peon.private == False
+#   private_sec_group: CSV Name/UUIDs of security group when peon.private == True
+#   userdata: structure to supply to cloud-init
+#   clouds: os-client-config http://docs.openstack.org/developer/os-client-config/
+#       default:
+#           auth: (dict)
+#               auth_url: (string) from os_server module requirements
+#               username: same as above
+#               password: same as above
+#               tenant_name: string - name or ID of project/tenant
+
 # Don't clash with the role name
 adept_openstack:
     # Where to get a floating IP from

@@ -1,0 +1,46 @@
+---
+
+- name: latest released packages installed
+  dnf:
+    name: '*'
+    state: latest
+
+- name: core dnf plugins and rawhide repo installed
+  dnf:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - dnf-plugins-core
+    - fedora-repos-rawhide
+
+- name: fedora, updates, updates-testing repos are disabled
+  command: dnf --assumeyes config-manager --set-disabled fedora updates updates-testing
+
+- name: rawhide repo is enabled
+  command: dnf config-manager --set-enabled rawhide
+
+- name: dnf cache is squeeky-clean for rawhide update
+  command: dnf --assumeyes clean -q dbcache plugins metadata
+
+- name: system will re-label SELinux contexts on reboot
+  copy:
+    dest: /.autorelabel
+    content: " "
+
+- name: system is switched to rawhide
+  command: dnf --assumeyes --releasever=rawhide --setopt=deltarpm=false distro-sync --nogpgcheck
+# This could be checked better, but should be good enough here.
+
+- name: restart hosts
+  shell: sleep 3 && shutdown -r now
+  async: 1
+  poll: 0
+  ignore_errors: true
+
+- name: wait for hosts to come down
+  local_action: wait_for host={{ inventory_hostname }} port=22 state=stopped
+  sudo: false
+
+- name: wait for hosts to come up
+  local_action: wait_for host={{ inventory_hostname }} port=22 state=started
+  sudo: false

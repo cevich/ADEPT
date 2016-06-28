@@ -67,7 +67,7 @@
 - name: Resolve docker_autotest templates
   template:
   args:
-    dest: "{{ autotest_docker_path }}/{{ item.dest | default(omit) }}"
+    dest: "{{ item.dest | default(omit) }}"
     follow: "{{ item.follow | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
@@ -78,7 +78,7 @@
     seuser: "{{ item.seuser | default(omit) }}"
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
-  with_items: docker_autotest.templates
+  with_items: '{{ docker_autotest.templates }}'
   when: docker_autotest.templates is defined and
         docker_autotest.templates != None
 
@@ -101,7 +101,8 @@
   when: docker_autotest.execute
 
 - name: Docker autotest execution variable is shown
-  debug: var=docker_autotest
+  debug:
+    var: '{{ docker_autotest }}'
   when: docker_autotest.execute
 
 - name: Execute Docker autotest

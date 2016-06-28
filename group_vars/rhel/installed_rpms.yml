@@ -1,31 +1,22 @@
 ---
-# vim-syntax: yaml
-
-disk_device: "/dev/vdb"
-parted_cmds: "unit % mklabel msdos mkpart primary 0 100 set 1 LVM on"
-
-lvg_ops:
-    - vg: docker_vg
-      force: yes
-      pvs: '{{ disk_device }}1'
-      state: present
 
 use_dnf: False
 installed_enablerepo:
-    - base
-    - extras
     - epel
-    - updates
+    - rhel-7-server-rpms
+    - rhel-7-server-extras-rpms
+    - rhel-7-server-optional-rpms
+    - rhel-7-server-supplementary-rpms
 installed_rpms:
     - docker
     - atomic
     - docker-selinux
     - procps
     - tar
+    - lvm2
     - findutils
     - bzip2
     - gdb
-    - lvm2
     - bridge-utils
     - nfs-utils
     - git
@@ -42,3 +33,4 @@ installed_rpms:
     - python-sphinx_rtd_theme
     - selinux-policy-targeted
     - libselinux-python
+    - iputils
