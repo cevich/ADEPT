@@ -8,6 +8,10 @@
 #   rpms_updated: boolean
 #   needs_reboot: boolean
 
+- name: rpms_updated starts out false
+  set_fact:
+    rpms_updated: False
+
 - include: roles/installed/tasks/main.yml
   vars:
     state: "latest"

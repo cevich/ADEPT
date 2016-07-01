@@ -33,6 +33,10 @@
       when: state is undefined or state == None or
             state == [] or state == ""
 
+    - name: rpms_installed starts out false
+      set_fact:
+        rpms_installed: False
+
 - block:
 
     # Defines repo_csv
@@ -62,6 +66,10 @@
         disablerepo: '{{ _disablerepo }}'
       register: rpms_installed
 
+    - name: rpms_installed reflects changed status
+      set_fact:
+        rpms_installed: "{{ rpms_installed | changed }}"
+
   when: _installed_rpms != '' and not use_dnf
 
 - block:
@@ -74,9 +82,13 @@
         disablerepo: '{{ _disablerepo }}'
       register: rpms_installed
 
+    - name: rpms_installed reflects changed status
+      set_fact:
+        rpms_installed: "{{ rpms_installed | changed }}"
+
   when: _installed_rpms != '' and use_dnf
 
 - name: rpms_installed and needs_reboot are defined
   set_fact:
-    rpms_installed: "{{ rpms_installed | changed }}"
-    needs_reboot: "{{ rpms_installed | changed }}"
+    rpms_installed: "{{ rpms_installed }}"
+    needs_reboot: "{{ rpms_installed }}"
