@@ -17,4 +17,3 @@
   file:
     path: '{{ kommandir_workspace }}'
     state: directory
-

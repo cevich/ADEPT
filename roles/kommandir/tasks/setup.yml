@@ -1,8 +1,14 @@
 ---
 
+- include: ../../../roles/common/tasks/workspace_file.yml
+  vars:
+    workspace_file: ssh_private_key
+    workspace: "{{ kommandir_workspaces }}/{{ adept_job }}"
+
 - name: runtime ssh-key is generated
   shell: >
     [ -r "{{ kommandir_workspaces }}/{{ adept_job }}/ssh_private_key" ] || \
-        ssh-keygen -f "{{ kommandir_workspaces }}/{{ adept_job }}/ssh_private_key" \
+        ssh-keygen -f "{{ filepath }}" \
                    -q \
                    -N ""
+  when: not exists
