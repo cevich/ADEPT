@@ -1,0 +1,26 @@
+language: python
+python:
+    - "2.7"
+
+branches:
+    only:
+        - master
+        - devel
+
+sudo: false
+
+matrix:
+  fast_finish: true
+
+git:
+    submodules: false
+
+install:
+    # These seem to match up roughly with behavior on RHEL 7
+    - pip install ansible-lint==2.0.3 Sphinx==1.2.2 unittest2==1.1.0 pylint==1.4.5
+
+script:
+    - cd docs && make html; cd ..
+    - unit2 -vfc
+    # FIXME: This throws a python traceback
+    # - for playbook in *.yml; do echo -e "\n$playbook:\n"; ansible-lint "$playbook"; done

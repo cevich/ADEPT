@@ -1,0 +1,72 @@
+---
+
+# Depends:
+#   - _peon
+#   - inner_item
+#   - adept_job
+# Registers:
+#   - _peon_set
+
+- block:
+
+    - name: peon attribute values updated from matrix product items
+      set_fact:
+        _peon: "{{ _peon | combine(
+                    {item.key: item.value }) }}"
+      # matrix_attributes items literally define 'key' and 'value' attributes
+      with_items: '{{ inner_item }}'
+
+    - name: peon double-buffer initialized empty
+      set_fact:
+        __peon: {}
+
+    - name: peon double-buffer excludes defaults and matrix_attributes items
+      set_fact:
+        __peon: "{{ __peon | combine(
+                    {item.key: item.value }) }}"
+      when: item.key not in matrix_attributes and item.key != 'defaults'
+      with_dict: '{{ _peon }}'
+
+    - name: peon buffer updated from double-buffer
+      set_fact:
+        _peon: '{{ __peon }}'
+
+  when: inner_item is defined and inner_item != []
+
+- name: peon's ansible groups are buffered
+  set_fact:
+    _groups: "{{ _peon.groups }}"
+
+- name: peon's dynamic job-specific group is set
+  set_fact:
+    _groups: '{{ _groups | union([adept_job]) }}'
+
+- name: peon's group list is updated from buffer
+  set_fact:
+    _peon: '{{ _peon | combine({"groups": _groups}) }}'
+
+- block:
+
+    # Not unique! Seed comes from adept_job + matrix parameters.
+    - name: peon uuid is generated
+      set_fact:
+        _uuid: "{{
+                    _peon.name
+                }}-{{
+                    _peon.version | trim
+                }}-{{
+                    ([_peon | to_uuid, adept_job] | join | to_uuid) |
+                    regex_replace('(\\w+-){4}(\\w+)', '\\2')
+                }}"
+
+    - name: peon uuid is also valid dns name
+      set_fact:
+        _uuid: "{{ _uuid | trim | regex_replace('[^-a-zA-Z0-9]', '-') }}"
+
+    - name: peon uuid is set
+      set_fact:
+        _peon: '{{ _peon | combine({"uuid": _uuid}) }}'
+
+- name: peon is stored in buffer
+  set_fact:
+    _peon_set: "{{ (_peon_set + [_peon]) | unique }}"

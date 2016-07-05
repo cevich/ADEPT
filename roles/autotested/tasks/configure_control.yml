@@ -1,6 +1,6 @@
 ---
-- debug: var=autotest_docker.timeout
-  when: autotest_docker.timeout is defined
+- debug: var=docker_autotest.timeout
+  when: docker_autotest.timeout is defined
 
 - name: Control timeout set
   lineinfile:
@@ -8,9 +8,9 @@
     backrefs: true
     dest: "{{ autotest_docker_path }}/control"
     follow: True
-    line: "\\1 {{ autotest_docker.timeout }}"
+    line: "\\1 {{ docker_autotest.timeout }}"
     regexp: "^(TIMEOUT\\s*=\\s*).*$"
-  when: autotest_docker.timeout is defined
+  when: docker_autotest.timeout is defined
 
 - name: Config_custom_control string is set
   set_fact:
@@ -44,10 +44,10 @@
     dest: "{{ autotest_docker_path }}/config_custom/control.ini"
     option: include
     section: Control
-    value: '{{ autotest_docker.include | join(",") }}'
+    value: '{{ docker_autotest.include | join(",") }}'
   when: control_needed and
-        autotest_docker.include is defined and
-        autotest_docker.include != None
+        docker_autotest.include is defined and
+        docker_autotest.include != None
 
 - name: Control is configured for excluded tests
   ini_file:
@@ -55,10 +55,10 @@
     dest: "{{ autotest_docker_path }}/config_custom/control.ini"
     option: exclude
     section: Control
-    value: '{{ autotest_docker.exclude | join(",") }}'
+    value: '{{ docker_autotest.exclude | join(",") }}'
   when: control_needed and
-        autotest_docker.exclude is defined and
-        autotest_docker.exclude != None
+        docker_autotest.exclude is defined and
+        docker_autotest.exclude != None
 
 
 - name: Control is configured for pre/intra/post/sub-tests to run
@@ -67,10 +67,10 @@
     dest: "{{ autotest_docker_path }}/config_custom/control.ini"
     option: subthings
     section: Control
-    value: '{{ autotest_docker.subthings | join(",") }}'
+    value: '{{ docker_autotest.subthings | join(",") }}'
   when: control_needed and
-        autotest_docker.subthings is defined and
-        autotest_docker.subthings != None
+        docker_autotest.subthings is defined and
+        docker_autotest.subthings != None
 
 - name: Control bugzilla checking is disabled
   ini_file:
@@ -80,6 +80,6 @@
     section: Bugzilla
     value: ''
   when: control_needed and
-        autotest_docker.enable_bugzilla is defined and
-        autotest_docker.enable_bugzilla != None and
-        not autotest_docker.enable_bugzilla
+        docker_autotest.enable_bugzilla is defined and
+        docker_autotest.enable_bugzilla != None and
+        not docker_autotest.enable_bugzilla

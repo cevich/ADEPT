@@ -1,0 +1,6 @@
+---
+
+updated_enablerepo: []
+updated_disablerepo: []
+use_dnf: False
+rpms_updated: False

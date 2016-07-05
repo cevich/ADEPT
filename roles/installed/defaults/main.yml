@@ -1,0 +1,7 @@
+---
+
+installed_rpms: []
+installed_enablerepo: []
+installed_disablerepo: []
+use_dnf: False
+rpms_installed: False

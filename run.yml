@@ -1,0 +1,15 @@
+---
+
+# Ensure slave is in the right groups
+- include: localhost.yml
+
+# Necessary for dynamic inventory
+- hosts: openstack
+  any_errors_fatal: true
+  roles:
+    - role: openstack
+
+- hosts: autotested:&{{ adept_job }}
+  any_errors_fatal: true
+  roles:
+    - role: autotested

@@ -1,0 +1,41 @@
+# Docker Autotest, subtest configuration file template.
+
+{% if test_image_fqin is defined %}[docker_cli/create/create_remote_tag]
+config_version = 0.8.5
+remote_image_fqin = {{ test_image_fqin }}
+run_options_csv ={% endif %}
+
+[docker_cli/pull]
+config_version = 0.8.5
+docker_pull_timeout = 600
+subsubtests = good,wrong_tag,wrong_registry_addr
+# Use image from defaults.ini
+
+[docker_cli/run/run_ping]
+config_version = 0.8.5
+generate_generic = yes
+ping_url = "www.redhat.com"
+cmd = 'ping -c 3 -q %(ping_url)s'
+exit_status = 0
+
+{% if test_image_fqin is defined %}[docker_cli/run/run_remote_tag]
+config_version = 0.8.5
+remote_image_fqin = {{ test_image_fqin }}
+run_options_csv =
+cmd = /bin/true{% endif %}
+
+[docker_cli/tag]
+config_version = 0.8.5
+tag_force = false
+gen_lower_only = True
+subsubtests = change_tag,change_repository,change_user,double_tag,double_tag_force
+tag_repo_name_prefix = test
+# Use image from defaults.ini
+
+[docker_cli/pull]
+config_version = 0.8.5
+#: Maximal duration of the ``docker pull`` command
+docker_pull_timeout = 120.0
+subsubtests = good,wrong_tag,wrong_registry_addr
+#: Allow test to pass if actual result matches this PASS/FAIL value
+docker_expected_exit_status = 0

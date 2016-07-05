@@ -1,43 +1,31 @@
 ---
 
-# Some system environments cause the fetch modle to fail with a checksum
-# mismatch error if certain characters are present in the destination
-# directory name.  This only affects the fetch module, and doesn't seem
-# linked to the ansible version.  To work around this, a temporary
-# directory is used to hold the results, before moving to the playbook directory.
-
-- name: Local temporary directory exists
-  command: mktemp -d
-  register: mktemp_result
-  notify:
-    - "Clean up temporary results directory"
-  delegate_to: 127.0.0.1
+- name: Results sub-directory is defined
+  set_fact:
+    rdir: "{{ workspace }}/results/{{ inventory_hostname }}"
 
 - name: Ensure results sub-directory exists
   file:
   args:
-    path: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/results/"
+    path: "{{ rdir }}"
     state: directory
-  delegate_to: 127.0.0.1
+  delegate_to: localhost
 
 - name: Collect autotest results
   synchronize:
-    # The test VM is the SOURCE, and local system is destination
     mode: pull
-    src: "{{ autotest_docker.autotest_dir }}/client/results/default/"
-    dest: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}"
-  # Still need other details collected below
+    src: "{{ autotest_dest_dir }}/client/results/default/"
+    dest: "{{ rdir }}"
   ignore_errors: true
+  # Rarely should need to debug the massive list of files
+  no_log: true
 
 - name: Collect Docker Autotest customized config
   synchronize:
     # The test VM is the SOURCE, and local system is destination
     mode: pull
-    src: "{{ autotest_docker_path }}/config_custom/"
-    dest: "{{ mktemp_result.stdout }}/results/{{ inventory_hostname }}/config_custom"
-  # Still need other details collected below
+    src: "{{ autotest_docker_path }}/config_custom"
+    dest: "{{ rdir }}"
   ignore_errors: true
-
-- name: Move temporary results into final results
-  command: cp -a {{ mktemp_result.stdout }}/results ./
-  delegate_to: 127.0.0.1
+  # Rarely should need to debug the massive list of files
+  no_log: true

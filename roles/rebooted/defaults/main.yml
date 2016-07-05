@@ -1,8 +1,8 @@
 ---
 needs_reboot: false
 
-# Additional time to wait after 45-seconds delay into 1-minute shutdown
-shutdown_timeout: 16
+# Time to wait for ssh port to close
+shutdown_timeout: 30
 
 # Maximum time to wait for system to become available again (in seconds)
-bootup_timeout: 600
+bootup_timeout: 300

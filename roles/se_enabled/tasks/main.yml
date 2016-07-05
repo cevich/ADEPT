@@ -1,8 +1,0 @@
----
-
-- name: Selinux is enabled
-  selinux:
-    state: enforcing
-    policy: targeted
-  notify:
-    - The needs_reboot flag is set because of install or package update

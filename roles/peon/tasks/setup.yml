@@ -1,0 +1,13 @@
+---
+
+- include: roles/common/tasks/workspace_file.yml
+  vars:
+    workspace_file: '{{ inventory_hostname }}_facts.yml'
+  delegate_to: localhost
+
+- name: Peon's hostvars written to workspace in yaml format
+  copy:
+    dest: '{{ filepath }}'
+    content: '{{ hostvars[ inventory_hostname ] | to_nice_yaml }}'
+  delegate_to: localhost
+  when: not exists

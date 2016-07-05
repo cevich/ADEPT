@@ -1,27 +1,20 @@
 ---
-- name: All repositories are disabled
-  command: /usr/sbin/subscription-manager repos --disable=*
 
-- include: ../../common/site_scripts.yml.inc
+# There are situations where default repositories are broken
+# - name: All repositories are disabled
+#   command: /usr/sbin/subscription-manager repos --disable=*
 
-- name: Support packages are installed
-  yum:
-  args:
-    name: "{{ install_rpms }}"
-    state: present
-    enablerepo: "{{ enabled_repos }}"
-  register: support_installed
-  notify:
-    - The needs_reboot flag is set because of install or package update
+- name: epel-release RPM copied to host
+  copy:
+    src: epel-release-latest-7.noarch.rpm
+    dest: /root/
+  register: copied
 
-- name: System is fully updated
-  yum:
-  args:
-    name: "*"
-    state: latest
-    enablerepo: "{{ enabled_repos }}"
-  register:
-    system_updated
-  notify:
-    - The needs_reboot flag is set because of install or package update
-  when: update_system
+- name: epel repository is installed
+  include: roles/installed/tasks/main.yml
+  vars:
+    installed_rpms:
+        - /root/epel-release-latest-7.noarch.rpm
+    installed_enablerepo: []
+    installed_disablerepo: []
+  when: copied | changed

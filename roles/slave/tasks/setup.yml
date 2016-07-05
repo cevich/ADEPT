@@ -1,0 +1,36 @@
+---
+
+# depends:
+#   - adept_cloud_type: group name to add the slave host to
+#   - ansible_force_color: true/false
+#   - adept_job
+
+- include: roles/common/tasks/workspace_file.yml
+  vars:
+    workspace_file: variables.yml
+
+- fail:
+    msg: "Required file {{ filepath }} does not exist"
+  when: not exists
+
+- name: variables file is loaded into buffer
+  set_fact:
+    _variables: '{{ lookup("file", filepath) | from_yaml }}'
+
+- name: adept_job is hard-coded in variables to current value
+  set_fact:
+    _variables: '{{ _variables | combine({"adept_job": adept_job}) }}'
+
+- name: Updated variables buffer is written to workspace file
+  copy:
+    dest: '{{ filepath }}'
+    content: '{{ _variables | to_nice_yaml }}'
+
+- name: slave is member of group from adept_cloud_type variable
+  include: roles/common/tasks/update_inventory.yml
+  vars:
+    update_hostname: 'localhost'
+    update_ip: '127.0.0.1'
+    update_extra: 'ansible_become=false ansible_connection=local'
+    update_groups:
+        - "{{ adept_cloud_type }}"

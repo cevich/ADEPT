@@ -1,0 +1,44 @@
+---
+
+# Depends:
+#   is_atomic
+# Registers:
+#   rpms_updated: boolean
+#   needs_reboot: boolean
+
+- fail:
+    msg: "Attempt to apply the atomic_upgrade role onto a non-Atomic host"
+  when: not is_atomic
+
+- block:
+
+    - name: ostree remotes.d file path is set
+      set_fact:
+        filepath: "/etc/ostree/remotes.d/{{ ostree_remotes_filename }}"
+
+    - name: ostree remotes.d file is setup
+      ini_file:
+        dest: '{{ filepath }}'
+        section: '{{ item.section | default(omit) }}'
+        option: '{{ item.option | default(omit) }}'
+        value: '{{ item.value | default(omit) }}'
+        state: ' {{ item.state | default(omit) }}'
+      with_items: '{{ ostree_inifile_actions }}'
+
+  when: ostree_remotes_filename is defined and ostree_remotes_filename != ''
+
+- name: Atomic host is updated to latest tree
+  command: atomic host upgrade
+  register: atomic_host_upgrade
+  changed_when: atomic_host_upgrade.stdout | search('pgrade prepared for next boot')
+  ignore_errors: true
+
+- name: Workaround BZ1313540
+  fail:
+    msg: "atomic host upgrade failed with unknown error: {{ atomic_host_upgrade }}"
+  when: atomic_host_upgrade.rc != 0 and atomic_host_upgrade.rc != 77
+
+- name: rpms_updated is set on update
+  set_fact:
+    rpms_updated: '{{ atomic_host_upgrade | changed }}'
+    needs_reboot: '{{ atomic_host_upgrade | changed }}'

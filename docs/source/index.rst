@@ -6,18 +6,9 @@
    :hidden:
 
    README
-   introduction
-   overview
-   practical
 
 .. include:: README.rst
    :end-before: The quickstart section begins next
-
-.. include:: introduction.rst
-
-.. include:: overview.rst
-
-.. include:: practical.rst
 
 Additional Documentation
 =========================
