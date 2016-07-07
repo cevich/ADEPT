@@ -31,39 +31,17 @@
   command: systemctl is-active docker
   when: defaults_needed
 
-- name: Systemctl shows docker MainPID
-  shell: systemctl show docker --property=MainPID | head -1 | cut -d= -f2
-  register: docker_main_pid_cmd
-  when: defaults_needed
-
-- name: Docker daemon cmdline file is defined
-  set_fact:
-    dd_proc_cmdline: /proc/{{ docker_main_pid_cmd.stdout }}/cmdline
-  when: defaults_needed
-
-- name: Docker daemon cmdline file exists
-  stat:
-  args:
-    path: "{{ dd_proc_cmdline }}"
-  register: dd_cmdline
-  when: defaults_needed
-
-# Cat exits 0 even if file doesn't exist
-- fail:
-  when: defaults_needed and not dd_cmdline.stat.exists
-
-- name: Docker daemon options are known
-  shell: "cat {{ dd_proc_cmdline }} | tr '\\000' ',' | tr -c -d [:print:] | cut -d, -f 2-"
-  register: cat_pid_cmd
-  when: defaults_needed
-
+# TODO: Cooperate with systemd and newer docker versions
+#       https://github.com/autotest/autotest-docker/issues/612
+# workaround for now, causing an error if any subtests attempt to use
+# dockertest.docker_daemon.start()
 - name: Defaults daemon_options is configured
   ini_file:
   args:
     dest: "{{ config_custom_defaults }}"
     option: daemon_options
     section: DEFAULTS
-    value: "{{ cat_pid_cmd.stdout_lines[0] }}"
+    value: "##### Not Supported #####"
   when: defaults_needed
 
 - name: Don't check Autotest version

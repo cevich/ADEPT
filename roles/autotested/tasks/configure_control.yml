@@ -8,7 +8,7 @@
     backrefs: true
     dest: "{{ autotest_docker_path }}/control"
     follow: True
-    line: "\\1 {{ docker_autotest.timeout }}"
+    line: "\\1 {{ docker_autotest_timeout }}"
     regexp: "^(TIMEOUT\\s*=\\s*).*$"
   when: docker_autotest.timeout is defined
 
