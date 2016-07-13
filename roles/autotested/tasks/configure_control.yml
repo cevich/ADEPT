@@ -60,7 +60,6 @@
         docker_autotest.exclude is defined and
         docker_autotest.exclude != None
 
-
 - name: Control is configured for pre/intra/post/sub-tests to run
   ini_file:
   args:
