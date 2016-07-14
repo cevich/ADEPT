@@ -18,7 +18,7 @@
     links: True
     perms: True
     recursive: True
-    # Don't trust clocks or mod-times
+    # When contents differ, prefer remote content over local
     checksum: True
     # Copy contents to dest, not src directory itself
     src: '{{ kommandir_workspace }}/'
@@ -35,9 +35,8 @@
     links: True
     perms: True
     recursive: True
-    # Don't trust clocks or mod-times
+    # When contents differ, prefer remote content over local
     checksum: True
-    # Copy contents to dest, not src directory itself
     src: '{{ kommandir_workspace }}/adept/'
     rsync_opts: '{{ kommandir_sync_excludes }}'
   # Rarely should need to debug the massive list of files

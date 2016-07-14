@@ -112,7 +112,7 @@
 
 - name: Default image preserve CSV value is formatted
   set_fact:
-    preserve_fqins: "{{ preserve_fqins_cmd.stdout | regex_replace('\\s*', '') }},{{ docker_autotest.preserve_fqins | join(',') }}"
+    preserve_fqins: "{{ preserve_fqins_cmd.stdout | regex_replace('\\s*', '') }},{{ docker_autotest.preserve_fqins | join(',') }},"
   when: defaults_needed and
         docker_autotest.preserve_fqins is defined and
         docker_autotest.preserve_fqins != None
@@ -123,7 +123,7 @@
     dest: "{{ config_custom_defaults }}"
     option: preserve_fqins
     section: DEFAULTS
-    value: "{{ preserve_fqins | regex_replace(',,', ',') }}"
+    value: "{{ preserve_fqins | regex_replace(',,', ',') }},"
   when: defaults_needed and
         docker_autotest.preserve_fqins is defined and
         docker_autotest.preserve_fqins != None
@@ -139,7 +139,7 @@
 
 - name: Default container preserve CSV value is formatted
   set_fact:
-    preserve_cnames: "{{ preserve_cnames_cmd.stdout | regex_replace('\\s*', '') }},{{ docker_autotest.preserve_cnames | join(',') }}"
+    preserve_cnames: "{{ preserve_cnames_cmd.stdout | regex_replace('\\s*', '') }},{{ docker_autotest.preserve_cnames | join(',') }},"
   when: defaults_needed and
         docker_autotest.preserve_cnames is defined and
         docker_autotest.preserve_cnames != None

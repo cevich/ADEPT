@@ -44,7 +44,7 @@
     dest: "{{ autotest_docker_path }}/config_custom/control.ini"
     option: include
     section: Control
-    value: '{{ docker_autotest.include | join(",") }}'
+    value: '{{ docker_autotest.include | join(",") }},'
   when: control_needed and
         docker_autotest.include is defined and
         docker_autotest.include != None
@@ -55,11 +55,10 @@
     dest: "{{ autotest_docker_path }}/config_custom/control.ini"
     option: exclude
     section: Control
-    value: '{{ docker_autotest.exclude | join(",") }}'
+    value: '{{ docker_autotest.exclude | join(",") }},'
   when: control_needed and
         docker_autotest.exclude is defined and
         docker_autotest.exclude != None
-
 
 - name: Control is configured for pre/intra/post/sub-tests to run
   ini_file:
@@ -67,7 +66,7 @@
     dest: "{{ autotest_docker_path }}/config_custom/control.ini"
     option: subthings
     section: Control
-    value: '{{ docker_autotest.subthings | join(",") }}'
+    value: '{{ docker_autotest.subthings | join(",") }},'
   when: control_needed and
         docker_autotest.subthings is defined and
         docker_autotest.subthings != None
