@@ -10,6 +10,7 @@
   set_fact:
     _ape:
         - "--exclude={{ adept_path }}"
+        - "--update"
 
 - name: workspace transfered to kommandir
   synchronize:
@@ -20,8 +21,6 @@
     owner: False
     group: False
     recursive: True
-    # Don't trust clocks or mod-times
-    checksum: True
     # Copy contents to dest, not src directory itself
     src: '{{ workspace }}/'
     rsync_opts: '{{ kommandir_sync_excludes |
@@ -44,11 +43,10 @@
     owner: False
     group: False
     recursive: True
-    # Don't trust clocks or mod-times
-    checksum: True
     # Copy contents to dest, not src directory itself
     src: '{{ adept_path }}/'
-    rsync_opts: '{{ kommandir_sync_excludes }}'
+    rsync_opts: '{{ kommandir_sync_excludes |
+                    union(["--update"]) }}'
   # Rarely should need to debug the massive list of files
   no_log: true
 
