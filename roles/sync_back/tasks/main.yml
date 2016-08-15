@@ -4,6 +4,7 @@
 #   - kommandir_workspace
 #   - kommandir_sync_excludes
 #   - adept_path
+#   - no_log_synchronize
 
 - name: kommandir workspace adept path excluded temporarily
   set_fact:
@@ -24,8 +25,7 @@
     src: '{{ kommandir_workspace }}/'
     rsync_opts: '{{ kommandir_sync_excludes |
                     union(_kwape) }}'
-  # Rarely should need to debug the massive list of files
-  no_log: true
+  no_log: '{{ no_log_synchronize | default(true) }}'
 
 - name: kommandir adept transfered to controller host
   synchronize:
@@ -39,5 +39,4 @@
     checksum: True
     src: '{{ kommandir_workspace }}/adept/'
     rsync_opts: '{{ kommandir_sync_excludes }}'
-  # Rarely should need to debug the massive list of files
-  no_log: true
+  no_log: '{{ no_log_synchronize | default(true) }}'

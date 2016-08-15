@@ -1,5 +1,9 @@
 ---
 
+# Depends:
+#   - no_log_synchronize
+#   - ...others....
+
 - name: Docker Service Restarted
   service:
   args:
@@ -21,8 +25,7 @@
     src: "{{ docker_autotest_cache_dir }}/autotest/"
     rsync_opts:
         - "--exclude=.git"
-  # Rarely should need to debug the massive list of files
-  no_log: true
+  no_log: '{{ no_log_synchronize | default(true) }}'
 
 - name: Untracked RELEASE-VERSION is removed
   file:
@@ -35,8 +38,7 @@
     src: "{{ docker_autotest_cache_dir }}/autotest-docker/"
     rsync_opts:
         - "--exclude=.git"
-  # Rarely should need to debug the massive list of files
-  no_log: true
+  no_log: '{{ no_log_synchronize | default(true) }}'
 
 - name: Cached bugzilla module is copied
   synchronize:
@@ -44,8 +46,7 @@
     src: "{{ docker_autotest_cache_dir }}/python-bugzilla/bugzilla"
     rsync_opts:
         - "--exclude=.git"
-  # Rarely should need to debug the massive list of files
-  no_log: true
+  no_log: '{{ no_log_synchronize | default(true) }}'
   when: docker_autotest.enable_bugzilla is defined and
         docker_autotest.enable_bugzilla
 

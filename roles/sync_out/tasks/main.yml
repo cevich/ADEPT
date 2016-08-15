@@ -4,6 +4,7 @@
 #   - kommandir_workspace
 #   - kommandir_syc_excludes
 #   - adept_job
+#   - no_log_synchronize
 
 # Avoid need to decode worskpace/adept_path relationship
 - name: source adept path excluded temporarily
@@ -25,8 +26,7 @@
     src: '{{ workspace }}/'
     rsync_opts: '{{ kommandir_sync_excludes |
                     union(_ape) }}'
-  # Rarely should need to debug the massive list of files
-  no_log: true
+  no_log: '{{ no_log_synchronize | default(true) }}'
 
 # Can't assume source adept resides w/in workspace
 - name: runtime job-specific adept directory exists
@@ -47,8 +47,7 @@
     src: '{{ adept_path }}/'
     rsync_opts: '{{ kommandir_sync_excludes |
                     union(["--update"]) }}'
-  # Rarely should need to debug the massive list of files
-  no_log: true
+  no_log: '{{ no_log_synchronize | default(true) }}'
 
 - name: ansible user owns all transfered files
   command: chown -R "{{ ansible_user_id }}.{{ ansible_user_id }}" "{{ kommandir_workspace }}"
