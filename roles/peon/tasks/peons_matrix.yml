@@ -55,7 +55,9 @@
                 }}-{{
                     _peon.version | trim
                 }}-{{
-                    ([_peon | to_uuid, adept_job] | join | to_uuid) |
+                    adept_job
+                }}-{{
+                    _peon | to_uuid |
                     regex_replace('(\\w+-){4}(\\w+)', '\\2')
                 }}"
 

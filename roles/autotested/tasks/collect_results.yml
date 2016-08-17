@@ -1,5 +1,9 @@
 ---
 
+# Depends:
+#   - no_log_synchronize
+#   - ...others....
+
 - name: Results sub-directory is defined
   set_fact:
     rdir: "{{ workspace }}/results/{{ inventory_hostname }}"
@@ -17,8 +21,7 @@
     src: "{{ autotest_dest_dir }}/client/results/default/"
     dest: "{{ rdir }}"
   ignore_errors: true
-  # Rarely should need to debug the massive list of files
-  no_log: true
+  no_log: '{{ no_log_synchronize | default(true) }}'
 
 - name: Collect Docker Autotest customized config
   synchronize:
@@ -27,5 +30,4 @@
     src: "{{ autotest_docker_path }}/config_custom"
     dest: "{{ rdir }}"
   ignore_errors: true
-  # Rarely should need to debug the massive list of files
-  no_log: true
+  no_log: '{{ no_log_synchronize | default(true) }}'

@@ -35,7 +35,7 @@ adept_openstack:
         rhel:
                 "7.2": "c735f097-077d-4fd0-bd8d-15897b50a0dd"
         rhelatomic:
-                "7.2": "b57cf95e-2292-410a-8073-089ccc4036c4"
+                "7.2": "6c38283e-4bf5-4f9b-ae48-e0d276ffeae4"
         fedora:
                 "23": "2ca94022-9656-4ce0-a41f-97a7b016a2ee"
                 "24": "54aa1d2b-b932-47bf-a045-7110abcd1e7e"

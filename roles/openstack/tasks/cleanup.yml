@@ -28,6 +28,9 @@
       when: item.volume is defined and
             item.volume != None and
             item.volume != ''
+      # Failure could occur before volume was created, then fail again
+      # here, but peon should still be removed.
+      ignore_errors: True
       with_items: "{{ peon_set }}"
 
     - name: All peons are deleted
