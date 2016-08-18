@@ -1,5 +1,4 @@
 ---
 
-ostree_remotes_filename: ''
-ostree_inifile_actions: []
+needs_reboot: False
 rpms_updated: False
