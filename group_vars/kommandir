@@ -11,7 +11,7 @@ kommandir_openstack:
     image: "7f185bb6-7d85-491b-8f69-3060c8b75397"
     tenant_name: "{{ _private_kommandir_tenant_name }}"
     # Needed for older openstack CLI
-    legacy_floating_ip_pool: "{{ _private_legacy_floating_ip_pool | default(omit) }}"
+    legacy_floating_ip_pool: "{{ [_private_legacy_floating_ip_pool | default(omit)] }}"
     # Userdata to supply to cloud-init
     userdata:
         # Because I'm self-centered

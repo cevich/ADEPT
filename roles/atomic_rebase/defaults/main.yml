@@ -1,0 +1,9 @@
+---
+
+ostree_remote:
+    name:
+    spec:
+    url:
+    extra:
+needs_reboot: False
+rpms_updated: False
