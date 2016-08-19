@@ -13,15 +13,7 @@
 #   - kmndrname
 #   - kmndrip
 
-- name: flag is set for newer ansible / openstack
-  set_fact:
-    new_ansible: true
-    osauth:
-        auth_url: "{{ kommandir_openstack.auth_url }}"
-        username: "{{ kommandir_openstack.username }}"
-        password: "{{ kommandir_openstack.password }}"
-        project_name: "{{ kommandir_openstack.tenant_name }}"
-  when: '{{ ansible_version.full | version_compare("2.0", ">") }}'
+# N/B: Don't assume Ansible > 1.94
 
 # Depends on old / deprecated openstack ansible modules
 # and command line clients because the initial VM creation
@@ -38,7 +30,7 @@
     username: '{{ kommandir_openstack.username }}'
     password: '{{ kommandir_openstack.password }}'
 
-- name: ADEPT kommandir VM exists (old ansible)
+- name: ADEPT kommandir VM exists
   nova_compute:
     auth_url: "{{ kommandir_openstack.auth_url }}"
     login_username: "{{ kommandir_openstack.username }}"
@@ -51,46 +43,21 @@
     user_data: |
         {{ "#cloud-config" }}
         {{ kommandir_openstack.userdata | to_nice_yaml }}
-    floating_ip_pools:
-        - kommandir_openstack.legacy_floating_ip_pool
+    floating_ip_pools: '{{ kommandir_openstack.legacy_floating_ip_pool | list }}'
     wait: "yes"
   register: nc
-  when: new_ansible is undefined
 
-- name: ADEPT kommandir VM exists (new ansible)
-  os_server:
-    auth: '{{ osauth }}'
-    # This must be large enough for the image being used
-    flavor: "m1.medium"
-    image: '{{ kommandir_openstack.image }}'
-    name: '{{ kmndrname | quote }}'
-    floating_ip_pools: '{{ kommandir_openstack.legacy_floating_ip_pool }}'
-    user_data: |
-        {{ "#cloud-config" }}
-        {{ kommandir_openstack.userdata | to_nice_yaml }}
-    timeout: 300
-    wait: True
-  register: nc
-  when: new_ansible is defined
-
-- name: ADEPT kommandir's public IP list is extracted (old ansible)
+- name: ADEPT kommandir's public IP list is extracted from variable
   set_fact:
     _kmndrip: '{{ nc.public_ip }}'
-  when: new_ansible is undefined
 
-- name: ADEPT kommandir's public IP list is created (new ansible)
-  set_fact:
-    _kmndrip: '{{ [nc.openstack.public_v4] }}'
-  when: new_ansible is defined
-
-# The type of this can vary between a list and a string
 - name: the kmndrip variable is set from first item in list
   set_fact:
     kmndrip: '{{ _kmndrip[0] | trim }}'
   # Minimum dotted IP notation length - so this must be a list
   when: '{{ _kmndrip | length < 7 }}'
 
-- name: the kmndrip variable is set from IP address string
+- name: the kmndrip variable is set from IP address tring
   set_fact:
     kmndrip: '{{ _kmndrip | trim }}'
   # Minimum dotted IP notation length - so this must be a IP address
@@ -107,29 +74,16 @@
   shell: "{{ workspace }}/openrc.sh /usr/bin/nova volume-show {{ kmndrname | quote }}"
   register: pre_nvc
   ignore_errors: True
-  when: new_ansible is undefined
-
-- name: Kommandir's workspace storage volume is created (new ansible)
-  os_volume:
-    auth: '{{ osauth }}'
-    display_name: '{{ kmndrname }}'
-    size: 10
-    state: present
-    timeout: 300
-    wait: True
-  when: new_ansible is defined
 
 - name: Kommandir's workspace storage volume state flag is set
   set_fact:
     _vol_create: True
-  when: new_ansible is undefined and
-        (pre_nvc | failed or
-         pre_nvc.stderr | search("No volume with a name"))
+  when: pre_nvc | failed or pre_nvc.stderr | search("No volume with a name")
 
 - name: Kommandir's workspace storage volume state flag is unset
   set_fact:
     _vol_create: False
-  when: new_ansible is defined or _vol_create is undefined
+  when: _vol_create is undefined
 
 - name: Kommandir's workspace storage volume is created
   shell: "{{ workspace }}/openrc.sh /usr/bin/nova volume-create --display-name {{ kmndrname | quote }} 10"
@@ -147,57 +101,36 @@
          nvs.stdout | search("status.+in-use")
   retries: 180
   delay: 1
-  when: new_ansible is undefined
 
 - name: Kommandir's workspace storage volume state is known
   shell: "{{ workspace }}/openrc.sh /usr/bin/nova volume-show {{ kmndrname | quote }}"
   register: post_nvc
   ignore_errors: True
-  when: new_ansible is undefined
 
 - name: Kommandir's workspace storage volume ID line is parsed
   # This takes many many many more lines in ansible
   shell: echo {{ post_nvc.stdout | quote }} | grep ' id ' | cut -d '|' -f 3
   register: vid
-  when: new_ansible is undefined
 
 - name: Kommandir's workspace storage volume ID line is parsed
   set_fact:
     _vol_id: '{{ vid.stdout | trim }}'
-  when: new_ansible is undefined
 
 - fail:
     msg: "Failed to parse Kommandir's workspace storage volume UUID"
   # 37 characters total, 36 repetitions
-  when: new_ansible is undefined and
-        not _vol_id | search("^[0-9a-zA-Z-]{36}$")
-
-- name: Kommandir's workspace storage volume is attached (new ansible)
-  os_server_volume:
-    auth: '{{ osauth }}'
-    server: '{{ kmndrname }}'
-    state: present
-    volume: '{{ kmndrname }}'
-    wait: True
-  # No way to check availability of volume, retry until successful
-  register: _vol_att
-  ignore_errors: True
-  until: _vol_att | succeeded
-  retries: 120
-  delay: 1
-  when: new_ansible is defined
+  when: not _vol_id | search("^[0-9a-zA-Z-]{36}$")
 
 - name: Kommandir's workspace storage volume attachment state flag is set
   set_fact:
     _vol_attach: True
-  when: new_ansible is undefined and
-        post_nvc | success and
+  when: post_nvc | success and
         not post_nvc.stdout | search("attachments.*server_id")
 
 - name: Kommandir's workspace storage volume attachment state flag is unset
   set_fact:
     _vol_attach: False
-  when: new_ansible is defined or _vol_attach is undefined
+  when: _vol_attach is undefined
 
 - name: Kommandir's workspace storage volume is attached
   # Hard-coded destination device, because detection is hard
@@ -211,9 +144,7 @@
   until: nvs.stdout | search("attachments.*server_id")
   retries: 180
   delay: 1
-  when: new_ansible is undefined
 
 - fail:
     msg: "Failed to attach container storage volume to slave"
-  when: new_ansible is undefined and
-        not nvs.stdout | search("attachments.*server_id")
+  when: not nvs.stdout | search("attachments.*server_id")
