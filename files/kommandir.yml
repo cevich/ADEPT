@@ -34,7 +34,7 @@
 
 # Setup/Run slave_container from inside kommandir node
 - command:
-    filepath: /usr/bin/bash
+    filepath: /bin/bash
     arguments: |
         -c 'set -ex;
 

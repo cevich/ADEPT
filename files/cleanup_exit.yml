@@ -7,7 +7,7 @@
     contexts:
         - setup
         - run
-    filepath: /usr/bin/bash
+    filepath: /bin/bash
     arguments: |
         -c 'set -ex;
             [ -r "$WORKSPACE/$ADEPT_CONTEXT.exit" ] || exit 1;

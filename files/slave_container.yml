@@ -5,7 +5,7 @@
 # Runs anywhere w/ only python interpreter, docker, and this repo
 - command:
     # All commands/playbooks run with cwd==$WORKSPACE
-    filepath: /usr/bin/bash
+    filepath: /bin/bash
     # This can be quite noisy, so send output into a file
     stdoutfile: $WORKSPACE/docker_build.stdout
     # $ADEPT_PATH and $WORKSPACE are automaticly set from called options
@@ -45,7 +45,7 @@
 - command:
     contexts:
         - cleanup
-    filepath: /usr/bin/bash
+    filepath: /bin/bash
     # Impossible to invalidate package update/install layer w/o rebuilding
     arguments: |
         -c '# Do nothing if in verbose mode
