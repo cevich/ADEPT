@@ -9,15 +9,15 @@
 #      (they're checked below)
 
 - command:
-    filepath: /usr/bin/test
+    filepath: /bin/test
     arguments: -r "$WORKSPACE/variables.yml"
 
 - command:
-    filepath: /usr/bin/test
+    filepath: /bin/test
     arguments: -r "$WORKSPACE/KOMMANDIR_NAME"
 
 - command:
-    filepath: /usr/bin/test
+    filepath: /bin/test
     arguments: -r "$WORKSPACE/UNIQUE_JOB_ID"
 
 # More checks & common steps shared with other adept yaml
