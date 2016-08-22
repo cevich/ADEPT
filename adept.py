@@ -279,9 +279,6 @@ class ActionBase(object):
 
     :param int index: Index number for this yaml map - aids in debugging
     :param str filepath: Relative/Absolute path to file for this action
-    :param bool pass_context: Whether or not the action should pass the
-                              the current context (str) through to the
-                              specific action.
     :param dict dargs: key/values from the yaml node for the specific action
     """
 
@@ -291,13 +288,8 @@ class ActionBase(object):
     index = None
     # Verified copy of filepath argument to __init__
     filepath = None
-    # Sets ADEPT_CONTEXT env. var
-    pass_context = False
-    # Sets ADEPT_OPTIONAL env. var
-    pass_optional = False
 
-    def __init__(self, index, filepath,
-                 pass_context=True, pass_optional=True, **dargs):
+    def __init__(self, index, filepath, **dargs):
         # These help with debugging yaml
         self.index = index
 
@@ -308,10 +300,6 @@ class ActionBase(object):
                                                        filepath)
         except RuntimeError, xcept:
             self.yamlerr("initializing", xcept.message)
-
-        for key, value in {'pass_context': pass_context,
-                           'pass_optional': pass_optional}.items():
-            setattr(self, key, bool(value))
 
         # Pass-through whatever else was in the yaml node
         self.init(**dargs)
@@ -327,9 +315,7 @@ class ActionBase(object):
         :param dict additional: Extra key/val dict to include (optional)
         """
         keyvals = {'yaml node': '%d' % self.index,
-                   'filepath': '%s' % self.filepath,
-                   'pass_context': str(self.pass_context),
-                   'pass_optional': str(self.pass_optional)}
+                   'filepath': '%s' % self.filepath}
         if additional:
             keyvals.update(additional)
         return pretty_output(self.__class__.__name__, keyvals)
@@ -359,7 +345,7 @@ class ActionBase(object):
         if in_string:
             for key, value in from_env.iteritems():
                 regex = r'(\${%s\})|(\$%s)' % (key, key)
-                in_string = re.sub(regex, value, in_string)
+                in_string = re.sub(regex, value, str(in_string))
         return in_string
 
     def yamlerr(self, doing, happened):
@@ -412,12 +398,10 @@ class Command(ActionBase):
     stderrfile = None
     exitfile = None
 
-    def __init__(self, index, filepath,
-                 pass_context=True, pass_optional=True, **dargs):
+    def __init__(self, index, filepath, **dargs):
         # Don't share dict reference across instances
         self.popen_dargs = deepcopy(self.popen_dargs)
-        super(Command, self).__init__(index, filepath,
-                                      pass_context, pass_optional, **dargs)
+        super(Command, self).__init__(index, filepath, **dargs)
 
     def __str__(self, additional=None):
         mine = {'cmd': " ".join(self.popen_dargs['args'])}
@@ -434,10 +418,8 @@ class Command(ActionBase):
         env = super(Command, self).make_env()
         ctx, opt = (self.parameters.context.strip(),
                     self.parameters.optional.strip())
-        if self.pass_context:
-            env['ADEPT_CONTEXT'] = ctx
-        if self.pass_optional:
-            env['ADEPT_OPTIONAL'] = opt
+        env['ADEPT_CONTEXT'] = ctx
+        env['ADEPT_OPTIONAL'] = opt
         return env
 
     @staticmethod
@@ -651,11 +633,14 @@ class Playbook(Command):
             self.limit = limit
             args.extend(['--limit', self.limit])
 
-        for name, value in {'varsfile':varsfile, 'inventory': inventory,
-                            'config': config}.items():
+        for name, value in {'varsfile': varsfile, 'inventory': inventory,
+                            'config': config,
+                            'context': self.parameters.context}.items():
+            if value:
+                value = value.strip()
             if not value:
                 continue
-            value = self.sub_env(new_env, value.strip())
+            value = self.sub_env(new_env, value)
             msg_fmt = 'You found a %s processing bug %%s:%%s' % name
             value = self.parameters.mangle_verify(self.parameters.context,
                                                   # other layers check existence
@@ -665,18 +650,16 @@ class Playbook(Command):
                 args.extend(['--extra-vars', '@%s' % value])
             elif name is 'inventory':
                 args.extend(['--inventory', value])
+            elif name is 'context':
+                args.extend(['--extra-vars', "adept_context='%s'" % value])
             else:  # name is 'config'
                 new_env['ANSIBLE_CONFIG'] = value
-            # Just in case is needed later
-            setattr(self, name, value)
-        for key, as_extra_vars in {'optional': self.pass_optional,
-                                   'context': self.pass_context}.items():
-            value = getattr(self.parameters, key).strip()
-            if as_extra_vars and value:  # into playbook as a variable
-                args.extend(['--extra-vars', "adept_%s='%s'" % (key, value)])
-            # Also, not else
-            if as_extra_vars and value and key is 'optional':
-                args.extend(shlex.split(value, True))
+
+        # Optionals get jammed onto the end of the command-line
+        spos = self.parameters.optional.strip()
+        if spos:
+            # Respect shell-style quoting, linewraps, etc.
+            args.extend(shlex.split(spos, True))
 
         # TODO: Don't hard-code private-key name/location?
         args.append('--private-key')

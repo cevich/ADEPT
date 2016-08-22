@@ -153,7 +153,7 @@ class TestPylint(TestCaseBase):
               ' --no-docstring-rgx="(__.*__)|(_.*)|(__init__)|(__new__)"'
               '')
     DISABLE = ("I0011,R0801,R0904,R0921,R0922,C0301,W0511,"
-               "C0302,W0212,W0201")
+               "C0302,W0212,W0201,W0142")
     # Sensitive to --msg-template if used
     BADWORDS = ('warning', 'error', 'convention')
 
@@ -598,19 +598,9 @@ class TestActionBase(TestActionBaseBase):
         sentinel = '1---nNNn0o0OOOO0!'  # getattr() None is default
         for key, value in {'parameters_source': self.mocks['parameters_source'],
                            'index': None,
-                           'filepath': None,
-                           'pass_optional': False,
-                           'pass_context': False}.iteritems():
+                           'filepath': None}.iteritems():
             self.assertEqual(getattr(self.uut.ActionBase, key, sentinel),
                              value)
-        for bits in xrange(4):
-            _pc = bits & 1
-            _po = (bits >> 1) & 1
-            test_ab = self.uut.ActionBase(index=0, filepath='whatever',
-                                          pass_context=_pc,
-                                          pass_optional=_po)
-            self.assertEqual(test_ab.pass_context, bool(_pc))
-            self.assertEqual(test_ab.pass_optional, bool(_po))
 
     def test_init_params(self):
         "Verify constructor API and initialized attributes"
@@ -639,16 +629,12 @@ class TestActionBase(TestActionBaseBase):
         # No args
         self.assertRaises(TypeError, self.uut.ActionBase)
 
-        special = {'pass_context': Mock(),
-                   'pass_optional': Mock(),
-                   'foo': 'bar',
+        special = {'foo': 'bar',
                    'baz': 'snafu'}
         test_ab = self.uut.ActionBase(123, '/foo/bar', **special)
 
         for falsy in (test_ab.parameters_source.called,
-                      self.mocks['action'].called,
-                      special['pass_context'].called,
-                      special['pass_optional'].called):
+                      self.mocks['action'].called):
             self.assertFalse(falsy)
 
         dunder_init = call(self.mocks['parameters_source'])
@@ -658,10 +644,6 @@ class TestActionBase(TestActionBaseBase):
         self.mocks['init'].assert_called_once_with(test_ab,
                                                    foo='bar',
                                                    baz='snafu')
-        for key, value in {'pass_context': special['pass_context'],
-                           'pass_optional': special['pass_optional']}.items():
-            self.assertEqual(getattr(test_ab, key, 'n00000w@y!'),
-                             bool(value))
 
     def test_action_call(self):
         "Verify action method called when instance called"
@@ -718,8 +700,6 @@ class TestCommand(TestActionBaseBase):
             exitfile = Mock()
             test_cmd = self.uut.Command(index=321,
                                         filepath='whatever',
-                                        pass_context=True,
-                                        pass_optional=True,
                                         arguments='foo',
                                         stdoutfile=stdoutfile,
                                         stderrfile=stderrfile,
@@ -937,10 +917,10 @@ class TestPlaybook(TestActionBaseBase):
                                      'arguments': 'foo bar baz'},
                                     {'args': (42, ''),
                                      'Beelzebub': 666},
-                                    {'args': (42, '/yes/sir', True, False),
+                                    {'args': (42, '/yes/sir'),
                                      'Beelzebub': 666})):
             self.assertRaisesRegex((ValueError, TypeError),
-                                   r'(takes at least 3)|(Playbook.+#42)',
+                                   r'(takes exactly 3 arguments)|(Playbook.+#42)',
                                    self.uut.Playbook,
                                    *dargs.pop('args', tuple()),
                                    **dargs)
@@ -948,13 +928,13 @@ class TestPlaybook(TestActionBaseBase):
         "Verify multiple instance have distinct popen_"
         # Re-use exact same setup
         self.test_init_bad()
-        one = self.uut.Playbook(1, '/path/to/one/file', True, False,
+        one = self.uut.Playbook(1, '/path/to/one/file',
                                 varsfile='one_varsfile', limit='one',
                                 inventory='foo', config='bar')
         self.assertEqual(one.popen_dargs['shell'], False)
         one.popen_dargs['shell'] = True
 
-        two = self.uut.Playbook(1, '/path/to/two/file', False, True,
+        two = self.uut.Playbook(1, '/path/to/two/file',
                                 varsfile='two_varsfile', limit='two',
                                 inventory='bar', config='foo')
         self.assertEqual(two.popen_dargs['executable'],
@@ -985,15 +965,11 @@ class TestPlaybook(TestActionBaseBase):
             values = ('/path/to/script',
                       'test_context', 'test_workspace', 'test_yaml', '      ')
             self.uut.ActionBase.parameters_source = values
-            test_play = self.uut.Playbook(0, '/dev/null',
-                                          pass_context=True,
-                                          pass_optional=True)
+            test_play = self.uut.Playbook(0, '/dev/null')
             self.assertEqual(test_play.parameters.context, 'test_context')
             self.assertEqual(test_play.parameters.workspace, 'test_workspace')
             self.assertEqual(test_play.parameters.yaml, 'test_yaml')
             self.assertEqual(test_play.parameters.optional, '')
-            self.assertTrue(test_play.pass_context)
-            self.assertTrue(test_play.pass_optional)
             podargs = test_play.popen_dargs
             for word in ('ADEPT_CONTEXT', 'WORKSPACE',
                          'ADEPT_PATH', 'HOSTNAME'):
