@@ -961,6 +961,9 @@ class TestPlaybook(TestActionBaseBase):
         # Create required (self.uut.open) to mock where it would be looked up
         # before a builtin
         with PatchedParameters(self.uut):
+            # FIXME: This needs to result in parameters.mangle_verify
+            #        altering the path to make sure it's being used
+            #        correctly
             self.patch_os_path(self.UUT)
             values = ('/path/to/script',
                       'test_context', 'test_workspace', 'test_yaml', '      ')

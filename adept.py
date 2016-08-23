@@ -642,10 +642,12 @@ class Playbook(Command):
                 continue
             value = self.sub_env(new_env, value)
             msg_fmt = 'You found a %s processing bug %%s:%%s' % name
-            value = self.parameters.mangle_verify(self.parameters.context,
-                                                  # other layers check existence
-                                                  lambda x: True,
-                                                  value, msg_fmt)
+            if name in ('varsfile', 'inventory'):
+                spmv = self.parameters.mangle_verify
+                value = spmv(self.parameters.context,
+                             # other layers check existence
+                             lambda x: True,
+                             value, msg_fmt)
             if name is 'varsfile':
                 args.extend(['--extra-vars', '@%s' % value])
             elif name is 'inventory':
