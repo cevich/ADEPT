@@ -102,17 +102,23 @@
         docker_autotest.test_image.user != None
 
 - name: Default image preserve CSV value is known
-  shell: "{{ docker_autotest.preserve_fqins_cmd }}"
+  shell: "{{ preserve_fqins_cmd }}"
   args:
     chdir: "{{ autotest_docker_path }}"
-  register: preserve_fqins_cmd
+  register: _preserve_fqins_cmd
   when: defaults_needed and
         docker_autotest.preserve_fqins is defined and
         docker_autotest.preserve_fqins != None
 
 - name: Default image preserve CSV value is formatted
   set_fact:
-    preserve_fqins: "{{ preserve_fqins_cmd.stdout | regex_replace('\\s*', '') }},{{ docker_autotest.preserve_fqins | join(',') }},"
+    preserve_fqins: "{{ _preserve_fqins_cmd.stdout |
+                        regex_replace('\\s*', '')
+                      }},{{
+                        docker_autotest.preserve_fqins |
+                        default([]) |
+                        join(',')
+                      }},"
   when: defaults_needed and
         docker_autotest.preserve_fqins is defined and
         docker_autotest.preserve_fqins != None
@@ -129,17 +135,23 @@
         docker_autotest.preserve_fqins != None
 
 - name: Default container preserve CSV value is known
-  shell: "{{ docker_autotest.preserve_cnames_cmd }}"
+  shell: "{{ preserve_cnames_cmd }}"
   args:
     chdir: "{{ autotest_docker_path }}"
-  register: preserve_cnames_cmd
+  register: _preserve_cnames_cmd
   when: defaults_needed and
         docker_autotest.preserve_cnames is defined and
         docker_autotest.preserve_cnames != None
 
 - name: Default container preserve CSV value is formatted
   set_fact:
-    preserve_cnames: "{{ preserve_cnames_cmd.stdout | regex_replace('\\s*', '') }},{{ docker_autotest.preserve_cnames | join(',') }},"
+    preserve_cnames: "{{ _preserve_cnames_cmd.stdout |
+                         regex_replace('\\s*', '')
+                      }},{{
+                         docker_autotest.preserve_cnames |
+                         default([]) |
+                         join(',')
+                      }},"
   when: defaults_needed and
         docker_autotest.preserve_cnames is defined and
         docker_autotest.preserve_cnames != None
