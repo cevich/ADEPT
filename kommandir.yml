@@ -16,6 +16,9 @@
   tasks:
     - include: roles/kommandir_name/tasks/main.yml
 
+    - debug: var=kommandir_type
+    - debug: var=adept_context
+
     - include: roles/kommandir/tasks/openstack.yml
       when: kommandir_type == 'openstack' and
             adept_context == 'setup'

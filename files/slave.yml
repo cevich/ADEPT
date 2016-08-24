@@ -18,9 +18,6 @@
     # Optional string to pass to the --limit option ($HOSTNAME is magic)
     limit: localhost
 
-    # Unless False, pass called context through in 'adept_context' variable
-    # pass_context: True
-
     # Path to file of additional variables
     varsfile: $WORKSPACE/variables.yml
 

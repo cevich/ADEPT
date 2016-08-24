@@ -2,11 +2,11 @@
 
 # This is hard-coded and required for ansible to work properly
 - command:
-    filepath: /usr/bin/test
+    filepath: /bin/test
     arguments: -r "$WORKSPACE/ssh_private_key"
 
 - command:
-    filepath: /usr/bin/test
+    filepath: /bin/test
     arguments: -r "$WORKSPACE/ssh_private_key.pub"
 
 # Create/Copy only the bare-minimum of what's needed to bootstrap

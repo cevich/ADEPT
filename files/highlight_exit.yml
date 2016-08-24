@@ -4,7 +4,7 @@
 # Since adept won't actually exit until (possibly) much later.
 
 - command:
-    filepath: /usr/bin/bash
+    filepath: /bin/bash
     arguments: |
         -c 'set -e;
             [ -r "$WORKSPACE/$ADEPT_CONTEXT.exit" ] || exit 126;

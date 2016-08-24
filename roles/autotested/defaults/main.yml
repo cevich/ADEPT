@@ -10,6 +10,17 @@ autotest_dest_dir: "/var/lib/autotest"
 # equally among all subtests.
 docker_autotest_timeout: "{{ docker_autotest_timeout | default(3600) }}"
 
+# The variables below allow flexibility to dynamicly determine
+# what docker repositories, container names and versions to
+# preserve upon.  More than likely they do not need to be modified
+# from default values unless you know what you're doing.
+
+# Command to use for retrieving preserve_fqins value
+preserve_fqins_cmd: ./config_value.py DEFAULTS preserve_fqins config_defaults/defaults.ini config_custom/defaults.ini
+
+# Command to use for retrieving preserve_cnames value
+preserve_cnames_cmd: ./config_value.py DEFAULTS preserve_cnames config_defaults/defaults.ini config_custom/defaults.ini
+
 docker_autotest:
 
     # Many tests rely on a default image for testing. Specify
@@ -42,13 +53,5 @@ docker_autotest:
     # Set to false to disable executing autotest on this host
     execute: true
 
-    # The variables below allow flexibility to dynamicly determine
-    # what docker repositories, container names and versions to
-    # preserve upon.  More than likely they do not need to be modified
-    # from default values unless you know what you're doing.
-
-    # Command to use for retrieving preserve_fqins value
-    preserve_fqins_cmd: ./config_value.py DEFAULTS preserve_fqins config_defaults/defaults.ini config_custom/defaults.ini
-
-    # Command to use for retrieving preserve_cnames value
-    preserve_cnames_cmd: ./config_value.py DEFAULTS preserve_cnames config_defaults/defaults.ini config_custom/defaults.ini
+    # Set true to copy in python-bugzilla from cache directory
+    enable_bugzilla: true
