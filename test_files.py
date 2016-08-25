@@ -17,6 +17,7 @@ from pdb import Pdb
 import mmap
 import re
 from glob import glob
+
 # ref: https://docs.python.org/dev/library/unittest.html
 import unittest2 as unittest
 import test_adept
@@ -53,9 +54,21 @@ class TestPylint(test_adept.TestPylint):
 
     """Run pylint over this unittest"""
 
+    def setUp(self):
+        """Override test_adept.TestCaseBase method"""
+        pass
+
+    def tearDown(self):
+        """Override test_adept.TestCaseBase method"""
+        pass
+
     def test_unittest_pylint(self):
         "Run pylint on the unittest module itself"
         self._pylintrun(os.path.basename(__file__))
+
+    @unittest.skip("Not relevant")
+    def test_uut_pylint(self):
+        pass
 
 
 class TestContentRegexs(TestCaseBase):
@@ -65,10 +78,12 @@ class TestContentRegexs(TestCaseBase):
     """
 
     globs = ('files/*.yml',)
-    regexes = (re.compile(r'usr/bin/bash'),
-               re.compile(r'usr/bin/sh'),
-               re.compile(r'usr/bin/test'),
-               re.compile(r'usr/bin/python'),
+    regexes = (re.compile(r'/usr/bin/bash'),
+               re.compile(r'/usr/bin/sh'),
+               re.compile(r'/usr/bin/cp'),
+               re.compile(r' /bin/test'),
+               re.compile(r'/usr/bin/mkdir'),
+               re.compile(r'/usr/bin/python'),
               )
     # If non-None, contain iterable of relative paths to files
     check_files = None

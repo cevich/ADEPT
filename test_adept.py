@@ -15,6 +15,7 @@ import os
 import os.path
 from collections import namedtuple
 from itertools import cycle, product
+from binascii import crc32
 from pdb import Pdb
 # ref: https://docs.python.org/dev/library/unittest.html
 import unittest2 as unittest
@@ -25,6 +26,143 @@ from pylint import epylint as lint
 
 # Prefer to keep number of extra files/modules low
 # pylint: disable=C0302
+
+class FakeOsPath(object):
+
+    """
+    Static testable os.path calls that don't rely on external state
+    """
+
+    user_map = {'~': '/home/user1',
+                '~user': '/home/user2'}
+
+    env_map = {'$HOME': '/home/user3',
+               '${HOME}': '/home/user4'}
+
+    time_map = {'atime': 0,
+                'mtime': 1,
+                'ctime': 2}
+
+    same_test = cmp
+
+    class FakeOsPathException(ValueError, os.error):
+        """Exception raised when fixed data is not available for return"""
+        pass
+
+    @staticmethod
+    def abspath(path):
+        """Return path prefixed with the string '/abs'"""
+        return FakeOsPath._pfxpath(path, '/abs')
+
+    @staticmethod
+    def exists(path):
+        """Return True if the string 'yes' is in path"""
+        return "yes" in path
+
+    lexists = exists
+
+    @staticmethod
+    def expanduser(path):
+        """
+        Substitute values in path with keys from FakeOsPath.user_map
+        """
+        for key, val in FakeOsPath.user_map.items():
+            if key in path:
+                path = path.replace(key, val)
+        return path
+
+    @staticmethod
+    def expandvars(path):
+        """
+        Substitute values in path with keys from FakeOsPath.env_map
+        """
+        for key, val in FakeOsPath.env_map.items():
+            if key in path:
+                path = path.replace(key, val)
+        return path
+
+    @staticmethod
+    def _gettime(path, key):
+        try:
+            return FakeOsPath.time_map[key]
+        except KeyError:
+            raise FakeOsPath.FakeOsPathException(path)
+
+    @staticmethod
+    def getatime(path):
+        """
+        Return integer from FakeOsPath.time_map with atime key
+        """
+        return FakeOsPath._gettime(path, 'atime')
+
+    @staticmethod
+    def getmtime(path):
+        """
+        Return integer from FakeOsPath.time_map with mtime key
+        """
+        return FakeOsPath._gettime(path, 'mtime')
+
+    @staticmethod
+    def getctime(path):
+        """
+        Return integer from FakeOsPath.time_map with ctime key
+        """
+        return FakeOsPath._gettime(path, 'ctime')
+
+    @staticmethod
+    def getsize(path):
+        """
+        Return the 32-bit checksum of path
+        """
+        return crc32(path)
+
+    @staticmethod
+    def isfile(path):
+        """Return true if the string 'file' is in path"""
+        return 'file' in path
+
+    @staticmethod
+    def isdir(path):
+        """Return true if the string 'dir' is in path"""
+        return 'dir' in path
+
+    @staticmethod
+    def islink(path):
+        """Return true if the string 'link' is in path"""
+        return 'link' in path
+
+    @staticmethod
+    def ismount(path):
+        """Return true if the string 'mount' is in path"""
+        return 'mount' in path
+
+    @staticmethod
+    def _pfxpath(path, prefix):
+        return os.path.join(prefix, path)
+
+    @staticmethod
+    def normpath(path):
+        """Return path with '/norm' prefixed on the beginning"""
+        return FakeOsPath._pfxpath(path, '/norm')
+
+    @staticmethod
+    def realpath(path):
+        """Return path with '/real' prefixed on the beginning"""
+        return FakeOsPath._pfxpath(path, '/real')
+
+    @staticmethod
+    def relpath(path):
+        """Return path with '/real' prefixed on the beginning"""
+        return FakeOsPath._pfxpath(path, '/real')
+
+    @staticmethod
+    def samefile(path1, path2):
+        """Return result of calling FakeOsPath.same_test on the paths"""
+        return FakeOsPath.same_test(path1, path2)
+
+    sameopenfile = samefile
+    samestat = samefile
+
 
 class TestSweet(unittest.TestSuite):
 
