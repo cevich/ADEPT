@@ -78,10 +78,12 @@ class TestContentRegexs(TestCaseBase):
     """
 
     globs = ('files/*.yml',)
-    regexes = (re.compile(r'usr/bin/bash'),
-               re.compile(r'usr/bin/sh'),
-               re.compile(r'usr/bin/test'),
-               re.compile(r'usr/bin/python'),
+    regexes = (re.compile(r'/usr/bin/bash'),
+               re.compile(r'/usr/bin/sh'),
+               re.compile(r'/usr/bin/cp'),
+               re.compile(r' /bin/test'),
+               re.compile(r'/usr/bin/mkdir'),
+               re.compile(r'/usr/bin/python'),
               )
     # If non-None, contain iterable of relative paths to files
     check_files = None
