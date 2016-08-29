@@ -30,18 +30,4 @@
         _adept_optional != None and
         _adept_optional != ''
 
-- name: The ostree ostree admin status command only succeeds on Atomic
-  command: ostree admin status
-  register: _ostree
-  ignore_errors: True
-  when: is_atomic is undefined
-
-- name: is_atomic is set to false
-  set_fact:
-    is_atomic: False
-  when: is_atomic is undefined and _ostree | failed
-
-- name: is_atomic is set to true
-  set_fact:
-    is_atomic: True
-  when: is_atomic is undefined and _ostree | success
+- include: ../../../roles/common/tasks/is_atomic.yml
