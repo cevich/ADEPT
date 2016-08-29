@@ -47,7 +47,7 @@
     rsync_opts:
         - "--exclude=.git"
   no_log: '{{ no_log_synchronize | default(true) }}'
-  when: docker_autotest.enable_bugzilla is defined and
+  when: docker_autotest.enable_bugzilla is undefined or
         docker_autotest.enable_bugzilla
 
 - name: Custom configuration is cleared
