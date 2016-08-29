@@ -3,24 +3,18 @@
 # Registers:
 #   is_atomic
 
-- name: Current is_atomic value is buffered
-  set_fact:
-    _is_atomic: '{{ is_atomic | default(False) }}'
+- name: The file /run/ostree-booted status is known
+  stat:
+    path: "/run/ostree-booted"
+    follow: True
+  register: exists
 
-- name: The ostree ostree admin status command succeeds on Atomic
-  command: ostree admin status
-  register: ostree
-  ignore_errors: True
-  when: is_atomic is undefined
-
-- name: is_atomic is set to false
-  set_fact:
-    is_atomic: False
-  when: is_atomic is undefined and ostree | failed
-  changed_when: is_atomic != _is_atomic
-
-- name: is_atomic is set to true
+- name: The file only exists on an Atomic Host
   set_fact:
     is_atomic: True
-  when: is_atomic is undefined and ostree | success
-  changed_when: is_atomic != _is_atomic
+  when: exists.stat is defined and exists.stat.exists and exists.stat.isreg
+
+- name: The file does not exist on non-Atomic Host
+  set_fact:
+    is_atomic: False
+  when: is_atomic is undefined or not is_atomic

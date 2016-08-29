@@ -134,7 +134,7 @@ class Parameters(Sequence):
         else:
             if source is None:
                 source = cls.default_source
-            cls._singleton = super(Parameters, cls).__new__(cls, source=source)
+            cls._singleton = super(Parameters, cls).__new__(cls)
             return cls._singleton
 
     def __init__(self, source=None):
