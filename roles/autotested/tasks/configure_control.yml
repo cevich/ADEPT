@@ -1,13 +1,13 @@
 ---
 
-- debug: var=docker_autotest.timeout
-  when: docker_autotest.timeout is defined
+- debug: var=docker_autotest_timeout
+  when: docker_autotest_timeout is defined
 
-- name: Control timeout set
+- name: Control timeout set in terms of seconds
   lineinfile:
     backrefs: true
     dest: "{{ autotest_docker_path }}/control"
     follow: True
-    line: "\\1 {{ docker_autotest_timeout }}"
+    line: "\\1 {{ docker_autotest_timeout }} * 60"
     regexp: "^(TIMEOUT\\s*=\\s*).*$"
   when: docker_autotest_timeout is defined
