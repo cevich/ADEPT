@@ -113,6 +113,8 @@
   async: 14401
   poll: 60
   when: docker_autotest.execute
+  # Any Autotest failures will eventually be reflected as missing results
+  ignore_errors: True
 
 - include: produce_results.yml
   when: autotest_execution is defined
