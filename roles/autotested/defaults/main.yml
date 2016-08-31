@@ -7,7 +7,7 @@ docker_autotest_cache_dir: "{{ workspace }}/cache/"
 autotest_dest_dir: "/var/lib/autotest"
 
 # Timeout in minutes to rewrite into control-file multiplied by 60
-docker_autotest_timeout: "{{ docker_autotest_timeout | default(60) }}"
+docker_autotest_timeout: 120
 
 # The variables below allow flexibility to dynamicly determine
 # what docker repositories, container names and versions to
