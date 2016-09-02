@@ -41,8 +41,7 @@ adept_openstack:
                 "24": "54aa1d2b-b932-47bf-a045-7110abcd1e7e"
         fedoratomic:
                 "23": "6fd19ae4-5b0f-4b42-b2f7-5389905bf4b2"
-                # 24 doesn't exist yet, check-
-                # https://getfedora.org/cloud/download/atomic.html
+                "24": "7754ce09-4e8d-41c6-b080-351768199a94"
 
     # Userdata to supply to cloud-init
     userdata:
