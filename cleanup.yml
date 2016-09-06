@@ -1,14 +1,5 @@
 ---
 
-# TODO are these even needed in cleanup context
-# - hosts: autotested:&{{ adept_job }}
-#   roles:
-#     - role: autotested
-
-# - hosts: peons:&{{ adept_job }}
-#   roles:
-#     - peon
-
 - hosts: peons:&{{ adept_job }}:&subscribed
   roles:
     - unsubscribed
