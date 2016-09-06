@@ -12,15 +12,6 @@ peon_defaults:
     defaults:
       defaults: 'defaults'
       version: '7.2'
-      # Covers all of CentOS and RHEL
-      versions:
-        - key: "version"
-          value: "7.2"
-      groups:
-        - autotested
-        - peons
-        - lvm
-        - rebooted
       private: False
       volume: ""
 
@@ -81,9 +72,7 @@ peon_defaults:
         - lvm
         - partitioned
         - rebooted
-      versions:
-        - key: "version"
-          value: "23"
+      version: "23"
 
     fedoratomic:
       groups:
@@ -93,8 +82,6 @@ peon_defaults:
         - autotested
         - peons
         - rebooted
-      versions:
-        - key: "version"
-          value: "23"
-        # 24 doesn't exist yet, check-
-        # https://getfedora.org/cloud/download/atomic.html
+      version: "23"
+      # 24 doesn't exist yet, check-
+      # https://getfedora.org/cloud/download/atomic.html

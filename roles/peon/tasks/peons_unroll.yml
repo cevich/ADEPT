@@ -37,42 +37,7 @@
                 }}"
       with_dict: '{{ _pd }}'
 
-- name: axis list is initially empty
-  set_fact:
-    # workaround failure on with_cartesian even when matrix_attributes == []
-    _axes: [[], []]
-
-- block:
-
-    - name: peon matrix axes populated
-      set_fact:
-        # A list of lists of dictionaries
-        _axes: "{{ _axes + [_peon[item]] }}"
-      when: _peon[item] is defined
-      with_items: "{{ matrix_attributes }}"
-
-    # Will silently NOT run if matrix_attributes | length == 1
-    - name: peon matrix product is computed
-      include: roles/peon/tasks/peons_matrix.yml
-      # inner_item will be one item from each list in _axes
-      with_cartesian: "{{ _axes }}"
-      loop_control:
-        loop_var: inner_item
-
-    - name: Single item 'matrix' is computed
-      include: roles/peon/tasks/peons_matrix.yml
-      vars:
-        # Third item b/c workaround above
-        inner_item: "{{ _axes[2] }}"
-      when: "{{ (matrix_attributes | length) == 1 }}"
-
-  when: matrix_attributes is defined and matrix_attributes != []
-
-- block:
-
-  - name: peons are defined w/o a matrix
-    include: roles/peon/tasks/peons_matrix.yml
-    vars:
-        inner_item: []
-
-  when: matrix_attributes is undefined or matrix_attributes == []
+- name: peons are defined
+  include: roles/peon/tasks/peons_matrix.yml
+  vars:
+    inner_item: []
