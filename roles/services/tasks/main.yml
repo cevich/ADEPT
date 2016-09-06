@@ -1,0 +1,44 @@
+---
+# Depends:
+#   enabled_services: []
+#   disabled_services: []
+#   started_services: []
+#   stopped_services: []
+#   restarted_services: []
+#   reloaded_services: []
+
+- name: Service lists buffered by state
+  set_fact:
+    # Order is important, use lists of dicts
+    _state:
+        - state: True
+          services: '{{ enabled_services | default([]) }}'
+        - state: False
+          services: '{{ disabled_services | default([]) }}'
+    _action:
+        - state: stopped
+          services: '{{ stopped_services | default([]) }}'
+        - state: started
+          services: '{{ started_services | default([]) }}'
+        - state: reloaded
+          services: '{{ reloaded_services | default([]) }}'
+        - state: restarted
+          services: '{{ restarted_services | default([]) }}'
+
+- name: Service state is set
+  service:
+    name: '{{ item.1 }}'
+    enabled: '{{ item.0.state }}'
+  with_subelements:
+    - "{{ _state }}"
+    - services
+    - skip_missing: True
+
+- name: Service action is taken
+  service:
+    name: '{{ item.1 }}'
+    state: '{{ item.0.state }}'
+  with_subelements:
+    - "{{ _action }}"
+    - services
+    - skip_missing: True

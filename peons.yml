@@ -50,3 +50,9 @@
   any_errors_fatal: true
   roles:
     - peon
+    - services
+
+- hosts: peons:rebooted:&{{ adept_job }}
+  any_errors_fatal: true
+  roles:
+    - rebooted
