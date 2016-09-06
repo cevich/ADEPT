@@ -31,6 +31,7 @@ peon_defaults:
         - centos
         - autotested
         - peons
+        - yumrepos
         - installed
         - updated
         - lvm
@@ -52,6 +53,7 @@ peon_defaults:
         - subscribed
         - autotested
         - peons
+        - yumrepos
         - installed
         - updated
         - lvm
@@ -73,6 +75,7 @@ peon_defaults:
         - fedora
         - autotested
         - peons
+        - yumrepos
         - installed
         - updated
         - lvm

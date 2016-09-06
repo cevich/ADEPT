@@ -20,6 +20,10 @@
   roles:
     - lvm
 
+- hosts: peons:&yumrepos:&{{ adept_job }}
+  roles:
+    - yumrepos
+
 - include: os-types.yml
 
 - hosts: peons:&installed:&{{ adept_job }}
