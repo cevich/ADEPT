@@ -32,6 +32,11 @@
     path: "{{ autotest_dest_dir }}/RELEASE-VERSION"
     state: absent
 
+- name: Bundled Docker Autotest directory is removed
+  file:
+    path: "{{ autotest_docker_path }}"
+    state: absent
+
 - name: Cached Docker Autotest is copied
   synchronize:
     dest: "{{ autotest_docker_path }}"
