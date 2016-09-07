@@ -33,7 +33,7 @@ adept_openstack:
         centosatomic:
                 "7.2": "7f185bb6-7d85-491b-8f69-3060c8b75397"
         rhel:
-                "7.2": "c735f097-077d-4fd0-bd8d-15897b50a0dd"
+                "7.2": "e14d0aa8-17fb-45c3-b842-056d987acec9"
                 "7.3": "216039d4-43b1-435b-baea-107bcaa06ac4"
         rhelatomic:
                 "7.2": "6c38283e-4bf5-4f9b-ae48-e0d276ffeae4"
