@@ -2,6 +2,21 @@
 
 - block:
 
+    # There are situations where default repositories are broken
+    - name: All repositories are disabled in subscription manager
+      command: /usr/sbin/subscription-manager repos --disable=*
+
+    - name: Explicit list of repositories enabled in subscription manager
+      command: /usr/sbin/subscription-manager repos --enable={{ item }}
+      when: installed_enablerepo is defined and
+            installed_enablerepo != [] and
+            not item | search('epel')
+      with_items: '{{ installed_enablerepo }}'
+
+  when: disable_all_rh_repos
+
+- block:
+
     - name: yum repository is setup
       yum_repository:
         name: "{{ item.name | mandatory }}"

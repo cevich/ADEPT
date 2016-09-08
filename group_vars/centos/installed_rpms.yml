@@ -4,7 +4,6 @@ use_dnf: False
 installed_enablerepo:
     - base
     - extras
-    - epel
     - updates
 installed_rpms:
     - docker
@@ -20,16 +19,8 @@ installed_rpms:
     - nfs-utils
     - git
     - glibc-devel
-    - python-bugzilla
     - which
     - cloud-utils-growpart
-    - python-nose
-    - python-unittest2
-    - python2-mock
-    - python-docutils
-    - python-sphinx
-    - python-sphinxcontrib-httpdomain
-    - python-sphinx_rtd_theme
     - selinux-policy-targeted
     - libselinux-python
     - iputils

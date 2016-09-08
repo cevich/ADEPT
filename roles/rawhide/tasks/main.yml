@@ -1,5 +1,9 @@
 ---
 
+- fail:
+    - msg: Not a fedora system / not in fedora group
+  when: 'fedora' not in group_names
+
 - name: latest released packages installed
   dnf:
     name: '*'
