@@ -1,0 +1,18 @@
+---
+
+- block:
+
+    - name: yum repository is setup
+      yum_repository:
+        name: "{{ item.name | mandatory }}"
+        baseurl: "{{ item.baseurl }}"
+        description: "Ansible added {{ item.name | mandatory }} repo"
+        gpgcheck: "{{ item.exclude | default(False) }}"
+        exclude: "{{ item.excludepkgs | default(omit) }}"
+        includepkgs: "{{ item.includepkgs | default(omit) }}"
+        metadata_expire: 900  # quarter-hour
+        protect: "{{ item.protect | default(False) }}"
+        state: present
+      with_items: '{{ yum_repos | default([]) }}'
+
+  when: yum_repos is defined and yum_repos != []

@@ -31,12 +31,3 @@ peons:
 
     - name: "fedoratomic"
       defaults: "fedoratomic"
-
-# List of peon attribute name(s) to compute matrix product.
-# Each referenced attribute in each peon (above or in defaults) must
-# contain a list of dictionaries.  Each dictionary must define values
-# for the keys: 'key' and 'value'. Where key's value represents the
-# peon attribute to modify, and value is the data to set.  The cartesian
-# product (every possible combination) defines the set of peons to create.
-matrix_attributes:
-    - versions
