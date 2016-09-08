@@ -1,9 +1,0 @@
----
-
-- name: epel repository is installed
-  include: roles/installed/tasks/main.yml
-  vars:
-    installed_rpms:
-        - epel-release
-    installed_enablerepo: []
-    installed_disablerepo: []

@@ -19,8 +19,6 @@
   roles:
     - yumrepos
 
-- include: os-types.yml
-
 - hosts: peons:&lvm:&{{ adept_job }}
   any_errors_fatal: true
   roles:
