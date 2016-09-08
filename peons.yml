@@ -15,16 +15,16 @@
   roles:
     - rebooted
 
-- hosts: peons:&lvm:&{{ adept_job }}
-  any_errors_fatal: true
-  roles:
-    - lvm
-
 - hosts: peons:&yumrepos:&{{ adept_job }}
   roles:
     - yumrepos
 
 - include: os-types.yml
+
+- hosts: peons:&lvm:&{{ adept_job }}
+  any_errors_fatal: true
+  roles:
+    - lvm
 
 - hosts: peons:&installed:&{{ adept_job }}
   any_errors_fatal: true
