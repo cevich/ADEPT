@@ -28,6 +28,9 @@
         metadata_expire: 900  # quarter-hour
         protect: "{{ item.protect | default(False) }}"
         state: present
+      register: result
       with_items: '{{ yum_repos | default([]) }}'
+
+    - debug: var=result
 
   when: yum_repos is defined and yum_repos != []
