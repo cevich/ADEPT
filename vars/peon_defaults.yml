@@ -77,7 +77,6 @@ peon_defaults:
     fedoratomic:
       groups:
         - fedoratomic
-        - subscribed
         - atomic_upgrade
         - autotested
         - peons
