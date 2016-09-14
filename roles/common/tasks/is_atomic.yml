@@ -8,13 +8,17 @@
     path: "/run/ostree-booted"
     follow: True
   register: exists
+  when: is_atomic is undefined
 
 - name: The file only exists on an Atomic Host
   set_fact:
     is_atomic: True
-  when: exists.stat is defined and exists.stat.exists and exists.stat.isreg
+  when: is_atomic is undefined and
+        exists.stat is defined and
+        exists.stat.exists and
+        exists.stat.isreg
 
 - name: The file does not exist on non-Atomic Host
   set_fact:
     is_atomic: False
-  when: is_atomic is undefined or not is_atomic
+  when: is_atomic is undefined
