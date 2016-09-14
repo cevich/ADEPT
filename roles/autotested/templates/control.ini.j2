@@ -16,10 +16,16 @@ include =
 # e.g. "docker_cli/run,docker_cli/attach/no_stdin"
 exclude = example,subexample,pretest_example,intratest_example,
           posttest_example,
+          docker_cli/run_volumes,
+{% if not is_atomic %}
           docker_cli/build/git_path,
-          docker_cli/info,
-          docker_cli/negativeusage,
-          docker_cli/run_volumes
+    {%- if is_enterprise %}
+          redhat/packaging,
+    {%- endif %}
+{% endif %}
+{% if not is_enterprise %}
+          redhat/rhel_push_plugin,
+{% endif %}
 
 # Subtests/Sub-subtest to consider for inclusion before
 # consulting include/exclude (above).
