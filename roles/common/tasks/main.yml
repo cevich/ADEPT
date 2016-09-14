@@ -31,3 +31,4 @@
         _adept_optional != ''
 
 - include: ../../../roles/common/tasks/is_atomic.yml
+- include: ../../../roles/common/tasks/is_enterprise.yml
