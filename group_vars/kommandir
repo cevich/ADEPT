@@ -8,7 +8,7 @@ kommandir_openstack:
     auth_url: "{{ _private_kommandir_auth_url }}"
     username: "{{ _private_kommandir_username }}"
     password: "{{ _private_kommandir_password }}"
-    image: "7f185bb6-7d85-491b-8f69-3060c8b75397"
+    image: "dbd01b32-3a5c-4bcb-9c4b-2857d17b4567"
     tenant_name: "{{ _private_kommandir_tenant_name }}"
     # Needed for older openstack CLI
     legacy_floating_ip_pool: "{{ [_private_legacy_floating_ip_pool | default(omit)] }}"
