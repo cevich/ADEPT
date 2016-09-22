@@ -39,12 +39,12 @@
 
 - name: public key is buffered
   set_fact:
-    pubkey: '{{ [ lookup("file", pubkeyfile) ] }}'
+    pubkey: '{{ lookup("file", pubkeyfile) }}'
   when: "{{ 'ssh_authorized_keys' in userdata }}"
 
 - name: ssh_authorized_keys updated from buffer
   set_fact:
-    ssh_authorized_keys: '{{ ssh_authorized_keys + pubkey }}'
+    ssh_authorized_keys: '{{ ssh_authorized_keys | union([pubkey]) }}'
   when: "{{ 'ssh_authorized_keys' in userdata }}"
 
 - name: userdata updated with new ssh_authorized_keys
