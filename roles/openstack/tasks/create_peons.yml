@@ -59,6 +59,19 @@
         {{ "#cloud-config" }}
         {{ userdata | to_nice_yaml }}
 
+- name: facts about peon's image are retrievable
+  os_image_facts:
+    cloud: default
+    image: '{{ adept_openstack.image_map[peon.name][peon.version] }}'
+    wait: True
+  # Helpful error message is next task
+  ignore_errors: True
+  register: _imgfacts
+
+- fail:
+    msg: "Error looking up image {{ adept_openstack.image_map[peon.name][peon.version] }}"
+  when: _imgfacts | failed
+
 - name: peon from peon_set is provisioned
   os_server:
     cloud: default

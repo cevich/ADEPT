@@ -29,9 +29,9 @@ adept_openstack:
     # Mapping of image name + version to openstack image uuids
     image_map:
         centos:
-                "7.2": "9d19a9e8-de8d-44d3-80d9-abcef8099a47"
+                "7.2": "3282ac5a-8b7e-4dc6-a36d-b13a276638f0"
         centosatomic:
-                "7.2": "7f185bb6-7d85-491b-8f69-3060c8b75397"
+                "7.2": "dbd01b32-3a5c-4bcb-9c4b-2857d17b4567"
         rhel:
                 "7.2": "e14d0aa8-17fb-45c3-b842-056d987acec9"
                 "7.3": "216039d4-43b1-435b-baea-107bcaa06ac4"
