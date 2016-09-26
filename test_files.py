@@ -77,7 +77,7 @@ class TestContentRegexs(TestCaseBase):
     Iterate over files from a glob, matching forbidden regular expressions
     """
 
-    globs = ('files/*.yml',)
+    globs = ('*.yml', '*.xn')
     regexes = (re.compile(r'/usr/bin/bash'),
                re.compile(r'/usr/bin/sh'),
                re.compile(r'/usr/bin/cp'),
@@ -94,7 +94,10 @@ class TestContentRegexs(TestCaseBase):
         here = os.path.dirname(sys.modules[__name__].__file__)
         here = os.path.abspath(here)
         for _glob in self.globs:
-            self.check_files += glob(os.path.join(here, _glob))
+            for dirpath, _, _ in os.walk(here):
+                if '.git' in dirpath:
+                    continue
+                self.check_files += glob(os.path.join(dirpath, _glob))
         if not self.check_files:
             self.check_files = None
 
