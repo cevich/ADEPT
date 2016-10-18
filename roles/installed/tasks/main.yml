@@ -27,9 +27,9 @@
       when: _installed_rpms is undefined
 
     # Allows re-use by 'updated' role
-    - name: state defaults to "present"
+    - name: state defaults to "installed"
       set_fact:
-        state: "present"
+        state: "installed"
       when: state is undefined or state == None or
             state == [] or state == ""
 
@@ -64,6 +64,7 @@
         state: "{{ state }}"
         enablerepo: '{{ _enablerepo }}'
         disablerepo: '{{ _disablerepo }}'
+        update_cache: true
       register: rpms_installed
 
     - name: rpms_installed reflects changed status
