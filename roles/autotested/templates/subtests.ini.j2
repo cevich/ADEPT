@@ -11,13 +11,6 @@ docker_pull_timeout = 600
 subsubtests = good,wrong_tag,wrong_registry_addr
 # Use image from defaults.ini
 
-[docker_cli/run/run_ping]
-config_version = 0.8.5
-generate_generic = yes
-ping_url = "www.redhat.com"
-cmd = 'yum install -y iputils && ping -c 3 -q %(ping_url)s'
-exit_status = 0
-
 {% if test_image_fqin is defined %}[docker_cli/run/run_remote_tag]
 config_version = 0.8.5
 remote_image_fqin = {{ test_image_fqin }}
@@ -39,3 +32,9 @@ docker_pull_timeout = 120.0
 subsubtests = good,wrong_tag,wrong_registry_addr
 #: Allow test to pass if actual result matches this PASS/FAIL value
 docker_expected_exit_status = 0
+
+{% if is_enterprise %}
+[docker_cli/run/run_install]
+install_cmd = yum --disablerepo="*" --enablerepo="rhel-7-server-rpms" --assumeyes iputils
+verify_cmd = ping -c 10 -q registry.access.redhat.com
+{% endif %}
