@@ -19,10 +19,16 @@
   roles:
     - yumrepos
 
-- hosts: peons:&lvm:&{{ adept_job }}
+# TODO: Apply all/most roles by conditional instead
+#       of group-membership.  Similar to below.
+- hosts: peons:&{{ adept_job }}
   any_errors_fatal: true
   roles:
-    - lvm
+    - role: lvm
+      when: lvg_ops is defined or lvol_ops is defined
+
+    - role: swap_enabled
+      when: swap_device is defined
 
 - hosts: peons:&installed:&{{ adept_job }}
   any_errors_fatal: true

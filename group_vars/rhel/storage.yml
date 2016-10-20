@@ -9,3 +9,10 @@ lvg_ops:
       force: yes
       pvs: '{{ disk_device }}1'
       state: present
+lvol_ops:
+    - lv: swap
+      size: 512
+      state: present
+      vg: docker_vg
+
+swap_device: /dev/docker_vg/swap
