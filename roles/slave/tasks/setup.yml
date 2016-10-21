@@ -25,12 +25,3 @@
   copy:
     dest: '{{ filepath }}'
     content: '{{ _variables | to_nice_yaml }}'
-
-- name: slave is member of group from adept_cloud_type variable
-  include: roles/common/tasks/update_inventory.yml
-  vars:
-    update_hostname: 'localhost'
-    update_ip: '127.0.0.1'
-    update_extra: 'ansible_become=false ansible_connection=local'
-    update_groups:
-        - "{{ adept_cloud_type }}"
