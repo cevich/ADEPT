@@ -10,8 +10,6 @@
 #   rpms_installed: boolean
 #   needs_reboot: boolean
 
-- debug: var=installed_rpms
-
 - block:
 
     # Allows re-use by 'updated' role
@@ -19,12 +17,8 @@
       set_fact:
         _installed_rpms: "{{ installed_rpms }}"
       when: installed_rpms is defined and installed_rpms != None and
-            installed_rpms != [] and installed_rpms != ""
-
-    - name: installed_rpms buffer defaults to empty
-      set_fact:
-        _installed_rpms: ""
-      when: _installed_rpms is undefined
+            installed_rpms != [] and installed_rpms != "" and
+            (_installed_rpms is undefined or installed_rpms == [])
 
     # Allows re-use by 'updated' role
     - name: state defaults to "installed"
@@ -56,15 +50,28 @@
       set_fact:
         _disablerepo: '{{ repo_csv }}'
 
+- debug:
+    msg: "Enabled Repos: {{ _enablerepo }}"
+
+- debug:
+    msg: "Disabled Repos: {{ _disablerepo }}"
+
+- debug:
+    msg: "Installing: {{ _installed_rpms }}"
+
 - block:
 
     - name: RPMs are installed with yum
       yum:
-        name: "{{ _installed_rpms | join(',') }}"
+        name: "{{ item }}"
         state: "{{ state }}"
         enablerepo: '{{ _enablerepo }}'
         disablerepo: '{{ _disablerepo }}'
         update_cache: true
+      when: not item | search("http://") and
+            not item | search("https://") and
+            not item | search("file://")
+      with_items: '{{ _installed_rpms }}'
       register: rpms_installed
 
     - name: rpms_installed reflects changed status
@@ -77,10 +84,14 @@
 
     - name: RPMs are installed with dnf
       dnf:
-        name: "{{ _installed_rpms | join(',') }}"
+        name: "{{ item }}"
         state: "{{ state }}"
         enablerepo: '{{ _enablerepo }}'
         disablerepo: '{{ _disablerepo }}'
+      when: not item | search("http://") and
+            not item | search("https://") and
+            not item | search("file://")
+      with_items: '{{ _installed_rpms }}'
       register: rpms_installed
 
     - name: rpms_installed reflects changed status

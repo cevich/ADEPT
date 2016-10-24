@@ -15,7 +15,7 @@
 - include: roles/installed/tasks/main.yml
   vars:
     state: "latest"
-    installed_rpms: "*"
+    _installed_rpms: "*"
 
 - name: rpms_updated is defined
   set_fact:

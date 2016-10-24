@@ -5,3 +5,7 @@ installed_enablerepo: []
 installed_disablerepo: []
 use_dnf: False
 rpms_installed: False
+
+# For use by other roles, bypasses reference to possibly overriden
+# installed_rpms
+_installed_rpms: []
