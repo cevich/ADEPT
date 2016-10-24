@@ -1,0 +1,13 @@
+---
+
+# After stopping docker, these parameters will be fed to 'atomic storage'.
+atomic_storage:
+    - reset
+
+# Each item is a line of content for /etc/sysconfig/docker-storage-setup.
+# Any existing content will be commented out
+sysconfig_dss_lines: []
+
+# If defined, and above is empty, render this template as
+# /etc/sysconfig/docker-storage-setup
+sysconfig_dss_template: ""
