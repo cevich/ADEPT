@@ -38,6 +38,4 @@
       with_dict: '{{ _pd }}'
 
 - name: peons are defined
-  include: roles/peon/tasks/peons_matrix.yml
-  vars:
-    inner_item: []
+  include: roles/peon/tasks/peons_guuid.yml
