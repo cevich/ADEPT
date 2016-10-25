@@ -1,0 +1,45 @@
+---
+
+- name: docker service is stopped
+  service:
+    name: docker
+    state: stopped
+
+- name: Atomic storage commands are run
+  command: "atomic storage {{ item }}"
+  with_items: "{{ atomic_storage }}"
+
+- name: render /etc/sysconfig/docker-storage-setup from template
+  template:
+    backup: True
+    dest: /etc/sysconfig/docker-storage-setup
+    src: "{{ sysconfig_dss_template }}"
+  when: sysconfig_dss_lines == [] and
+        sysconfig_dss_template != ""
+
+- block:
+
+    - name: Comment out all /etc/sysconfig/docker-storage-setup lines
+      replace:
+        backup: True
+        dest: /etc/sysconfig/docker-storage-setup
+        regexp: "^(.*)"
+        replace: "# \\1"
+
+    - name: Add lines to /etc/sysconfig/docker-storage-setup
+      lineinfile:
+        backup: False
+        dest: /etc/sysconfig/docker-storage-setup
+        line: "{{ item }}"
+      with_items: '{{ sysconfig_dss_lines }}'
+
+  when: sysconfig_dss_lines != [] and
+        sysconfig_dss_template == ""
+
+- name: docker storage is (re)configured
+  command: docker-storage-setup
+  register: result
+
+- debug:
+    var: item
+  with_items: '{{ result.stdout_lines }}'

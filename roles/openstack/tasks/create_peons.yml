@@ -53,6 +53,11 @@
                                        ssh_authorized_keys}) }}'
   when: "{{ 'ssh_authorized_keys' in userdata }}"
 
+- name: peon-specific cloud-config included into userdata
+  set_fact:
+    userdata: '{{ userdata | combine(peon.userdata) }}'
+  when: peon.userdata is defined and peon.userdata != {}
+
 - name: userdata is defined
   set_fact:
     userdata: |

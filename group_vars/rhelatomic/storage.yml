@@ -1,0 +1,9 @@
+---
+
+lvol_ops:
+    - lv: swap
+      size: 512
+      state: present
+      vg: atomicos
+
+swap_device: /dev/atomicos/swap

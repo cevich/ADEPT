@@ -5,18 +5,19 @@
 #   - lvol_ops: list of parameter dictionaries for lvol module
 # Registers:
 
+# Must happen here, role applied before os-type roles
+- include: roles/installed/tasks/main.yml
+  vars:
+    _installed_rpms:
+        - lvm2
+        - lvm2-libs
+  when: not is_atomic and
+        (lvg_ops != [] or lvol_ops != [])
+
+- include: roles/lvm/tasks/main_debug.yml
+
 # Condition should apply to task, not each iteration
 - block:
-
-    # Must happen here, role applied before os-type roles
-    - include: roles/installed/tasks/main.yml
-      vars:
-        installed_rpms:
-            - lvm2
-            - lvm2-libs
-        installed_enablerepo:
-        installed_disablerepo:
-      when: not is_atomic
 
     - name: lvg module commands are executed
       lvg:
@@ -42,6 +43,8 @@
         snapshot: '{{ item.snapshot | default(omit) }}'
         state: '{{ item.state | default(omit) }}'
         vg: '{{ item.vg | default(omit) }}'
-      with_items: '{{ lvg_ops }}'
+      with_items: '{{ lvol_ops }}'
 
   when: lvol_ops != []
+
+- include: roles/lvm/tasks/main_debug.yml

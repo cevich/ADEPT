@@ -14,6 +14,7 @@ peon_defaults:
       version: '7.2'
       private: False
       volume: ""
+      userdata: {}
 
     # Named defaults
     centos:
@@ -25,7 +26,6 @@ peon_defaults:
         - yumrepos
         - installed
         - updated
-        - lvm
         - partitioned
         - rebooted
 
@@ -47,7 +47,6 @@ peon_defaults:
         - yumrepos
         - installed
         - updated
-        - lvm
         - partitioned
         - rebooted
 
@@ -69,7 +68,6 @@ peon_defaults:
         - yumrepos
         - installed
         - updated
-        - lvm
         - partitioned
         - rebooted
       version: "23"

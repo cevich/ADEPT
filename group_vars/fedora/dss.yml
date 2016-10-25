@@ -1,0 +1,4 @@
+---
+
+sysconfig-dss-lines:
+    - VG=docker_vg
