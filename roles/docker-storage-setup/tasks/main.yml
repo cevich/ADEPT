@@ -14,8 +14,7 @@
     backup: True
     dest: /etc/sysconfig/docker-storage-setup
     src: "{{ sysconfig_dss_template }}"
-  when: sysconfig_dss_lines == [] and
-        sysconfig_dss_template != ""
+  when: sysconfig_dss_template != ""
 
 - block:
 
@@ -33,8 +32,7 @@
         line: "{{ item }}"
       with_items: '{{ sysconfig_dss_lines }}'
 
-  when: sysconfig_dss_lines != [] and
-        sysconfig_dss_template == ""
+  when: sysconfig_dss_lines != []
 
 - name: docker storage is (re)configured
   command: docker-storage-setup
