@@ -1,7 +1,0 @@
----
-
-enabled_services:
-    - docker
-
-restarted_services:
-    - docker
