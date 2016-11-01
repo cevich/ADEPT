@@ -7,6 +7,7 @@ installed_enablerepo:
     - updates
 installed_rpms:
     - docker
+    - docker-latest
     - atomic
     - docker-selinux
     - procps

@@ -13,22 +13,7 @@
 #   private: # Use private / security mode when True
 #   volume: # Optional, if non-empty, size (GB) of additional storage attach
 
-_docker_latest_userdata:
-    write_files:
-        - path: /etc/sysconfig/docker
-          content: |
-            OPTIONS='--selinux-enabled --log-driver=journald'
-            ADD_REGISTRY='--add-registry registry.access.redhat.com'
-            DOCKERBINARY=/usr/bin/docker-latest
-
 peons:
-    # Latest only
-    - name: "fedora"
-      defaults: "fedora"
-
-    - name: "fedoratomic"
-      defaults: "fedoratomic"
-
     # Docker Current
     - name: "centos"
       defaults: "centos"
@@ -45,16 +30,28 @@ peons:
     # Docker latest
     - name: "centos_latest"
       defaults: "centos"
-      userdata: '{{ _docker_latest_userdata }}'
+      extra_groups: ["docker-latest"]
 
     - name: "centosatomic_latest"
       defaults: "centosatomic"
-      userdata: '{{ _docker_latest_userdata }}'
+      userdata: '{{ docker_latest_userdata }}'
+      extra_groups: ["docker-latest"]
 
     - name: "rhel_latest"
       defaults: "rhel"
-      userdata: '{{ _docker_latest_userdata }}'
+      extra_groups: ["docker-latest"]
 
     - name: "rhelatomic_latest"
       defaults: "rhelatomic"
-      userdata: '{{ _docker_latest_userdata }}'
+      userdata: '{{ docker_latest_userdata }}'
+      extra_groups: ["docker-latest"]
+
+    # Latest only
+    - name: "fedora"
+      defaults: "fedora"
+      extra_groups: ["docker-latest"]
+
+    - name: "fedoratomic"
+      defaults: "fedoratomic"
+      userdata: '{{ docker_latest_userdata }}'
+      extra_groups: ["docker-latest"]

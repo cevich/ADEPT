@@ -8,5 +8,3 @@ docs/build
 hosts
 workspace
 files/*private*
-group_vars/all
-!group_vars/all/.empty

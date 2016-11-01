@@ -27,23 +27,6 @@
     chdir: "{{ autotest_docker_path }}"
   when: defaults_needed
 
-- name: Docker daemon is active
-  command: systemctl is-active docker
-  when: defaults_needed
-
-# TODO: Cooperate with systemd and newer docker versions
-#       https://github.com/autotest/autotest-docker/issues/612
-# workaround for now, causing an error if any subtests attempt to use
-# dockertest.docker_daemon.start()
-- name: Defaults daemon_options is configured
-  ini_file:
-  args:
-    dest: "{{ config_custom_defaults }}"
-    option: daemon_options
-    section: DEFAULTS
-    value: "##### Not Supported #####"
-  when: defaults_needed
-
 - name: Don't check Autotest version
   ini_file:
   args:

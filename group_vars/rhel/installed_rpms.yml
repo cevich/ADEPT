@@ -8,6 +8,7 @@ installed_enablerepo:
     - rhel-7-server-supplementary-rpms
 installed_rpms:
     - docker
+    - docker-latest
     - atomic
     - docker-selinux
     - procps

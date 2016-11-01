@@ -47,6 +47,7 @@
     - peon
     - role: docker-storage-setup
       when: sysconfig_dss_lines != [] or sysconfig_dss_template != ""
+    - sysconfig_docker
     - services
 
 - hosts: peons:rebooted:&{{ adept_job }}

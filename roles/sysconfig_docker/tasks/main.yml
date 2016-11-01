@@ -1,0 +1,19 @@
+---
+
+- name: DOCKERBINARY set to "docker-latest"
+  replace:
+    backup: True
+    dest: /etc/sysconfig/docker
+    regexp: "^(#\\s*)?DOCKERBINARY=.*"
+    replace: "DOCKERBINARY=/usr/bin/docker-latest"
+  when: sysconfig_docker_latest is defined and
+        sysconfig_docker_latest
+
+- name: DOCKERBINARY commented out
+  replace:
+    backup: True
+    dest: /etc/sysconfig/docker
+    regexp: "^(#\\s*)?(DOCKERBINARY=.*)"
+    replace: "# \\2"
+  when: sysconfig_docker_latest is defined and
+        not sysconfig_docker_latest

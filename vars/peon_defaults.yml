@@ -15,6 +15,7 @@ peon_defaults:
       private: False
       volume: ""
       userdata: {}
+      extra_groups: ["docker"]
 
     # Named defaults
     centos:
