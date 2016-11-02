@@ -43,3 +43,14 @@
     groups: '{{ peon.groups | join(",") }}'
   args:
     ansible_host: '{{ openstack_servers[0].public_v4 }}'
+
+- name: The /bin/true command runs successfuly on peon
+  command: /bin/true
+  delegate_to: '{{ peon.uuid }}'
+  delegate_facts: False
+  ignore_errors: True
+  register: result
+  until: result | success
+  retries: 6
+  delay: 10
+
