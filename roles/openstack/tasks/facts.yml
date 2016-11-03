@@ -39,9 +39,3 @@
         peon_facts: '{{ _peon_facts }}'
 
   when: peon_facts is undefined
-
-- name: setup runs on all newly added peons
-  setup:
-  delegate_facts: true
-  delegate_to: '{{ item }}'
-  with_inventory_hostnames: peons:&{{ adept_job }}
