@@ -33,7 +33,7 @@ adept_openstack:
                 "7.2": "dbd01b32-3a5c-4bcb-9c4b-2857d17b4567"
         rhel:
                 "7.2": "e14d0aa8-17fb-45c3-b842-056d987acec9"
-                "7.3": "rhel-7.3-server-x86_64-latest"
+                "7.3": "rhel-7.3-server-x86_64-released"
         rhelatomic:
                 "7.2": "6c38283e-4bf5-4f9b-ae48-e0d276ffeae4"
                 "7.3": "rhel-atomic-cloud-7.3.0-latest"

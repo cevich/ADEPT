@@ -11,7 +11,7 @@ peon_defaults:
     # Default defaults
     defaults:
       defaults: 'defaults'
-      version: '7.2'
+      version: '7.3'
       private: False
       volume: ""
       userdata: {}
@@ -20,6 +20,7 @@ peon_defaults:
     # Named defaults
     centos:
       volume: "20"
+      version: '7.2'
       groups:
         - centos
         - autotested
@@ -31,6 +32,7 @@ peon_defaults:
         - rebooted
 
     centosatomic:
+      version: '7.2'
       groups:
         - centosatomic
         - atomic_upgrade
@@ -62,6 +64,7 @@ peon_defaults:
 
     fedora:
       volume: "20"
+      version: "24"
       groups:
         - fedora
         - autotested
@@ -71,13 +74,12 @@ peon_defaults:
         - updated
         - partitioned
         - rebooted
-      version: "24"
 
     fedoratomic:
+      version: "24"
       groups:
         - fedoratomic
         - atomic_upgrade
         - autotested
         - peons
         - rebooted
-      version: "24"
