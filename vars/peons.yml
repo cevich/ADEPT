@@ -10,11 +10,15 @@
 #   version: Optional, arbitrary version / type string for image mapping
 #   groups: Optional, list of ansible-group lists to join.
 #           One dynamic group, '{{adept_job}}' will always be added.
-#   private: # Use private / security mode when True
-#   volume: # Optional, if non-empty, size (GB) of additional storage attach
+#   extra_groups: Additional groups to append, permits inheriting default groups
+#                 and specifying alternate setups for specific peons.
+#   private: Use private / security mode when True
+#   volume: Optional, if non-empty, size (GB) of additional storage attach
+#   userdata: Optional, additional metadata to include with peon, cloud-specific
+#             (docker_latest_userdata defined globally for openstack clouds)
 
 peons:
-    # Docker Current
+    # Docker Current (default extra_groups == ["docker"])
     - name: "centos"
       defaults: "centos"
 

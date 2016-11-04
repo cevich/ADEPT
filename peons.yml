@@ -12,54 +12,52 @@
       with_sequence: start=0 end=10
     - setup:
   roles:
-    - subscribed
+    - role: subscribed
+      when: rhsm is defined and
+            "subscribed" in group_names and
+            rhsm.username is defined and rhsm.username != [] and
+            rhsm.password is defined and rhsm.password != []
 
-- hosts: peons:&partitioned:&{{ adept_job }}
-  roles:
-    - partitioned
+    - role: partitioned
+      when: disk_device is defined and disk_device != '' and
+            parted_cmds is defined and parted_cmds != ''
 
-- hosts: peons:&rebooted:&{{ adept_job }}
-  roles:
-    - rebooted
+    - role: rebooted
+      when: needs_reboot == True
 
-- hosts: peons:&yumrepos:&{{ adept_job }}
-  roles:
-    - yumrepos
+    - role: yumrepos
+      when: disable_all_rh_repos is defined and
+            yum_repos is defined and yum_repos != []
 
-# TODO: Apply all/most roles by conditional instead
-#       of group-membership.  Similar to below.
-- hosts: peons:&{{ adept_job }}
-  roles:
     - role: lvm
       when: lvg_ops is defined or lvol_ops is defined
 
     - role: swap_enabled
       when: swap_device is defined
 
-- hosts: peons:&installed:&{{ adept_job }}
-  roles:
-    - installed
+    - role: installed
+      when: installed_rpms is defined and installed_rpms != []
 
-- hosts: peons:&updated:&{{ adept_job }}
-  roles:
-    - updated
+    - role: updated
+      when: '"updated" in group_names'
 
-- hosts: peons:&atomic_upgrade:&{{ adept_job }}
-  roles:
-    - atomic_upgrade
+    - role: atomic_upgrade
+      # common role defines is_atomic
+      when: is_atomic is defined and is_atomic == True and
+            "atomic_upgrade" in group_names
 
-- hosts: peons:rebooted:&{{ adept_job }}
-  roles:
-    - rebooted
+    - role: rebooted
+      when: needs_reboot == True
 
-- hosts: peons:&{{ adept_job }}
-  roles:
     - peon
+
     - role: docker-storage-setup
       when: sysconfig_dss_lines != [] or sysconfig_dss_template != ""
+
     - sysconfig_docker
+
     - services
 
-- hosts: peons:rebooted:&{{ adept_job }}
-  roles:
-    - rebooted
+  post_tasks:
+    - include: roles/rebooted/tasks/main.yml
+      when: needs_reboot == True

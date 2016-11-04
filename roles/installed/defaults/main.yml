@@ -1,5 +1,6 @@
 ---
 
+# Empty-lists used as (undefined) sentinel values
 installed_rpms: []
 installed_enablerepo: []
 installed_disablerepo: []

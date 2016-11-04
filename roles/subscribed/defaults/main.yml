@@ -1,8 +1,9 @@
 ---
 # Red Hat Subscription Manager activation credentials for test resources.
 rhsm:
-    username:
-    password:
+    # Empty-list is sentinel (unset) value
+    username: []
+    password: []
     # Set true to unsubscribe system at end of testing
     unsubscribe: true
 

@@ -25,11 +25,7 @@ peon_defaults:
         - centos
         - autotested
         - peons
-        - yumrepos
-        - installed
         - updated
-        - partitioned
-        - rebooted
 
     centosatomic:
       version: '7.2'
@@ -38,7 +34,6 @@ peon_defaults:
         - atomic_upgrade
         - autotested
         - peons
-        - rebooted
 
     rhel:
       volume: "20"
@@ -47,11 +42,7 @@ peon_defaults:
         - subscribed
         - autotested
         - peons
-        - yumrepos
-        - installed
         - updated
-        - partitioned
-        - rebooted
 
     rhelatomic:
       groups:
@@ -60,7 +51,6 @@ peon_defaults:
         - atomic_upgrade
         - autotested
         - peons
-        - rebooted
 
     fedora:
       volume: "20"
@@ -69,11 +59,7 @@ peon_defaults:
         - fedora
         - autotested
         - peons
-        - yumrepos
-        - installed
         - updated
-        - partitioned
-        - rebooted
 
     fedoratomic:
       version: "24"
@@ -82,4 +68,3 @@ peon_defaults:
         - atomic_upgrade
         - autotested
         - peons
-        - rebooted

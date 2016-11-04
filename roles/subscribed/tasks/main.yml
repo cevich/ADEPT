@@ -11,3 +11,7 @@
   until: result | success
   retries: "{{ rhsm_retries }}"
   delay: "{{ rhsm_delay }}"
+  when: rhsm.username is defined and
+        rhsm.username != [] and
+        rhsm.password is defined and
+        rhsm.password != []
