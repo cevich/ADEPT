@@ -2,4 +2,3 @@
 
 disk_device: ''
 parted_cmds: ''
-needs_reboot: False

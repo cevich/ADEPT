@@ -30,7 +30,8 @@
 - name: Atomic host is updated to latest tree
   command: atomic host upgrade
   register: atomic_host_upgrade
-  changed_when: atomic_host_upgrade.stdout | search('pgrade prepared for next boot')
+  changed_when: atomic_host_upgrade.rc == 0 or
+                atomic_host_upgrade.rc == 77
   ignore_errors: true
   when: _needs_upgrade
 

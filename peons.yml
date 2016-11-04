@@ -4,8 +4,6 @@
 - hosts: peons:&{{ adept_job }}
   gather_facts: False
   strategy: free
-  vars:
-    needs_reboot: False
   pre_tasks:
     - debug: msg="Verifying peons remain accessable for 10-second period"
     - include: roles/peon/tasks/try_sleep.yml
