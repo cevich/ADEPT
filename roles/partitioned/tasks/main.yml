@@ -4,10 +4,6 @@
 #   disk_device: path to device node to operate on
 #   parted_cmds: string of commands and options to pass into parted
 
-- name: buffer current needs_reboot value
-  set_fact:
-    _needs_reboot: "{{ needs_reboot | default(False) }}"
-
 - block:
 
     - name: Current partition table is stored
@@ -47,6 +43,5 @@
       set_fact:
         needs_reboot: True
       when: sfdisk_before.stdout != sfdisk_after.stdout
-      changed_when: needs_reboot != _needs_reboot
 
   when: disk_device is defined and disk_device != None and disk_device != ''

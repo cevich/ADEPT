@@ -11,31 +11,29 @@ peon_defaults:
     # Default defaults
     defaults:
       defaults: 'defaults'
-      version: '7.2'
+      version: '7.3'
       private: False
       volume: ""
       userdata: {}
+      extra_groups: ["docker"]
 
     # Named defaults
     centos:
       volume: "20"
+      version: '7.2'
       groups:
         - centos
         - autotested
         - peons
-        - yumrepos
-        - installed
         - updated
-        - partitioned
-        - rebooted
 
     centosatomic:
+      version: '7.2'
       groups:
         - centosatomic
         - atomic_upgrade
         - autotested
         - peons
-        - rebooted
 
     rhel:
       volume: "20"
@@ -44,11 +42,7 @@ peon_defaults:
         - subscribed
         - autotested
         - peons
-        - yumrepos
-        - installed
         - updated
-        - partitioned
-        - rebooted
 
     rhelatomic:
       groups:
@@ -57,28 +51,20 @@ peon_defaults:
         - atomic_upgrade
         - autotested
         - peons
-        - rebooted
 
     fedora:
       volume: "20"
+      version: "24"
       groups:
         - fedora
         - autotested
         - peons
-        - yumrepos
-        - installed
         - updated
-        - partitioned
-        - rebooted
-      version: "23"
 
     fedoratomic:
+      version: "24"
       groups:
         - fedoratomic
         - atomic_upgrade
         - autotested
         - peons
-        - rebooted
-      version: "23"
-      # 24 doesn't exist yet, check-
-      # https://getfedora.org/cloud/download/atomic.html

@@ -7,6 +7,8 @@
 # Registers:
 #   - needs_reboot
 
+- debug: var=needs_reboot
+
 - block:
 
     - name: Reboot System
@@ -34,11 +36,8 @@
       delegate_to: localhost
       changed_when: True
 
-# FIXME: https://github.com/cevich/autotest-docker-enabled-product-testing/issues/50
+  when: needs_reboot == True
 
-#    # This will exit the block
-#    - name: needs_reboot flag is set false
-#      set_fact:
-#        needs_reboot: False
-
-#  when: needs_reboot
+- name: needs_reboot flag is set false
+  set_fact:
+    needs_reboot: False

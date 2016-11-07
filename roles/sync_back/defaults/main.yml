@@ -1,9 +1,9 @@
 ---
 
-# list of rsync exclusions for sensitive files not to sync out to kommandir
+# list of rsync exclusions for sensitive files not to sync back from kommandir
 kommandir_sync_excludes:
-    - '--exclude=.??*'
-    - '--exclude=.??*/***'
+    - '--exclude=.properties'
+    - '--exclude=.git'
     - '--exclude=**private**'
     - '--exclude=inventory/***'
     - '--exclude=AGENT_WORKSPACE'
