@@ -17,9 +17,6 @@ lvol_ops:
 
 swap_device: /dev/docker_vg/swap
 
-# docker-storage-setup hasn't run yet
-atomic_storage: []
-
 sysconfig_dss_lines:
     - VG=docker_vg
     - WIPE_SIGNATURES=true
