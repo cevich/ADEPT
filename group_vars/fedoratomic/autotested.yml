@@ -8,9 +8,9 @@ docker_autotest:
         tag: "latest"
         build_url:
     templates:
-        - src: "subtests.ini.j2"
+        - src: "{{ custom_subtests_ini_j2 | default('subtests.ini.j2') }}"
           dest: "{{ autotest_docker_path }}/config_custom/subtests.ini"
-        - src: "control.ini.j2"
+        - src: "{{ custom_control_ini_j2 | default('control.ini.j2') }}"
           dest: "{{ autotest_docker_path }}/config_custom/control.ini"
     preserve_fqins:
         - "docer.io/fedora:latest"

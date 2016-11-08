@@ -26,10 +26,10 @@ docker_autotest:
     # either _all_ components of the fully-qualified-image-name.
     # or no components to use defaults from docker autotest.
     test_image:
-        name:
-        tag:
         host:
         user:
+        name:
+        tag:
         # Build this image from url, tagged as above name.
         # Leave empty to pull test image instead.
         build_url:
@@ -38,9 +38,9 @@ docker_autotest:
     # e.g. - dest: "config_custom/tests.ini"
     #        src: "tests.ini.j2"
     templates:
-        - src: "subtests.ini.j2"
+        - src: "{{ custom_subtests_ini_j2 | default('subtests.ini.j2') }}"
           dest: "{{ autotest_docker_path }}/config_custom/subtests.ini"
-        - src: "control.ini.j2"
+        - src: "{{ custom_control_ini_j2 | default('control.ini.j2') }}"
           dest: "{{ autotest_docker_path }}/config_custom/control.ini"
 
     # List of fqins to protect from removal during all tests
