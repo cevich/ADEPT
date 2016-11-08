@@ -28,9 +28,9 @@ adept_openstack:
     # Mapping of image name + version to openstack images
     image_map:
         centos:
-                "7.2": "CentOS-7-x86_64-GenericCloud"
+                "7.2": "CentOS-Cloud-7"
         centosatomic:
-                "7.2": "CentOS-Atomic-Host-7-GenericCloud"
+                "7.2": "CentOS-Atomic-7"
         rhel:
                 "7.2": "rhel-7.2-server-x86_64-released"
                 "7.3": "rhel-7.3-server-x86_64-released"
@@ -38,11 +38,9 @@ adept_openstack:
                 "7.2": "rhel-atomic-cloud-7.2-latest"
                 "7.3": "rhel-atomic-cloud-7.3.0-latest"
         fedora:
-                "23": "Fedora-Cloud-Base-23-20151030"
-                "24": "Fedora-Cloud-Base-24-compose-latest"
+                "24": "Fedora-Cloud-24"
         fedoratomic:
-                "23": "Fedora-Cloud-Atomic-23-20151030"
-                "24": "Fedora-Atomic-24-compose-latest"
+                "24": "Fedora-Atomic-24"
 
     # Userdata to supply to cloud-init
     userdata:

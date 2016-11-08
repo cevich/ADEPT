@@ -57,8 +57,8 @@ posttests = posttests
 url = https://bugzilla.redhat.com/xmlrpc.cgi
 
 # Authentication options if required
-username =
-password =
+username = {{ _private_bugzilla_username | default("") }}
+password = {{ _private_bugzilla_password | default("") }}
 
 # This will automatically be populated
 # with names of subtests/sub-subtests excluded
