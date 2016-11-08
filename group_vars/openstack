@@ -25,7 +25,7 @@ adept_openstack:
     # When sec_mode is True
     private_sec_groups: private
 
-    # Mapping of image name + version to openstack image uuids
+    # Mapping of image name + version to openstack images
     image_map:
         centos:
                 "7.2": "CentOS-7-x86_64-GenericCloud"
