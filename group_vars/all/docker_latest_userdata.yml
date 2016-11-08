@@ -7,8 +7,8 @@ docker_latest_userdata:
     write_files:
         - path: /etc/sysconfig/docker
           content: |
-            OPTIONS='--selinux-enabled --log-driver=journald'
-            ADD_REGISTRY='--add-registry registry.access.redhat.com'
+            OPTIONS="--selinux-enabled --log-driver=journald"
+            ADD_REGISTRY="--add-registry registry.access.redhat.com"
             DOCKERBINARY=/usr/bin/docker-latest
     bootcmd:
         - cloud-init-per once instance systemctl disable docker

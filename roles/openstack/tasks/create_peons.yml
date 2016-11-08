@@ -77,6 +77,20 @@
     msg: "Error looking up image from {{ adept_openstack.image_map }}"
   when: _imgfacts | failed
 
+- debug:
+    msg: |
+      os_server module arguments:
+        cloud: default
+        flavor: "m1.medium"
+        image: '{{ adept_openstack.image_map[peon.defaults][peon.version] }}'
+        name: '{{ peon.uuid }}'
+        security_groups: '{{ _secgrps }}'
+        auto_ip: False
+        userdata: "{{ userdata }}"
+        meta: "{{ metadata }}"
+        timeout: 300
+        wait: True
+
 - name: peon from peon_set is provisioned
   os_server:
     cloud: default
