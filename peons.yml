@@ -7,6 +7,11 @@
     - debug: msg="Verifying peons remain accessable for 10-second period"
     - include: roles/peon/tasks/try_sleep.yml
       with_sequence: start=0 end=10
+    - name: Any low-level pre-setup raw commands are executed
+      raw: "{{ item }}"
+      args:
+        executable: "/bin/bash"
+      with_items: '{{ pre_raw_cmds | default([]) }}'
     - setup:
   roles:
     - role: subscribed
