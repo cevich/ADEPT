@@ -19,7 +19,7 @@
 - name: Set _needs_upgrade flag False when indicated by atomic command
   set_fact:
     _needs_upgrade: False
-  when: (upgrade_check.rc == 0 or atomic_host_upgrade.rc == 77) and
+  when: (upgrade_check.rc == 0 or upgrade_check.rc == 77) and
         upgrade_check.stdout | search('No upgrade available.')
 
 - name: Set _needs_upgrade flag True
