@@ -29,8 +29,9 @@
 
 - block:
 
-    - name: Workaround around BZ1290281
+    - name: Workaround BZ1290281
       selinux:
+        policy: targeted
         state: permissive
 
     - name: Atomic host is updated to latest tree
@@ -53,7 +54,7 @@
 
   always:
 
-    - name: Workaround around BZ1290281
+    - name: Undo Workaround BZ1290281
       selinux:
         policy: targeted
         state: enforcing

@@ -16,7 +16,9 @@
     - name: Missing/corrupt partition table is okay
       assert:
         msg: "The word 'Success' must appear in failed sfdisk --dump output"
-        that: "sfdisk_before.stdout | search('Success')"
+        that:
+            sfdisk_before.stdout | search('Success') or
+            sfdisk_before.stderr | search('Success')
       when: sfdisk_before | failed
 
     - block:
