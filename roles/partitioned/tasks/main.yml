@@ -9,7 +9,15 @@
     - name: Current partition table is stored
       command: "/usr/sbin/sfdisk --dump {{ disk_device }}"
       register: sfdisk_before
+      # Fails if no disk label exists, caught by 'fail' module below
+      ignore_errors: true
       changed_when: False
+
+    - name: Missing/corrupt partition table is okay
+      assert:
+        msg: "The word 'Success' must appear in failed sfdisk --dump output"
+        that: "sfdisk_before.stdout | search('Success')"
+      when: sfdisk_before | failed
 
     - block:
 
