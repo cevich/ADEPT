@@ -1,5 +1,7 @@
 ---
 
+use_dnf: True
+
 installed_rpms:
     - docker
     - docker-latest

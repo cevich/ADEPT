@@ -57,6 +57,9 @@
     msg: "Disabled Repos: {{ _disablerepo }}"
 
 - debug:
+    msg: "Use DNF, not yum: {{ use_dnf }}"
+
+- debug:
     msg: "Installing: {{ _installed_rpms }}"
 
 - block:
