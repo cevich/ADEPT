@@ -1,62 +1,25 @@
 ---
 
-- name: docker_autotest.test_image is optional
-  set_fact:
-    _no_d_a_t_i: True
-  when: docker_autotest.test_image is undefined or
-        docker_autotest.test_image == {} or
-        docker_autotest.test_image == None or
-        docker_autotest.test_image == ''
-
-- name: Test image host is optional
-  set_fact:
-    _test_image_host: ''
-  when: _no_d_a_t_i or
-        docker_autotest.test_image is defined and
-        docker_autotest.test_image.host is defined and
-        (docker_autotest.test_image.host == None or
-         docker_autotest.test_image.host == "")
-
-- name: Test image host is defined
-  set_fact:
-    _test_image_host: "{{ docker_autotest.test_image.host }}/"
-  when: _test_image_host is not defined
-
-- name: Test image user is optional
-  set_fact:
-    _test_image_user: ''
-  when: _no_d_a_t_i or
-        docker_autotest.test_image is defined and
-        docker_autotest.test_image.user is defined and
-        (docker_autotest.test_image.user == None or
-         docker_autotest.test_image.user == "")
-
-- name: Test image user is defined
-  set_fact:
-    _test_image_user: "{{ docker_autotest.test_image.user }}/"
-  when: _test_image_user is not defined
-
-- name: Test image tag is optional
-  set_fact:
-    _test_image_tag: ''
-  when: _no_d_a_t_i or
-        docker_autotest.test_image is defined and
-        docker_autotest.test_image.tag is defined and
-        (docker_autotest.test_image.tag == None or
-         docker_autotest.test_image.tag == "")
-
-- name: Test image tag is defined
-  set_fact:
-    _test_image_tag: ":{{ docker_autotest.test_image.tag }}"
-  when: _test_image_tag is not defined
-
 - name: Docker Autotest test image known in fqin format
   set_fact:
-    test_image_fqin: "{{ _test_image_host }}{{ _test_image_user }}{{ docker_autotest.test_image.name }}{{ _test_image_tag }}"
+    # Must be all one string. Host, User, and Tag are optional.
+    test_image_fqin: >
+        {%- if docker_autotest.test_image.host is defined and
+               docker_autotest.test_image.host not in ['', None]
+        %}{{ docker_autotest.test_image.host
+        }}/ {%- endif
+        %} {%- if docker_autotest.test_image.user is defined and
+                  docker_autotest.test_image.user not in ['', None]
+        %}{{ docker_autotest.test_image.user
+        }}/ {%- endif
+        %}{{ docker_autotest.test_image.name
+        }} {%- if docker_autotest.test_image.tag is defined and
+                  docker_autotest.test_image.tag not in ['', None]
+        %}:{{ docker_autotest.test_image.tag }}{% endif %}
   when: docker_autotest.test_image is defined and
         docker_autotest.test_image.name is defined and
-        (docker_autotest.test_image.name != None or
-         docker_autotest.test_image.name == "")
+        docker_autotest.test_image.name not in ['', None]
+
 
 # Image matching above name already exists on system, do not pull
 - name: Docker Autotest test image was previously built
