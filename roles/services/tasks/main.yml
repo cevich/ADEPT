@@ -7,34 +7,47 @@
 #   restarted_services: []
 #   reloaded_services: []
 
+- name: systemd is reloaded
+  command: "systemctl daemon-reload"
+
+- name: valid service unit names are known
+  shell: >
+    systemctl list-units --type=service --plain --no-pager --no-legend --all |
+        awk --field-separator '.' -e '{print $1}'
+  register: result
+
+- name: result set to result's stdout lines
+  set_fact:
+    result: '{{ result.stdout_lines | default([]) }}'
+
 - name: Service lists buffered by state
   set_fact:
     # Order is important, use lists of dicts
     _state:
-        - state: True
-          services: '{{ enabled_services | default([]) }}'
-        - state: False
-          services: '{{ disabled_services | default([]) }}'
+        - enabled: True
+          services: '{{ enabled_services | default([]) | intersect(result) }}'
+        - enabled: False
+          services: '{{ disabled_services | default([]) | intersect(result) }}'
     _action:
         - state: stopped
-          services: '{{ stopped_services | default([]) }}'
+          services: '{{ stopped_services | default([]) | intersect(result) }}'
         - state: started
-          services: '{{ started_services | default([]) }}'
+          services: '{{ started_services | default([]) | intersect(result) }}'
         - state: reloaded
-          services: '{{ reloaded_services | default([]) }}'
+          services: '{{ reloaded_services | default([]) | intersect(result) }}'
         - state: restarted
-          services: '{{ restarted_services | default([]) }}'
+          services: '{{ restarted_services | default([]) | intersect(result) }}'
 
-- name: Service state is set
+- name: Services are enabled/disabled
   service:
     name: '{{ item.1 }}'
-    enabled: '{{ item.0.state }}'
+    enabled: '{{ item.0.enabled }}'
   with_subelements:
     - "{{ _state }}"
     - services
     - skip_missing: True
 
-- name: Service action is taken
+- name: Services are stopped/started/reloaded/restarted
   service:
     name: '{{ item.1 }}'
     state: '{{ item.0.state }}'
