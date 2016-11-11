@@ -17,6 +17,6 @@
     state: "latest"
     _installed_rpms: "*"
 
-- name: rpms_updated is defined
+- name: rpms_updated set from rpms_installed value
   set_fact:
-    rpms_updated: "{{ rpms_installed }}"
+    rpms_updated: '{{ rpms_installed }}'

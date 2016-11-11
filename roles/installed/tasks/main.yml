@@ -57,6 +57,9 @@
     msg: "Disabled Repos: {{ _disablerepo }}"
 
 - debug:
+    msg: "Use DNF, not yum: {{ use_dnf }}"
+
+- debug:
     msg: "Installing: {{ _installed_rpms }}"
 
 - block:
@@ -94,7 +97,7 @@
 
   when: _installed_rpms != '' and use_dnf
 
-- name: rpms_installed and needs_reboot are defined
+- name: needs_reboot set True if rpms_installed is True
   set_fact:
-    rpms_installed: "{{ rpms_installed }}"
-    needs_reboot: "{{ rpms_installed }}"
+    needs_reboot: True
+  when: '{{ rpms_installed }}'

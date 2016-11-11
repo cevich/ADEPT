@@ -1,8 +1,9 @@
 ---
 
+use_dnf: True
+
 installed_rpms:
     - docker
-    - docker-latest
     - atomic
     - docker-selinux
     - procps

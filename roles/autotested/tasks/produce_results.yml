@@ -10,6 +10,16 @@
         autotest_execution is defined and
         autotest_execution|success
 
+- name: Attempt to run alternate results2junit
+  shell: "{{ autotest_docker_path }}/results2junit --name {{ inventory_hostname }} > {{ autotest_dest_dir }}/client/results/default/results.junit"
+  args:
+    chdir: "{{ autotest_dest_dir }}/client"
+  register: results2junit
+  ignore_errors: true
+  when: docker_autotest.execute and
+        autotest_execution is defined and
+        autotest_execution | success
+
 # Sometimes this breaks if a test fails in the "wrong" way.
 - name: Convert Results to junit
   shell: tools/results2junit.py results/default > {{ autotest_dest_dir }}/client/results/default/results.junit
@@ -20,5 +30,5 @@
   ignore_errors: true
   when: docker_autotest.execute and
         autotest_execution is defined and
-        autotest_execution|success
-
+        autotest_execution | success and
+        results2junit | failed
