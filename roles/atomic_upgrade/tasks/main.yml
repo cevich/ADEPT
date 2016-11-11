@@ -61,7 +61,7 @@
 
   when: _needs_upgrade
 
-- name: rpms_updated + needs_reboot are set false
+- name: rpms_updated is set false
   set_fact:
         # Leave needs_reboot state as-is, but rpms_updated flag safe to flip
         rpms_updated: False
