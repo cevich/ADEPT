@@ -12,7 +12,7 @@
 
 - name: valid service unit names are known
   shell: >
-    systemctl list-units --type=service --plain --no-pager --no-legend --all |
+    systemctl list-unit-files --type=service --plain --no-pager --no-legend --all |
         awk --field-separator '.' -e '{print $1}'
   register: result
 
