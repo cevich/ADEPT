@@ -1,10 +1,10 @@
 ---
 
-# If it can do this 10 times, consider the peon up/functional
 - hosts: peons:&{{ adept_job }}
   gather_facts: False
   pre_tasks:
     - debug: msg="Verifying peons remain accessable for 10-second period"
+    # If it can do this 10 times, consider the peon up/functional
     - include: roles/peon/tasks/try_sleep.yml
       with_sequence: start=0 end=10
     - name: Any low-level pre-setup raw commands are executed
@@ -27,6 +27,9 @@
     - role: rebooted
       when: needs_reboot == True
 
+# Allow rebooted role to apply again if needed
+- hosts: peons:&{{ adept_job }}
+  roles:
     - role: yumrepos
       when: disable_all_rh_repos is defined and
             yum_repos is defined and yum_repos != []
@@ -51,6 +54,9 @@
     - role: rebooted
       when: needs_reboot == True
 
+# Allow rebooted role to apply third time if needed
+- hosts: peons:&{{ adept_job }}
+  roles:
     - peon
 
     - role: docker-storage-setup
@@ -60,6 +66,6 @@
 
     - services
 
-  post_tasks:
-    - include: roles/rebooted/tasks/main.yml
+    - role: rebooted
       when: needs_reboot == True
+
