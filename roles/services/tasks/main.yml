@@ -38,6 +38,8 @@
         - state: restarted
           services: '{{ restarted_services | default([]) | intersect(result) }}'
 
+- debug: var=_state
+
 - name: Services are enabled/disabled
   service:
     name: '{{ item.1 }}'
@@ -46,6 +48,8 @@
     - "{{ _state }}"
     - services
     - skip_missing: True
+
+- debug: var=_action
 
 - name: Services are stopped/started/reloaded/restarted
   service:
