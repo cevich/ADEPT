@@ -18,11 +18,10 @@
 
 - block:
 
-    #- debug:
-    #    msg: "Going to create peon {{ peon.uuid }}"
-    #  with_items: "{{ peon_set }}"
-    #  loop_control:
-    #    loop_var: peon
+    - name: host_vars directory exists
+      file:
+        path: '{{ adept_path }}/host_vars'
+        state: directory
 
     # Does not wait for 'ACTIVE' state
     - include: roles/openstack/tasks/create_peons.yml
@@ -30,8 +29,9 @@
       loop_control:
         loop_var: peon
 
-    # Waits for 'ACTIVE' state + defines peon_facts
+    # Waits for 'ACTIVE' state + defines peon_facts (exits block)
     - include: roles/openstack/tasks/facts.yml
+
 
   rescue:
     - include: roles/openstack/tasks/cleanup.yml
@@ -40,3 +40,11 @@
         cleanup_peon_facts: False
         cleanup_clouds_yaml: False
   when: peon_facts is undefined
+
+- name: peon's metadata written into its host_vars
+  copy:
+    dest: '{{ adept_path}}/host_vars/{{ peon.uuid}}.yml'
+    content: "peon_metadata: {{ peon | to_nice_json }}"
+  with_items: "{{ peon_set }}"
+  loop_control:
+    loop_var: peon

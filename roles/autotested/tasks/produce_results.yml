@@ -10,13 +10,22 @@
         autotest_execution is defined and
         autotest_execution|success
 
+- debug:
+    msg: "I am {{ peon_metadata.name }}"
+  when: peon_metadata is defined
+
+# Extract a name unique to this run, but common across runs of same job
 - name: Attempt to run alternate results2junit
-  shell: "{{ autotest_docker_path }}/results2junit --name {{ inventory_hostname }} results/default > {{ autotest_dest_dir }}/client/results/default/results.junit"
+  shell: >
+    {{ autotest_docker_path }}/results2junit
+        --name {{ peon_metadata.name }}
+        results/default
   args:
     chdir: "{{ autotest_dest_dir }}/client"
   register: results2junit
   ignore_errors: true
-  when: docker_autotest.execute and
+  when: peon_metadata is defined and
+        docker_autotest.execute and
         autotest_execution is defined and
         autotest_execution | success
 
