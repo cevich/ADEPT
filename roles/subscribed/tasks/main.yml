@@ -3,9 +3,12 @@
 - name: System is registered and subscribed
   redhat_subscription:
   args:
-    autosubscribe: yes
+    autosubscribe: True
     username: "{{ rhsm.username }}"
     password: "{{ rhsm.password }}"
+    rhsm_baseurl: "{{ rhsm.baseurl | default(omit) }}"
+    server_hostname: "{{ rhsm.hostname | default(omit) }}"
+    insecure: "{{ rhsm.insecure | default(omit) }}"
     state: present
   register: result
   until: result | success

@@ -4,6 +4,10 @@ rhsm:
     # Empty-list is sentinel (unset) value
     username: []
     password: []
+    # Null value defaults to omitted
+    baseurl:
+    hostname:
+    insecure:
     # Set true to unsubscribe system at end of testing
     unsubscribe: true
 
