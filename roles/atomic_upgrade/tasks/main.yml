@@ -39,18 +39,7 @@
       register: atomic_host_upgrade
       changed_when: atomic_host_upgrade.rc == 0 or
                     atomic_host_upgrade.rc == 77
-      ignore_errors: true
-
-    - name: Workaround BZ1313540
-      fail:
-        msg: "atomic host upgrade failed with unknown error: {{ atomic_host_upgrade }}"
-      when: atomic_host_upgrade.rc != 0 and atomic_host_upgrade.rc != 77
-
-    - name: rpms_updated + needs_reboot are set on update
-      set_fact:
-        rpms_updated: True
-        needs_reboot: True
-      when: atomic_host_upgrade | changed
+      failed_when: atomic_host_upgrade.rc not in [0,77]  # BZ1313540
 
   always:
 
@@ -60,6 +49,16 @@
         state: enforcing
 
   when: _needs_upgrade
+
+- name: Verify upgrade exited 0 or 77 (BZ1313540)
+  assert:
+    that: atomic_host_upgrade.rc == 0 or atomic_host_upgrade.rc == 77
+
+- name: rpms_updated + needs_reboot are set on update
+  set_fact:
+    rpms_updated: True
+    needs_reboot: True
+  when: atomic_host_upgrade | changed
 
 - name: rpms_updated is set false
   set_fact:
