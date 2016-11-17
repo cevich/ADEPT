@@ -40,6 +40,8 @@
       changed_when: atomic_host_upgrade.rc == 0 or
                     atomic_host_upgrade.rc == 77
       failed_when: atomic_host_upgrade.rc not in [0,77]  # BZ1313540
+      until: atomic_host_upgrade | success
+      retries: 3
 
   always:
 
