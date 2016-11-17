@@ -5,5 +5,11 @@ lvol_ops:
       size: 512
       state: present
       vg: atomicos
+    - lv: root
+      vg: atomicos
+      size: 5g
+
+post_cmnds:
+    - "/usr/sbin/xfs_growfs /"
 
 swap_device: /dev/atomicos/swap
