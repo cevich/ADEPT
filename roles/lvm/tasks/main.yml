@@ -16,6 +16,10 @@
 
 - include: roles/lvm/tasks/main_debug.yml
 
+- name: post_cmnd_flag starts out false
+  set_fact:
+    post_cmnd_flag: False
+
 # Condition should apply to task, not each iteration
 - block:
 
@@ -27,7 +31,13 @@
         state: '{{ item.state | default(omit) }}'
         vg: '{{ item.vg | default(omit) }}'
         vg_options: '{{ item.vg_options | default(omit) }}'
+      register: result
       with_items: '{{ lvg_ops }}'
+
+    - name: post_cmnd_flag set True when result changed
+      set_fact:
+        post_cmnd_flag: True
+      when: result | changed
 
   when: lvg_ops != []
 
@@ -43,8 +53,23 @@
         snapshot: '{{ item.snapshot | default(omit) }}'
         state: '{{ item.state | default(omit) }}'
         vg: '{{ item.vg | default(omit) }}'
+      register: result
       with_items: '{{ lvol_ops }}'
+
+    - name: post_cmnd_flag set True when result changed
+      set_fact:
+        post_cmnd_flag: True
+      when: result | changed
 
   when: lvol_ops != []
 
 - include: roles/lvm/tasks/main_debug.yml
+
+
+- block:
+
+    - name: post-lvm operation commands are executed
+      command: '{{ item }}'
+      with_items: '{{ post_cmnds }}'
+
+  when: post_cmnd_flag and post_cmnds != []
