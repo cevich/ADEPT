@@ -25,11 +25,10 @@
             parted_cmds is defined and parted_cmds != ''
 
     - role: rebooted
+      # Workaround "feature" of role only being applied once per play
+      run_more_than_once: "foo"
       when: needs_reboot == True
 
-# Allow rebooted role to apply again if needed
-- hosts: peons:&{{ adept_job }}
-  roles:
     - role: yumrepos
       when: disable_all_rh_repos is defined and
             yum_repos is defined and yum_repos != []
@@ -52,11 +51,9 @@
             "atomic_upgrade" in group_names
 
     - role: rebooted
+      run_more_than_once: "bar"
       when: needs_reboot == True
 
-# Allow rebooted role to apply third time if needed
-- hosts: peons:&{{ adept_job }}
-  roles:
     - peon
 
     - role: docker-storage-setup
@@ -67,6 +64,7 @@
     - services
 
     - role: rebooted
+      run_more_than_once: "baz"
       when: needs_reboot == True
 
     # Must be very last role
