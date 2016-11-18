@@ -11,10 +11,10 @@
     server_insecure: "{{ rhsm.insecure | default(omit) }}"
     state: present
   register: result
-  until: result | success
-  retries: "{{ rhsm_retries }}"
-  delay: "{{ rhsm_delay }}"
   when: rhsm.username is defined and
         rhsm.username != [] and
         rhsm.password is defined and
         rhsm.password != []
+  until: result | success
+  retries: "{{ rhsm_retries | default(omit) }}"
+  delay: "{{ rhsm_delay | default(omit) }}"
