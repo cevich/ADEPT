@@ -8,7 +8,7 @@
     password: "{{ rhsm.password }}"
     rhsm_baseurl: "{{ rhsm.baseurl | default(omit) }}"
     server_hostname: "{{ rhsm.hostname | default(omit) }}"
-    insecure: "{{ rhsm.insecure | default(omit) }}"
+    server_insecure: "{{ rhsm.insecure | default(omit) }}"
     state: present
   register: result
   until: result | success
