@@ -1,5 +1,6 @@
 ---
 
 disable_all_rh_repos: False
+enable_rh_repos: []
 # empty-list is (unset) sentinel value
 yum_repos: []

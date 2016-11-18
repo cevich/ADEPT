@@ -1,36 +1,28 @@
 ---
 
-- block:
-
-    # There are situations where default repositories are broken
-    - name: All repositories are disabled in subscription manager
-      command: /usr/sbin/subscription-manager repos --disable=*
-
-    - name: Explicit list of repositories enabled in subscription manager
-      command: /usr/sbin/subscription-manager repos --enable={{ item }}
-      when: installed_enablerepo is defined and
-            installed_enablerepo != [] and
-            not item | search('epel')
-      with_items: '{{ installed_enablerepo }}'
-
+# There are situations where default repositories are broken
+- name: All RH repositories are disabled in subscription manager
+  command: /usr/sbin/subscription-manager repos --disable=*
   when: disable_all_rh_repos
 
-- block:
+- name: Select RH repos are enabled
+  command: /usr/sbin/subscription-manager repos --enable={{ item }}
+  when: enable_rh_repos != []
+  with_items: '{{ enable_rh_repos | default([]) }}'
 
-    - name: yum repository is setup
-      yum_repository:
-        name: "{{ item.name | mandatory }}"
-        baseurl: "{{ item.baseurl }}"
-        description: "Ansible added {{ item.name | mandatory }} repo"
-        gpgcheck: "{{ item.exclude | default(False) }}"
-        exclude: "{{ item.excludepkgs | default(omit) }}"
-        includepkgs: "{{ item.includepkgs | default(omit) }}"
-        metadata_expire: 900  # quarter-hour
-        protect: "{{ item.protect | default(False) }}"
-        state: present
-      register: result
-      with_items: '{{ yum_repos | default([]) }}'
-
-    - debug: var=result
-
+- name: yum repository is setup
+  yum_repository:
+    name: "{{ item.name | mandatory }}"
+    baseurl: "{{ item.baseurl }}"
+    description: "Ansible added {{ item.name | mandatory }} repo"
+    gpgcheck: "{{ item.exclude | default(False) }}"
+    exclude: "{{ item.excludepkgs | default(omit) }}"
+    includepkgs: "{{ item.includepkgs | default(omit) }}"
+    metadata_expire: 900  # quarter-hour
+    protect: "{{ item.protect | default(False) }}"
+    # Subscription manager can't disable non-redhat repos.
+    enabled: True
+    state: present
+  register: result
+  with_items: '{{ yum_repos | default([]) }}'
   when: yum_repos is defined and yum_repos != []

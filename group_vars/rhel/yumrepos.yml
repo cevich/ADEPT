@@ -1,3 +1,4 @@
 ---
 
 disable_all_rh_repos: True
+installed_enablerepo: '{{ enable_rh_repos }}'
