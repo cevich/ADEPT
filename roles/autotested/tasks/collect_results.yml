@@ -4,6 +4,8 @@
 #   - no_log_synchronize
 #   - ...others....
 
+# N/B: Running inside block's "always" task list, everything must pass
+
 - name: Results sub-directory is defined
   set_fact:
     rdir: "{{ workspace }}/results/{{ inventory_hostname }}"
@@ -13,6 +15,7 @@
   args:
     path: "{{ rdir }}"
     state: directory
+  ignore_errors: true
   delegate_to: localhost
 
 - name: Collect autotest results

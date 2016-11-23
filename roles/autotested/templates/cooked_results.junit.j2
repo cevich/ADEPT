@@ -1,0 +1,7 @@
+<testsuites>
+    <testsuite name="{% if peon_metadata is defined %}{{ peon_metadata.name }}{% else %}{{ inventory_hostname }}{% endif %}" timestamp="{{ ansible_date_time.date }}" tests="1" errors="0" failures="1" skipped="0">
+        <testcase classname="{% if peon_metadata is defined %}{{ peon_metadata.name }}{% else %}{{ inventory_hostname }}{% endif %}.all_tests" name="everything" time="0">
+            <failure message="Either autotest or results2junit failed completely"/>
+        </testcase>
+    </testsuite>
+</testsuites>

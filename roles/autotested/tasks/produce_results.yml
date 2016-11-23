@@ -1,18 +1,21 @@
 ---
 
+# N/B: Running inside block's "always" task list, everything must pass
+
+- name: results directory exists
+  file:
+    path: "{{ autotest_dest_dir }}/client/results/default"
+    state: directory
+  ignore_errors: true
+
 - name: Convert Results to text-table
   shell: tools/scan_results.py > {{ autotest_dest_dir }}/client/results/default/results.txt
   args:
     chdir: "{{ autotest_dest_dir }}/client"
-  # This thing is really easy to break
   ignore_errors: true
   when: docker_autotest.execute and
         autotest_execution is defined and
-        autotest_execution|success
-
-- debug:
-    msg: "I am {{ peon_metadata.name }}"
-  when: peon_metadata is defined
+        autotest_execution | success
 
 # Extract a name unique to this run, but common across runs of same job
 - name: Attempt to run alternate results2junit
@@ -32,9 +35,23 @@
   args:
     chdir: "{{ autotest_dest_dir }}/client"
   register: results2junit
-  # This thing is also really easy to break
   ignore_errors: true
   when: docker_autotest.execute and
         autotest_execution is defined and
         autotest_execution | success and
         results2junit | failed
+
+# There must always be a results.junit file if autotest was suppose to run
+- name: Status of results.junit file is known
+  stat:
+    path: "{{ autotest_dest_dir }}/client/results/default/results.junit"
+  register: result
+
+- name: Cooked "all failed" results.junit file is written
+  template:
+    src: cooked_results.junit.j2
+    dest: "{{ autotest_dest_dir }}/client/results/default/results.junit"
+  when: docker_autotest.execute and
+        autotest_execution is defined and
+        (result.stat.exists is undefined or
+         result.stat.exists == False)
