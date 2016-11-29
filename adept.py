@@ -346,7 +346,7 @@ class ActionBase(object):
 
         :param dict additional: Extra key/val dict to include (optional)
         """
-        keyvals = {'%s node' % getattr(self.parameters, XTN):
+        keyvals = {'%s node' % os.path.basename(getattr(self.parameters, XTN)):
                        '%d' % self.index}
         if additional:
             keyvals.update(additional)
@@ -524,18 +524,17 @@ class Command(ActionBase):
         self.popen_dargs = {'bufsize': 1,   # line buffered for swirly
                             'close_fds': False,  # Allow stdio passthrough
                             'shell': False}
-        self.filepath = filepath
         self.arguments = arguments
         try:
             # popen() functions take large number of keyword arguments
+            self.popen_dargs['env'] = new_env = self.make_env()
+            self.strip_env(new_env)  # Don't let empties sit around
+            self.filepath = self.sub_env(new_env, filepath)
+            self.filepath = self.parameters.verifyfile(self.parameters.context,
+                                                       self.filepath)
             self.popen_dargs['cwd'] = self.parameters.workspace
             self.popen_dargs['args'] = args = [self.filepath]
             self.popen_dargs['executable'] = self.filepath
-            self.popen_dargs['env'] = new_env = self.make_env()
-            self.strip_env(new_env)  # Don't let empties sit around
-            filepath = self.sub_env(new_env, filepath)
-            self.filepath = self.parameters.verifyfile(self.parameters.context,
-                                                       filepath)
         except RuntimeError, xcept:
             self.yamlerr("initializing", xcept.message)
 
