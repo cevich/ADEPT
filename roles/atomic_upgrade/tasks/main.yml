@@ -13,19 +13,18 @@
 - name: Record upgrade diff check output
   command: atomic host upgrade --check-diff
   register: upgrade_check
-  # BZ1313540
-  ignore_errors: true
-
-- name: Set _needs_upgrade flag False when indicated by atomic command
-  set_fact:
-    _needs_upgrade: False
-  when: (upgrade_check.rc == 0 or upgrade_check.rc == 77) and
-        upgrade_check.stdout | search('No upgrade available.')
+  failed_when: upgrade_check.rc not in [0,77]
+  changed_when: False
 
 - name: Set _needs_upgrade flag True
   set_fact:
     _needs_upgrade: True
-  when: _needs_upgrade is undefined
+
+- name: Set _needs_upgrade flag False when indicated by atomic diff
+  set_fact:
+    _needs_upgrade: False
+  when: upgrade_check.rc in [0,77] or
+        upgrade_check.stdout | search('No upgrade available.')
 
 - block:
 
@@ -37,8 +36,7 @@
     - name: Atomic host is updated to latest tree
       command: atomic host upgrade
       register: atomic_host_upgrade
-      changed_when: atomic_host_upgrade.rc == 0 or
-                    atomic_host_upgrade.rc == 77
+      changed_when: atomic_host_upgrade.rc in [0,77]
       failed_when: atomic_host_upgrade.rc not in [0,77]  # BZ1313540
       until: atomic_host_upgrade | success
       retries: 3
@@ -52,18 +50,15 @@
 
   when: _needs_upgrade
 
-- name: Verify upgrade exited 0 or 77 (BZ1313540)
-  assert:
-    that: atomic_host_upgrade.rc == 0 or atomic_host_upgrade.rc == 77
-
 - name: rpms_updated + needs_reboot are set on update
   set_fact:
     rpms_updated: True
     needs_reboot: True
-  when: atomic_host_upgrade | changed
+  when: atomic_host_upgrade is defined and
+        atomic_host_upgrade | changed
 
 - name: rpms_updated is set false
   set_fact:
         # Leave needs_reboot state as-is, but rpms_updated flag safe to flip
         rpms_updated: False
-  when: _needs_upgrade == False
+  when: atomic_host_upgrade is undefined
