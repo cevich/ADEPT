@@ -1,8 +1,8 @@
 ---
 
-- include: roles/common/tasks/workspace_file.yml
+- include: roles/common/tasks/chkfile.yml
   vars:
-    workspace_file: '{{ inventory_hostname }}_facts.yml'
+    filename: '{{ inventory_hostname }}_facts.yml'
   delegate_to: localhost
 
 - name: Peon's hostvars written to workspace in yaml format

@@ -1,9 +1,9 @@
 ---
 
-- include: ../../../roles/common/tasks/workspace_file.yml
+- include: ../../../roles/common/tasks/chkfile.yml
   vars:
-    workspace_file: ssh_private_key
-    workspace: "{{ kommandir_workspaces }}/{{ adept_job }}"
+    filename: ssh_private_key
+    dirpath: "{{ kommandir_workspace }}"
 
 - name: runtime ssh-key is generated
   shell: >
