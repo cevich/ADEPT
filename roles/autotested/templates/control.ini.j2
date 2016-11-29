@@ -17,12 +17,12 @@ include =
 exclude = example,subexample,pretest_example,intratest_example,
           posttest_example,
           docker_cli/run_volumes,
-{% if is_atomic %}
-          # Atomic host does not have git
+{# Atomic host does not have git #}
+          {% if is_atomic %}
           docker_cli/build/git_path,
 {% endif %}
 {% if not is_enterprise %}
-          # We never test the RHEL base-image on CentOS
+          {# We never test the RHEL base-image on CentOS #}
           redhat/rhel_push_plugin,
 {% endif %}
 
