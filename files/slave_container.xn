@@ -37,7 +37,7 @@
             adept_slave:latest
             $ADEPT_CONTEXT
             /var/lib/workspace
-            /var/lib/adept/files/slave.yml
+            /var/lib/adept/files/slave.xn
             # N/B cleanup context uses different symantics for optional arg.
             # see last item (below)
             $ADEPT_OPTIONAL

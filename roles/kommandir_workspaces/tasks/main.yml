@@ -1,5 +1,8 @@
 ---
 
+- debug: var=kommandir_workspaces
+- debug: var=adept_job
+
 - name: runtime job-specific workspace location is buffered
   set_fact:
     kommandir_workspace: '{{ kommandir_workspaces }}/{{ adept_job }}'
