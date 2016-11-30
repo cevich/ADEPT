@@ -8,12 +8,12 @@
 
 - name: Results sub-directory is defined
   set_fact:
-    rdir: "{{ workspace }}/results/{{ inventory_hostname }}"
+    result: "{{ workspace }}/results/{{ inventory_hostname }}"
 
 - name: Ensure results sub-directory exists
   file:
   args:
-    path: "{{ rdir }}"
+    path: "{{ result }}"
     state: directory
   ignore_errors: true
   delegate_to: localhost
@@ -22,7 +22,7 @@
   synchronize:
     mode: pull
     src: "{{ autotest_dest_dir }}/client/results/default/"
-    dest: "{{ rdir }}"
+    dest: "{{ result }}"
   ignore_errors: true
   no_log: '{{ no_log_synchronize | default(true) }}'
 
@@ -31,6 +31,6 @@
     # The test VM is the SOURCE, and local system is destination
     mode: pull
     src: "{{ autotest_docker_path }}/config_custom"
-    dest: "{{ rdir }}"
+    dest: "{{ result }}"
   ignore_errors: true
   no_log: '{{ no_log_synchronize | default(true) }}'

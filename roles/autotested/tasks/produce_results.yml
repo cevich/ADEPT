@@ -40,18 +40,3 @@
         autotest_execution is defined and
         autotest_execution | success and
         results2junit | failed
-
-# There must always be a results.junit file if autotest was suppose to run
-- name: Status of results.junit file is known
-  stat:
-    path: "{{ autotest_dest_dir }}/client/results/default/results.junit"
-  register: result
-
-- name: Cooked "all failed" results.junit file is written
-  template:
-    src: cooked_results.junit.j2
-    dest: "{{ autotest_dest_dir }}/client/results/default/results.junit"
-  when: docker_autotest.execute and
-        autotest_execution is defined and
-        (result.stat.exists is undefined or
-         result.stat.exists == False)

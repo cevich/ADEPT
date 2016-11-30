@@ -3,6 +3,10 @@
 - hosts: peons:&{{ adept_job }}
   gather_facts: False
   pre_tasks:
+    - include: roles/autotested/tasks/all_fail.yml
+      vars:
+        failure_component: ADEPT
+        failure_message: Peon failed to complete setup.
     - debug: msg="Verifying peons remain accessable for 10-second period"
     # If it can do this 10 times, consider the peon up/functional
     - include: roles/peon/tasks/try_sleep.yml
