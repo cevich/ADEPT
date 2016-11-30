@@ -72,9 +72,3 @@
     inventory: $WORKSPACE/inventory
     config: $WORKSPACE/ansible.cfg
     limit: localhost:sync_back
-
-# TODO: support including files directly
-# Represent original exit code from slave_container run (above)
-- command:
-    filepath: $ADEPT_PATH/adept.py
-    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/cleanup_exit.yml
