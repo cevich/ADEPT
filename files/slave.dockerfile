@@ -30,7 +30,8 @@ RUN yum install -y python-pip python-devel && \
     rm -rf /usr/src /usr/share/doc
 
 RUN echo "" > /etc/ansible/hosts && \
-    mkdir -p /etc/openstack
+    mkdir -p /etc/openstack && \
+    ln -s /var/lib/workspace/clouds.yml /etc/openstack/
 
 VOLUME ["/var/lib/adept", "/var/lib/workspace"]
 WORKDIR /var/lib/workspace
