@@ -7,9 +7,9 @@
 #   - openstack_servers
 #   - peon_set
 
-- include: roles/common/tasks/workspace_file.yml
+- include: roles/common/tasks/chkfile.yml
   vars:
-    workspace_file: "peon_facts.yml"
+    filename: "peon_facts.yml"
 
 - name: peon_facts.yml file is loaded
   set_fact:

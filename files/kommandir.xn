@@ -23,7 +23,7 @@
 # More checks & common steps shared with other adept yaml
 - command:
     filepath: $ADEPT_PATH/adept.py
-    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/ansible_bootstrap.yml
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/ansible_bootstrap.xn
 
 # Setup the kommander VM itself - drops KMNDRIP into WORKSPACE
 - playbook:
@@ -51,7 +51,7 @@
                     root@${KMNDRIP} $KMNDRWS/adept/adept.py \
                         $ADEPT_CONTEXT \
                         $KMNDRWS/ \
-                        $KMNDRWS/adept/files/slave_container.yml \
+                        $KMNDRWS/adept/files/slave_container.xn \
                         $ADEPT_OPTIONAL;
                 exit $?;
             else
@@ -63,7 +63,7 @@
 # Reveal error if there was one, to aid in debugging
 - command:
     filepath: $ADEPT_PATH/adept.py
-    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/highlight_exit.yml
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/highlight_exit.xn
 
 # Ensure any changes are pulled back to aid debugging/reporting
 - playbook:
@@ -72,9 +72,3 @@
     inventory: $WORKSPACE/inventory
     config: $WORKSPACE/ansible.cfg
     limit: localhost:sync_back
-
-# TODO: support including files directly
-# Represent original exit code from slave_container run (above)
-- command:
-    filepath: $ADEPT_PATH/adept.py
-    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/cleanup_exit.yml

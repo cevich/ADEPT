@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Context aware ADEPT playbook shim for arbitrary clouds
+Renders actions from yaml-based context/state transition files or stdin
 
 Depends on: python-2.7 and PyYAML-3.10
 """
@@ -12,11 +12,11 @@ import sys
 import subprocess
 import re
 import shlex
-from copy import deepcopy
+import json
 from socket import gethostname
 from select import (poll, POLLPRI, POLLIN)
 from collections import namedtuple, Sequence
-from yaml import load_all
+from yaml import load_all, load
 
 # Prefer LibYAML instead of (slower) python version
 try:
@@ -39,7 +39,27 @@ def file_path_name_dir(module):
 (MYFILE, MYPATH,
  MYNAME, MYDIR) = file_path_name_dir(sys.modules[__name__])
 
-MYHOSTNAME = gethostname()
+# These can get quite long, only use the most significant part
+MYHOSTNAME = gethostname().split('.', 1)[0]
+
+# Filename extension for ADEPT transition (yaml format) files
+# Keeps them distinguished from ansible playbook files
+XTN = 'xn'
+
+# Only pass a certain select set of environment variables through
+# to child processes, for security purposes.  Additional variables
+# can be set by some action items.
+SAFE_ENV_VARS = ('HOME', 'EDITOR', 'TERM', 'PATH', 'PYTHONPATH',
+                 'ANSIBLE_CONFIG', 'ANSIBLE_LIBRARY',
+                 'ANSIBLE_INVENTORY', 'SSH_AUTH_SOCK',
+                 'SSH_CONNECTION', 'SSH_TTY', 'TZ', 'USER',
+                 'SHELL', 'ANSIBLE_HOST_KEY_CHECKING',
+                 'ANSIBLE_ROLES_PATH', 'ANSIBLE_PRIVATE_KEY_FILE',
+                 'ANSIBLE_VAULT_PASSWORD_FILE', 'ANSIBLE_FORCE_COLOR',
+                 'DISPLAY_SKIPPED_HOSTS', 'ANSIBLE_HOST_KEY_CHECKING',
+                 'OS_AUTH_URL', 'OS_TENANT_NAME', 'OS_USERNAME',
+                 'OS_PASSWORD')
+# ref: https://github.com/ansible/ansible/blob/devel/lib/ansible/constants.py
 
 def highlight_normal(color_code=32):  # Green
     """
@@ -86,7 +106,7 @@ def pretty_output(heading, keyvals):
 ParametersDataBase = namedtuple('ParametersData',
                                 ['context',    # Arbitrary string
                                  'workspace',  # Store state here
-                                 'yaml',       # Path to yaml file
+                                 XTN,          # Path to transition (yaml) file
                                  'optional'])  # Extra optional args (greedy)
 
 
@@ -100,7 +120,7 @@ class ParametersData(ParametersDataBase):
     fields = ParametersDataBase._fields
     xforms = {'context': 'verifystr',
               'workspace': 'verifydir',
-              'yaml': 'verifyfile'}
+              XTN: 'verifyxtn'}
 
 
 class Parameters(Sequence):
@@ -123,9 +143,10 @@ class Parameters(Sequence):
     FIELDS = STORAGE_CLASS.fields
     USAGE = ("Usage: %s %s\n"
              "Where the first is a string, second is a directory, "
-             "third is an adept yaml file,\n"
-             "and any remaining arguments are optional"
-             % (MYNAME, " ".join(FIELDS[:-1]))) # last one is greedy
+             "third is an adept transition .%s file,\n"
+             "and any remaining optional arguments are passed through "
+             "into all cmmand/playbook handlers"
+             % (MYNAME, " ".join(FIELDS[:-1]), XTN)) # optional is greedy
 
     def __new__(cls, source=None):
         if cls._singleton is not None:
@@ -253,6 +274,21 @@ class Parameters(Sequence):
         else:
             return self.mangle_verify(name, os.path.exists, filepath, msgfmt)
 
+    def verifyxtn(self, name, filepath,
+                  msgfmt=("%s Error: %s is not a transition (yaml) file "
+                          "ending in {xtn}".format(xtn=XTN))):
+        """
+        For non-stdin files, verify it exists and ends in expected extension
+        """
+        filepath = self.verifyfile(name, filepath)
+        if filepath == '-':
+            return '-'
+        else:
+            return self.mangle_verify(name,
+                                      lambda _filepath:
+                                      _filepath.endswith('.%s' % XTN),
+                                      filepath, msgfmt)
+
     def verifystr(self, name, one_word,
                   msgfmt="%s Error: Unacceptable string: '%s'"):
         """
@@ -275,10 +311,9 @@ class Parameters(Sequence):
 class ActionBase(object):
 
     """
-    ABC for all yaml-based action definitions, abstract method: action()
+    ABC for all yaml-based transition action definitions
 
     :param int index: Index number for this yaml map - aids in debugging
-    :param str filepath: Relative/Absolute path to file for this action
     :param dict dargs: key/values from the yaml node for the specific action
     """
 
@@ -286,20 +321,17 @@ class ActionBase(object):
     parameters_source = None
     # In exceptions, this makes finding the offending section easier
     index = None
-    # Verified copy of filepath argument to __init__
-    filepath = None
+    # Global runtime variables (shared between all instances)
+    global_vars = None
 
-    def __init__(self, index, filepath, **dargs):
+    def __new__(cls, index, **dargs):
+        if ActionBase.global_vars is None:
+            ActionBase.global_vars = dict()
+        return super(ActionBase, cls).__new__(cls, index, **dargs)
+
+    def __init__(self, index, **dargs):
         # These help with debugging yaml
         self.index = index
-
-        new_env = self.make_env()
-        try:
-            filepath = self.sub_env(new_env, filepath)
-            self.filepath = self.parameters.verifyfile(self.parameters.context,
-                                                       filepath)
-        except RuntimeError, xcept:
-            self.yamlerr("initializing", xcept.message)
 
         # Pass-through whatever else was in the yaml node
         self.init(**dargs)
@@ -314,8 +346,8 @@ class ActionBase(object):
 
         :param dict additional: Extra key/val dict to include (optional)
         """
-        keyvals = {'yaml node': '%d' % self.index,
-                   'filepath': '%s' % self.filepath}
+        keyvals = {'%s node' % os.path.basename(getattr(self.parameters, XTN)):
+                       '%d' % self.index}
         if additional:
             keyvals.update(additional)
         return pretty_output(self.__class__.__name__, keyvals)
@@ -331,10 +363,17 @@ class ActionBase(object):
         """
         Return updated environment dict with WORKSPACEW & ADEPT_PATH
         """
-        env = os.environ.copy()
+        env = {}
+        # Safe variables to bring in (if they are set)
+        for safe in SAFE_ENV_VARS:
+            # Don't bother if it's empty either
+            if safe in os.environ and os.environ[safe]:
+                env[safe] = os.environ[safe]
         env.update({'WORKSPACE': self.parameters.workspace,
                     'ADEPT_PATH': os.path.dirname(MYPATH),
-                    'HOSTNAME': MYHOSTNAME})
+                    'HOSTNAME': MYHOSTNAME,
+                    'ADEPT_CONTEXT': self.parameters.context.strip(),
+                    'ADEPT_OPTIONAL': self.parameters.optional.strip()})
         return env
 
     @staticmethod
@@ -344,7 +383,7 @@ class ActionBase(object):
         """
         if in_string:
             for key, value in from_env.iteritems():
-                regex = r'(\${%s\})|(\$%s)' % (key, key)
+                regex = r'(\$\{%s\})|(\$%s)' % (key, key)
                 in_string = re.sub(regex, value, str(in_string))
         return in_string
 
@@ -356,7 +395,7 @@ class ActionBase(object):
         raise ValueError("Error: While %s for %s action item #%d "
                          "in %s with context %s: %s" %
                          (doing, self.__class__.__name__,
-                          self.index, parameters.yaml,
+                          self.index, getattr(parameters, XTN),
                           parameters.context, happened))
 
     def init(self, **dargs):
@@ -380,28 +419,24 @@ class ActionBase(object):
 class Command(ActionBase):
 
     """
-    Handler class for command action-type yaml item
+    Handler class for command action-type transition item
 
+    :param str filepath: Relative/Absolute path to file for this action
     :param str arguments: Shell-string of command-line arguments.
     :param str stdoutfile: Filename to send data, None for stdout.
     :param str stderrfile: Filename to send data, None for stderr.
     :param str exitfile: Filename to write exit code, None to return it.
     """
 
-    # defaults
-    popen_dargs = {'bufsize': 1,   # line buffered for swirly
-                   'close_fds': False,  # Allow stdio passthrough
-                   'shell': False}
+    # Input file path
+    filepath = None
+    # Setup during init() used in action()
+    popen_dargs = None
 
     # Output file objects or special subprocess tokens
     stdoutfile = None
     stderrfile = None
     exitfile = None
-
-    def __init__(self, index, filepath, **dargs):
-        # Don't share dict reference across instances
-        self.popen_dargs = deepcopy(self.popen_dargs)
-        super(Command, self).__init__(index, filepath, **dargs)
 
     def __str__(self, additional=None):
         mine = {'cmd': " ".join(self.popen_dargs['args'])}
@@ -413,14 +448,6 @@ class Command(ActionBase):
             if self._notspecial(thing):
                 mine[fname] = thing
         return super(Command, self).__str__(mine)
-
-    def make_env(self):
-        env = super(Command, self).make_env()
-        ctx, opt = (self.parameters.context.strip(),
-                    self.parameters.optional.strip())
-        env['ADEPT_CONTEXT'] = ctx
-        env['ADEPT_OPTIONAL'] = opt
-        return env
 
     @staticmethod
     def strip_env(env):
@@ -486,19 +513,31 @@ class Command(ActionBase):
                          'received unknown/unsupported key(s): %s'
                          % str(extras))  # pop removed known keys
 
-    def init(self, arguments=None, **dargs):
+    def init(self, filepath, arguments=None, **dargs):
         """
         Initializes Command instance to be called
 
+        :param str filepath: Relative/Absolute path to file for this action
         :param str arguments: Additional items to pass when executing filepath
         :param dict dargs: May contain paths stdoutfile, stderrfile, & exitfile
         """
-        # popen() functions take large number of keyword arguments
-        self.popen_dargs['executable'] = self.filepath  # from base-class
-        self.popen_dargs['cwd'] = self.parameters.workspace
-        self.popen_dargs['env'] = new_env = self.make_env()
-        self.popen_dargs['args'] = args = [self.filepath]  # from base-class
+        self.popen_dargs = {'bufsize': 1,   # line buffered for swirly
+                            'close_fds': False,  # Allow stdio passthrough
+                            'shell': False}
         self.arguments = arguments
+        try:
+            # popen() functions take large number of keyword arguments
+            self.popen_dargs['env'] = new_env = self.make_env()
+            self.strip_env(new_env)  # Don't let empties sit around
+            self.filepath = self.sub_env(new_env, filepath)
+            self.filepath = self.parameters.verifyfile(self.parameters.context,
+                                                       self.filepath)
+            self.popen_dargs['cwd'] = self.parameters.workspace
+            self.popen_dargs['args'] = args = [self.filepath]
+            self.popen_dargs['executable'] = self.filepath
+        except RuntimeError, xcept:
+            self.yamlerr("initializing", xcept.message)
+
         if self.arguments:
             self.arguments = self.sub_env(new_env, self.arguments)
             self.arguments = shlex.split(self.arguments, True)
@@ -506,8 +545,6 @@ class Command(ActionBase):
             args.extend(self.arguments)
         # Playbook class does the same thing
         self.init_stdfiles(new_env, **dargs)
-        # Empty strings needed for substitution purposes only
-        self.strip_env(new_env)
 
     def swirly(self, child_proc):
         """
@@ -540,6 +577,14 @@ class Command(ActionBase):
                     flusher()
         return child_proc.returncode
 
+    def process_global_vars(self):
+        """Perform substitutions on variables, then add them to env."""
+        if self.global_vars:
+            env = self.popen_dargs['env']
+            for key, val in self.global_vars.items():
+                val = self.sub_env(env, val)
+                env[key] = val
+
     def action(self):
         """
         Execute filepath with arguments and handle any output/exit
@@ -548,6 +593,7 @@ class Command(ActionBase):
         """
         cwd_default = self.popen_dargs.get('cwd', self.parameters.workspace)
         self.popen_dargs['cwd'] = cwd_default
+        self.process_global_vars()
         child_proc = subprocess.Popen(**self.popen_dargs)
         # No need to display them if they're headed to a file
         if child_proc.stderr or child_proc.stdout:
@@ -574,20 +620,10 @@ class Command(ActionBase):
 
 class Playbook(Command):
 
-    """Handler class for playbook action-type yaml item"""
+    """Handler class for playbook action-type transition item"""
 
     # Full path to ansible-playbook command
     ansible_cmd = '/usr/bin/ansible-playbook'
-
-    # defaults
-    popen_dargs = {'bufsize': 1,   # line buffered for speed
-                   'close_fds': False,
-                   'shell': False,
-                   'args': [ansible_cmd],
-                   'executable': ansible_cmd,
-                   'stdout': None,
-                   'stderr': subprocess.STDOUT,
-                   'universal_newlines': True}
 
     # Variables that only apply to this class
     limit = None
@@ -605,27 +641,25 @@ class Playbook(Command):
                 mine[name] = thing
         return super(Playbook, self).__str__(mine)
 
-    def make_env(self):
-        env = super(Playbook, self).make_env()
-        ctx, opt = (self.parameters.context.strip(),
-                    self.parameters.optional.strip())
-        # Always available in environment if non-empty
-        if len(ctx):
-            env['ADEPT_CONTEXT'] = ctx
-        if len(opt):
-            env['ADEPT_OPTIONAL'] = opt
-        return env
-
-    def init(self, varsfile=None, limit=None, inventory=None,
+    def init(self, filepath, varsfile=None, limit=None, inventory=None,
              config=None, **dargs):
+        self.popen_dargs = {'bufsize': 1,   # line buffered for speed
+                            'close_fds': False,
+                            'shell': False,
+                            'args': [self.ansible_cmd],
+                            'executable': self.ansible_cmd,
+                            'stdout': None,
+                            'stderr': subprocess.STDOUT,
+                            'universal_newlines': True}
+
         # The only difference with parent class
         if 'arguments' in dargs:
             self.yamlerr('initializing',
                          'encountered unsupported "arguments" key')
 
-        self.popen_dargs['env'] = new_env = self.make_env()
-
         args = self.popen_dargs['args']
+        self.popen_dargs['env'] = new_env = self.make_env()
+        self.filepath = self.sub_env(new_env, filepath.strip())
 
         if limit:
             limit = self.sub_env(new_env,
@@ -635,12 +669,13 @@ class Playbook(Command):
 
         for name, value in {'varsfile': varsfile, 'inventory': inventory,
                             'config': config,
-                            'context': self.parameters.context}.items():
+                            'context': self.parameters.context,
+                            'workspace': self.parameters.workspace}.items():
             if value:
                 value = value.strip()
-            if not value:
+                value = self.sub_env(new_env, value)
+            else:
                 continue
-            value = self.sub_env(new_env, value)
             msg_fmt = 'You found a %s processing bug %%s:%%s' % name
             if name in ('varsfile', 'inventory'):
                 spmv = self.parameters.mangle_verify
@@ -654,6 +689,8 @@ class Playbook(Command):
                 args.extend(['--inventory', value])
             elif name is 'context':
                 args.extend(['--extra-vars', "adept_context='%s'" % value])
+            elif name is 'workspace':
+                args.extend(['--extra-vars', "workspace='%s'" % value])
             else:  # name is 'config'
                 new_env['ANSIBLE_CONFIG'] = value
 
@@ -663,19 +700,112 @@ class Playbook(Command):
             # Respect shell-style quoting, linewraps, etc.
             args.extend(shlex.split(spos, True))
 
-        # TODO: Don't hard-code private-key name/location?
-        args.append('--private-key')
-        args.append(self.sub_env(new_env, '$WORKSPACE/ssh_private_key'))
         # Last goes the playbook for debugging clarity
         args.append(self.filepath)
         # Handles all the common dargs keys
         super(Playbook, self).init_stdfiles(new_env, **dargs)
         self.strip_env(new_env)
+        # Relative paths in playbook assume this directory
+        self.popen_dargs['cwd'] = os.path.dirname(self.filepath)
+
+    def process_global_vars(self):
+        if self.global_vars:
+            args = self.popen_dargs['args']
+            env = self.popen_dargs['env']
+            for key, val in self.global_vars.items():
+                val = self.sub_env(env, val)
+                if val.strip():
+                    # Format entire string as JSON, strip quotes
+                    val = json.dumps(load('%s: %s' % (key, val)))
+                    args.extend(['--extra-vars', val])
+
+class Variable(ActionBase):
+    """Manipulates global variables accessable to all action instances"""
+
+    # Private buffers, don't use
+    name = None
+    _value = None
+    _from_env = None
+    _from_file = False
+
+    def __str__(self, additional=None):
+        if not additional:
+            additional = {}
+        if self._from_file:
+            additional[self.name] = '<from %s> ' % self._from_file
+        elif self._from_env:
+            additional[self.name] = '<from $%s>' % self._from_env
+        elif self._value:
+            additional[self.name] = self._value
+        else:
+            additional[self.name] = '<must exist>'
+        return pretty_output(self.__class__.__name__, additional)
+
+
+    def init(self, name, value=None, from_env=None, from_file=None, **dargs):
+        """
+        Initializes manipulator of global variables to subsequent actions
+
+        :param str name: The name of the variable to modify or assert
+                         existence when no value specified.
+        :param str value: The new, non-empty string value to set for name
+                          (optional)
+        :param str from_env: Set value from environment variable with
+                             this name, error if empty or unset. (optional)
+        :param str from_file: Set value from environment variable from
+                              contents of named file. (optional)
+        :param dict dargs: not used (required by API)
+        """
+        self.name = name.strip()
+        if self.global_vars is None or not isinstance(self.global_vars, dict):
+            self.yamlerr('initializing', 'encountered invalid global state')
+        if value and from_env or value and from_env or value and from_file:
+            self.yamlerr('initializing',
+                         'only one of value(%s), from_env(%s), or '
+                         'from_file(%s) may be set for %s'
+                         % (value, from_env, from_file, self.name))
+        self._value = value
+        self._from_env = from_env
+        self._from_file = from_file
+
+    def action(self):
+        """
+        Perform desired modifications to global variables
+        """
+        value = None
+        if self._from_file:
+            try:
+                with open(self._from_file, 'rb') as from_file:
+                    value = from_file.read()
+            except IOError, errr:
+                self.yamlerr('executing',
+                             'reading from file %s: %s'
+                             % (self._from_file, errr.strerror))
+        elif self._from_env:
+            if self._from_env not in os.environ:
+                self.yamlerr('executing',
+                             'environment variable %s does not exist '
+                             'in environment' % self._from_env)
+            value = os.environ[self._from_env].strip()
+            if value == '':
+                self.yamlerr('executing',
+                             'environment variable %s is empty'
+                             % self._from_env)
+        elif self._value:
+            value = self._value
+        else:
+            if self.name not in self.global_vars:
+                self.yamlerr('executing',
+                             'Required global variable %s is not set'
+                             % self.name)
+        self.global_vars[self.name] = value.strip()
+        return 0
 
 
 # Associate node name from yaml to class object for action_class()
 ACTIONMAP = {'command': Command,
-             'playbook': Playbook}
+             'playbook': Playbook,
+             'variable': Variable}
 
 
 def action_class(index, node_name, parameters_source=None):
@@ -700,7 +830,7 @@ def action_class(index, node_name, parameters_source=None):
         raise ValueError("Error: While processing %s, "
                          "in context %s, encountered "
                          "unsupported action type %s "
-                         "item #%d" % (params.yaml,
+                         "item #%d" % (getattr(params, XTN),
                                        params.context,
                                        node_name,
                                        index))
@@ -708,7 +838,7 @@ def action_class(index, node_name, parameters_source=None):
 
 def action_items(yaml_document, parameters_source=None):
     """
-    Process items from all documents in json_document through action_class()
+    Process items from all documents in yaml_document through action_class()
     """
     errpfx = "Error: While processing %s, in context %s, index #%d, "
     errfmt = errpfx + "encountered unsupported 'contexts' value: '%s'"
@@ -727,9 +857,10 @@ def action_items(yaml_document, parameters_source=None):
                         klass = action_class(index, node_name)
                         applies_to = dargs.pop('contexts', [])
                         if not isinstance(applies_to, (list, tuple)):
-                            raise ValueError(errfmt % (params.yaml,
-                                                       params.context,
-                                                       index, applies_to))
+                            raise ValueError(errfmt
+                                             % (getattr(params, XTN),
+                                                params.context,
+                                                index, applies_to))
                         # Empty list applies to everything
                         if applies_to and params.context not in applies_to:
                             continue
@@ -738,30 +869,33 @@ def action_items(yaml_document, parameters_source=None):
                         except TypeError:
                             fmt = errpfx + ("%s node is missing required "
                                             "values, see documentation")
-                            raise ValueError(fmt % (params.yaml, params.context,
-                                                    index, klass.__name__))
+                            raise ValueError(fmt
+                                             % (getattr(params, XTN),
+                                                params.context,
+                                                index, klass.__name__))
 
 
-def main(parameters_source=None):
+def main(parameters_source=None, stdin=sys.stdin,
+         stdout=sys.stdout, stderr=sys.stderr):
     """Process command-line parameters, perform actions based on yaml input"""
+    del stdout  # Not currently used
     try:
         parameters = Parameters(parameters_source)
     except RuntimeError, xcept:
-        sys.stderr.write(prefix_divider(xcept.message))
-        sys.exit(1)
-    sys.stderr.write("%s\n" % parameters)
+        raise RuntimeError(prefix_divider(xcept.message))
+    stderr.write("%s\n" % parameters)
 
     yaml_document = None
-    if parameters.yaml == '-':
-        yaml_document = load_all(sys.stdin, Loader=Loader)
+    if getattr(parameters, XTN) == '-':
+        yaml_document = load_all(stdin, Loader=Loader)
     else:
-        yamlfile = open(parameters.yaml, 'rb')
+        yamlfile = open(getattr(parameters, XTN), 'rb')
         yaml_document = load_all(yamlfile, Loader=Loader)
     exit_code = 0
     for action_item in action_items(yaml_document, parameters_source):
         exit_code = action_item()  # executes it!
         if exit_code:
-            sys.stderr.write("    exit = %d\n" % exit_code)
+            stderr.write("    exit = %d\n" % exit_code)
             break
     return exit_code
 

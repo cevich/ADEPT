@@ -6,9 +6,9 @@
 # Registers:
 #   - peon_set: set of peon dictionaries according to product of matrix_attributes
 
-- include: roles/common/tasks/workspace_file.yml
+- include: roles/common/tasks/chkfile.yml
   vars:
-    workspace_file: 'peon_set.yml'
+    filename: 'peon_set.yml'
 
 - name: peon_set.yml file is loaded
   set_fact:

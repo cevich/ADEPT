@@ -1,9 +1,9 @@
 ---
 
 # older ansible needs the path this way
-- include: ../../../roles/common/tasks/workspace_file.yml
+- include: ../../../roles/common/tasks/chkfile.yml
   vars:
-    workspace_file: "KOMMANDIR_NAME"
+    filename: "KOMMANDIR_NAME"
 
 - name: Kommandir name is defined from KOMMANDIR_NAME file
   set_fact:

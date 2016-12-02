@@ -20,7 +20,7 @@ from pdb import Pdb
 # ref: https://docs.python.org/dev/library/unittest.html
 import unittest2 as unittest
 # ref: http://www.voidspace.org.uk/python/mock/index.html
-from mock import Mock, NonCallableMock, patch, MagicMock, DEFAULT, call, ANY
+from mock import Mock, NonCallableMock, patch, MagicMock, DEFAULT
 from mock import mock_open
 from pylint import epylint as lint
 
@@ -735,48 +735,23 @@ class TestActionBase(TestActionBaseBase):
         self.start_patchers()
         sentinel = '1---nNNn0o0OOOO0!'  # getattr() None is default
         for key, value in {'parameters_source': self.mocks['parameters_source'],
-                           'index': None,
-                           'filepath': None}.iteritems():
+                           'index': None}.iteritems():
             self.assertEqual(getattr(self.uut.ActionBase, key, sentinel),
                              value)
 
-    def test_init_params(self):
-        "Verify constructor API and initialized attributes"
-        self.start_patchers()
-        # No args
-        self.assertRaises(TypeError, self.uut.ActionBase)
-
-        special = {'foo': 'bar', 'baz': 'snafu'}
-        test_ab = self.uut.ActionBase(123, '/foo/bar', **special)
-
-        for falsy in (test_ab.parameters_source.called,
-                      self.mocks['action'].called,):
-            self.assertFalse(falsy)
-
-        dunder_init = call(self.mocks['parameters_source'])
-        self.mocks['Parameters'].assert_has_calls([dunder_init, ANY])
-        self.assertEqual(test_ab.index, 123)
-        self.assertEqual(test_ab.parameters, self.mocks['Parameters']())
-        self.mocks['init'].assert_called_once_with(test_ab,
-                                                   foo='bar',
-                                                   baz='snafu')
-
-    def test_init_bools(self):
-        "Verify constructor API and initialized attributes"
+    def test_init_no_action(self):
+        "Verify constructor API and initial"
         self.start_patchers()
         # No args
         self.assertRaises(TypeError, self.uut.ActionBase)
 
         special = {'foo': 'bar',
                    'baz': 'snafu'}
-        test_ab = self.uut.ActionBase(123, '/foo/bar', **special)
+        test_ab = self.uut.ActionBase(123, **special)
 
         for falsy in (test_ab.parameters_source.called,
                       self.mocks['action'].called):
             self.assertFalse(falsy)
-
-        dunder_init = call(self.mocks['parameters_source'])
-        self.mocks['Parameters'].assert_has_calls([dunder_init, ANY])
         self.assertEqual(test_ab.index, 123)
         self.assertEqual(test_ab.parameters, self.mocks['Parameters']())
         self.mocks['init'].assert_called_once_with(test_ab,
@@ -789,7 +764,7 @@ class TestActionBase(TestActionBaseBase):
         sentinel = Mock()
         self.mocks['action'].return_value = sentinel
         self.assertFalse(self.mocks['action'].called)
-        test_ab = self.uut.ActionBase(123, '/foo/bar')
+        test_ab = self.uut.ActionBase(123)
         self.assertFalse(self.mocks['action'].called)
         result = test_ab()
         self.mocks['action'].assert_called_once_with(test_ab)
@@ -798,19 +773,20 @@ class TestActionBase(TestActionBaseBase):
     def test_make_env(self):
         "Verify make_env API"
         self.start_patchers()
-        mock_env = {'cantouchthis': "hammertime"}
+        mock_env = {'cantouchthis': "hammertime", 'SHELL': '/bin/noway'}
+        self.uut.SAFE_ENV_VARS = self.uut.SAFE_ENV_VARS + ('cantouchthis',)
         with patch.dict('%s.os.environ' % self.UUT,
                         mock_env, clear=True):
             self.patch_os_path(self.UUT)
-            test_ab = self.uut.ActionBase(123, '/foo/bar')
+            test_ab = self.uut.ActionBase(123)
             result = test_ab.make_env()
-            for key in ('cantouchthis', 'WORKSPACE', 'ADEPT_PATH'):
+            for key in ('cantouchthis', 'WORKSPACE', 'ADEPT_PATH', 'SHELL'):
                 self.assertIn(key, result)
 
     def test_yamlerr(self):
         "Verify yamlerr raises a ValueError"
         self.start_patchers()
-        test_ab = self.uut.ActionBase(123, '/foo/bar')
+        test_ab = self.uut.ActionBase(123)
         strs = ('one_string', 'two_string')
         self.assertRaisesRegex(ValueError, r'(%s)|(%s)' % strs,
                                test_ab.yamlerr, *strs)
@@ -843,12 +819,14 @@ class TestCommand(TestActionBaseBase):
                                         stderrfile=stderrfile,
                                         exitfile=exitfile)
             cmdinit.assert_called_once_with(test_cmd,
+                                            filepath='whatever',
                                             stderrfile=stderrfile,
                                             exitfile=exitfile,
                                             stdoutfile=stdoutfile,
                                             arguments='foo')
             self.assertEqual(test_cmd.index, 321)
-            self.assertIsInstance(test_cmd.filepath, MagicMock)
+            self.assertEqual(test_cmd.global_vars, {})
+            self.assertEqual(test_cmd.popen_dargs, None)
 
     def test_init_stdfiles_none(self):
         "Verify method behaves as documented"
@@ -858,7 +836,7 @@ class TestCommand(TestActionBaseBase):
         # before a builtin
         with patch('%s.open' % self.UUT, _mock_open, create=True):
             self.patch_os_path(self.UUT)
-            test_cmd = self.uut.Command(42, '/dev/null')
+            test_cmd = self.uut.Command(42, filepath='/dev/null')
             self.assertTrue(test_cmd.stdoutfile is None)
             self.assertTrue(test_cmd.stderrfile is not None)
             self.assertEqual(test_cmd.exitfile, None)
@@ -869,7 +847,7 @@ class TestCommand(TestActionBaseBase):
         _mock_open = mock_open()
         with patch('%s.open' % self.UUT, _mock_open, create=True):
             self.patch_os_path(self.UUT)
-            test_cmd = self.uut.Command(42, '/dev/null',
+            test_cmd = self.uut.Command(42, filepath='/dev/null',
                                         arguments='--help',
                                         stdoutfile='foo',
                                         stderrfile='bar',
@@ -921,7 +899,7 @@ class TestCommand(TestActionBaseBase):
             child.stderr.fileno = Mock(return_value=2)
 
         return patch('%s.subprocess.Popen' % self.UUT,
-                     autospec=Popen, return_value=child)
+                     spec=Popen, return_value=child)
 
     # Simply many things that need mocking for a single test, refactor if more.
     def test_action_swirly(self):  # pylint: disable=R0914
@@ -945,7 +923,7 @@ class TestCommand(TestActionBaseBase):
         self.patch_os_path(self.UUT)
         for out, err, ext in self.subtests(
                 product(stdoutfiles, stderrfiles, exitfiles)):
-            test_cmd = self.uut.Command(42, '/dev/null',
+            test_cmd = self.uut.Command(42, filepath='/dev/null',
                                         arguments=args,
                                         stdoutfile=out,
                                         stderrfile=err,
@@ -997,7 +975,8 @@ class TestCommand(TestActionBaseBase):
         mock_parameters.verifyfile.side_effect = lambda mock_self, x: str(x)
 
         self.patch_os_path(self.UUT)
-        test_cmd = self.uut.Command(42, '/dev/null', arguments='',
+
+        test_cmd = self.uut.Command(42, filepath='/path/to/file', arguments='',
                                     exitfile='/some/exit/file')
         with self.setup_sppo(test_cmd, exitcode=42):
             # Distinguish stdio from test_cmd.exitfile
@@ -1027,18 +1006,22 @@ class TestPlaybook(TestActionBaseBase):
                              value)
         self.assertIsInstance(self.uut.Playbook.ansible_cmd, basestring)
         # Not testing any side-effects of real init method
-        init_effect = lambda mockself, **dargs: None
+        init_effect = lambda mockself, **dargs: mockself.__dict__.update(dargs)
         with patch('%s.Playbook.init' % self.UUT,
                    autospec=True, side_effect=init_effect) as paraminit:
-            test_param = self.uut.Playbook(index=123,
-                                           filepath='whatever',
-                                           varsfile='/foo/bar/baz',
-                                           limit=True)
-            paraminit.assert_called_once_with(test_param,
+            test_pb = self.uut.Playbook(index=123,
+                                        filepath='whatever',
+                                        varsfile='/foo/bar/baz',
+                                        limit=True)
+            paraminit.assert_called_once_with(test_pb,
+                                              filepath='whatever',
                                               varsfile='/foo/bar/baz',
                                               limit=True)
-            self.assertEqual(test_param.index, 123)
-            self.assertIsInstance(test_param.filepath, MagicMock)
+            self.assertIsInstance(test_pb.global_vars, dict)
+            self.assertEqual(test_pb.index, 123)
+            self.assertEqual(test_pb.filepath, 'whatever')
+            self.assertEqual(test_pb.limit, True)
+            self.assertEqual(test_pb.varsfile, '/foo/bar/baz')
 
     def test_init_bad(self):
         "Verify differences in init method from Command class"""
@@ -1058,7 +1041,9 @@ class TestPlaybook(TestActionBaseBase):
                                     {'args': (42, '/yes/sir'),
                                      'Beelzebub': 666})):
             self.assertRaisesRegex((ValueError, TypeError),
-                                   r'(takes exactly 3 arguments)|(Playbook.+#42)',
+                                   r'(.*init.*takes at least 2 arguments)|'
+                                   r'(.*new.*takes exactly 2 arguments)|'
+                                   r'(Playbook.+#42)|',
                                    self.uut.Playbook,
                                    *dargs.pop('args', tuple()),
                                    **dargs)
@@ -1066,13 +1051,13 @@ class TestPlaybook(TestActionBaseBase):
         "Verify multiple instance have distinct popen_"
         # Re-use exact same setup
         self.test_init_bad()
-        one = self.uut.Playbook(1, '/path/to/one/file',
+        one = self.uut.Playbook(1, filepath='/path/to/one/file',
                                 varsfile='one_varsfile', limit='one',
                                 inventory='foo', config='bar')
         self.assertEqual(one.popen_dargs['shell'], False)
         one.popen_dargs['shell'] = True
 
-        two = self.uut.Playbook(1, '/path/to/two/file',
+        two = self.uut.Playbook(1, filepath='/path/to/two/file',
                                 varsfile='two_varsfile', limit='two',
                                 inventory='bar', config='foo')
         self.assertEqual(two.popen_dargs['executable'],
@@ -1106,10 +1091,11 @@ class TestPlaybook(TestActionBaseBase):
             values = ('/path/to/script',
                       'test_context', 'test_workspace', 'test_yaml', '      ')
             self.uut.ActionBase.parameters_source = values
-            test_play = self.uut.Playbook(0, '/dev/null')
+            test_play = self.uut.Playbook(0, filepath='/dev/null')
             self.assertEqual(test_play.parameters.context, 'test_context')
             self.assertEqual(test_play.parameters.workspace, 'test_workspace')
-            self.assertEqual(test_play.parameters.yaml, 'test_yaml')
+            self.assertEqual(getattr(test_play.parameters, self.uut.XTN),
+                             'test_yaml')
             self.assertEqual(test_play.parameters.optional, '')
             podargs = test_play.popen_dargs
             for word in ('ADEPT_CONTEXT', 'WORKSPACE',
@@ -1127,7 +1113,105 @@ class TestPlaybook(TestActionBaseBase):
             self.assertNotIn('      ', podargs['args'])  # matches values (above)
 
 
-# TODO: Tests with some yaml input
+class TestVariable(TestCaseBase):
+
+    """Exercize for Variable class"""
+
+    def setUp(self):
+        super(TestVariable, self).setUp()
+        sup = self.uut.Parameters = MagicMock(spec=list)
+        sup.return_value = sup
+        supf = self.uut.ParametersData.fields
+        sup.__len__ = len(supf)
+        argv = [str(_) for _ in xrange(len(supf))]
+        sup.__iter__ = dict(zip(supf, argv))
+        sup.__contains__ = lambda mockself, key: key in supf
+        sup.__getitem__ = supf.__getitem__
+        for argidx, key in enumerate(supf):
+            setattr(sup, key, argv[argidx])
+        self.mockparams = sup
+        self.uut.Variable.parameters_source = argv
+        self.uut.Variable.__str__ = lambda mockself: ""
+        self.env = dict(zip(self.uut.SAFE_ENV_VARS,
+                            [str(_) for _ in xrange(len(self.uut.SAFE_ENV_VARS))]))
+        self.osenv = patch.dict(self.uut.os.environ, self.env)
+        self.osenv.start()
+        self.uut.Variable.make_env = Mock(return_value=self.env)
+
+    def tearDown(self):
+        if self.osenv:
+            self.osenv.stop()
+        super(TestVariable, self).tearDown()
+
+    def test_init_simple(self):
+        """Verify init(self, name, value=None, from_env=None, from_file=None)"""
+        # missing index argument
+        self.assertRaises(TypeError, self.uut.Variable, 123)
+        # missing name argument
+        self.assertRaises(TypeError, self.uut.Variable)
+        test_var = self.uut.Variable(123, name='foo')
+        self.assertIsInstance(test_var.global_vars, dict)
+        self.assertEqual(id(self.uut.ActionBase.global_vars),
+                         id(test_var.global_vars))
+        self.assertEqual(test_var.name, 'foo')
+        self.assertEqual(test_var.index, 123)
+
+    def test_init_api_negative(self):
+        """Verify negative documented behavior of init()"""
+        with patch.object(self.uut.Variable, 'global_vars', None):
+            self.assertRaises(ValueError, self.uut.Variable, 123, name='foo')
+            self.assertRaises(ValueError, self.uut.Variable, 123, name='foo',
+                              value='this', from_env='will', from_file='fail')
+            self.assertRaises(ValueError, self.uut.Variable, 123, name='foo',
+                              value='this', from_file='too')
+            self.assertRaises(ValueError, self.uut.Variable, 123, name='foo',
+                              from_env='and', from_file='this')
+
+    def test_init_api_positive(self):
+        """Verify positive documented behavior of init()"""
+        for param, value in {'value': 'foo', 'from_env': 'bar',
+                             'from_file': "/some/file/to/read"}.items():
+            # TODO: patch open() and read() to test from_fil
+            test_var = self.uut.Variable(123, name='foo', **{param: value})
+            self.assertEqual(test_var.global_vars, self.uut.Command.global_vars)
+            self.assertEqual(self.uut.Command.global_vars, {})
+            self.assertEqual(test_var.name, 'foo')
+
+    def test_action(self):
+        """Verify action behaves as documented"""
+        # Prevent __call__ from printing out a bunch of crap
+        mock_call = lambda mockself: mockself.action()
+        with patch.object(self.uut.ActionBase, '__call__', mock_call):
+            self.uut.ActionBase.global_vars = {}
+            for safe in self.uut.SAFE_ENV_VARS:
+                test_var = self.uut.Variable(123, name="foo", from_env=safe)
+                self.assertEqual(test_var(), 0)  # side effects!!!!
+                if test_var.global_vars['foo'] != self.env[safe]:
+                    self.trace()
+                self.assertEqual(test_var.global_vars['foo'], self.env[safe])
+
+            self.uut.ActionBase.global_vars = {}
+            for value in ('foo', 'bar', 'baz'):
+                test_var = self.uut.Variable(123, name=value.upper(),
+                                             value=value)
+                self.assertEqual(test_var(), 0)  # side effects!!!!
+            self.assertEqual(self.uut.ActionBase.global_vars,
+                             {'BAZ': 'baz', 'FOO': 'foo', 'BAR': 'bar'})
+
+class TestAIsBase(TestCaseBase):
+    """action_items(yaml_document, parameters_source=None)"""
+
+    # Placeholders for inputs
+    yaml_document = None
+    parameters_source = None
+
+    def setUp(self):
+        self.yaml_document = []
+        self.parameters_source = ['/path/to/adept.py']
+        super(TestAIsBase, self).setUp()
+
+    # TODO: Write me
+
 
 
 if __name__ == '__main__':

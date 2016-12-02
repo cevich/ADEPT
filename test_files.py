@@ -77,7 +77,7 @@ class TestContentRegexs(TestCaseBase):
     Iterate over files from a glob, matching forbidden regular expressions
     """
 
-    globs = ('*.yml', '*.xn')
+    globs = ('*.sh', '*.xn')
     regexes = (re.compile(r'/usr/bin/bash'),
                re.compile(r'/usr/bin/sh'),
                re.compile(r'/usr/bin/cp'),
@@ -90,13 +90,14 @@ class TestContentRegexs(TestCaseBase):
 
     def setUp(self):
         super(TestContentRegexs, self).setUp()
-        self.check_files = []
         here = os.path.dirname(sys.modules[__name__].__file__)
         here = os.path.abspath(here)
         for _glob in self.globs:
             for dirpath, _, _ in os.walk(here):
                 if '.git' in dirpath:
                     continue
+                if self.check_files is None:
+                    self.check_files = []
                 self.check_files += glob(os.path.join(dirpath, _glob))
         if not self.check_files:
             self.check_files = None
@@ -122,13 +123,17 @@ class TestContentRegexs(TestCaseBase):
                 if found_one:
                     break
         finally:
-            mmfile.close()
+            if mmfile:
+                mmfile.close()
         return found_one
 
     def test_regexes(self):
         """Verify no globbed file matches any regex"""
         self.assertTrue(self.check_files, "glob did not match any files")
         for filename in self.subtests(self.check_files):
+            # Can't mmap empty files
+            if os.stat(filename).st_size < 1:  # ignore unexp. st_size too
+                continue
             with open(filename, 'r+') as openfile:
                 # The value is it's own test-failure message
                 found_one = self.regexs_not_in(self.regexes, openfile)

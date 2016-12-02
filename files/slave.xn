@@ -5,7 +5,7 @@
 # TODO: Support including files
 - command:
     filepath: $ADEPT_PATH/adept.py
-    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/ansible_bootstrap.yml
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/ansible_bootstrap.xn
 
 # Allow just the slave to set itself up (includes ansible.cfg)
 - playbook:
@@ -38,9 +38,4 @@
 # Reveal error if there was one, to aid in debugging
 - command:
     filepath: $ADEPT_PATH/adept.py
-    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/highlight_exit.yml
-
-# Only present non-zero exit code in setup/run contexts
-- command:
-    filepath: $ADEPT_PATH/adept.py
-    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/cleanup_exit.yml
+    arguments: $ADEPT_CONTEXT $WORKSPACE $ADEPT_PATH/files/highlight_exit.xn

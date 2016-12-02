@@ -5,9 +5,9 @@
 #   - ansible_force_color: true/false
 #   - adept_job
 
-- include: roles/common/tasks/workspace_file.yml
+- include: roles/common/tasks/chkfile.yml
   vars:
-    workspace_file: variables.yml
+    filename: variables.yml
 
 - fail:
     msg: "Required file {{ filepath }} does not exist"

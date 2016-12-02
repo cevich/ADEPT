@@ -6,9 +6,9 @@
 #   - service_catalog: Written to $WORSKAPCE/service_catalog.yml
 #                      if it doesn't already exist
 
-- include: roles/common/tasks/workspace_file.yml
+- include: roles/common/tasks/chkfile.yml
   vars:
-    workspace_file: "service_catalog.yml"
+    filename: "service_catalog.yml"
 
 - name: service_catalog is loaded from service_catalog.yml
   set_fact:
