@@ -13,18 +13,23 @@
 - name: Record upgrade diff check output
   command: atomic host upgrade --check-diff
   register: upgrade_check
-  failed_when: upgrade_check.rc not in [0,77]
+  # 0 == Upgrade ready, applicable, & available.
+  # 77 == No change
+  # 1 == Error or no newer upgrade available
+  failed_when: upgrade_check.rc not in [0,77] and
+               not upgrade_check.stdout | search('older than current revision')
   changed_when: False
 
-- name: Set _needs_upgrade flag True
-  set_fact:
-    _needs_upgrade: True
-
-- name: Set _needs_upgrade flag False when indicated by atomic diff
+- name: Set _needs_upgrade flag False
   set_fact:
     _needs_upgrade: False
-  when: upgrade_check.rc in [0,77] or
-        upgrade_check.stdout | search('No upgrade available.')
+
+- name: Set _needs_upgrade flag True when indicated by atomic diff
+  set_fact:
+    _needs_upgrade: True
+  when: upgrade_check.rc == 0 and
+        not upgrade_check.stdout | search('older than current revision') and
+        not upgrade_check.stdout | search('No upgrade available.')
 
 - block:
 
