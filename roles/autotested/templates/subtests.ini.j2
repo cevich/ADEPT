@@ -35,6 +35,6 @@ docker_expected_exit_status = 0
 
 {% if is_enterprise %}
 [docker_cli/run/run_install]
-install_cmd = yum --disablerepo="*" --enablerepo="rhel-7-server-rpms" --assumeyes iputils
+install_cmd = yum --disablerepo="*" --enablerepo="rhel-7-server-rpms" --assumeyes install iputils
 verify_cmd = ping -c 10 -q registry.access.redhat.com
 {% endif %}
