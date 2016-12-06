@@ -17,7 +17,8 @@
   # 77 == No change
   # 1 == Error or no newer upgrade available
   failed_when: upgrade_check.rc not in [0,77] and
-               not upgrade_check.stdout | search('older than current revision')
+               not upgrade_check.stderr | search('older than current revision') and
+               not upgrade_check.stdout | search('No upgrade available.')
   changed_when: False
 
 - name: Set _needs_upgrade flag False
@@ -27,9 +28,9 @@
 - name: Set _needs_upgrade flag True when indicated by atomic diff
   set_fact:
     _needs_upgrade: True
-  when: upgrade_check.rc == 0 and
-        not upgrade_check.stdout | search('older than current revision') and
-        not upgrade_check.stdout | search('No upgrade available.')
+  when: upgrade_check.rc == 0
+
+- debug: var=upgrade_check
 
 - block:
 
