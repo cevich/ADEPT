@@ -24,3 +24,6 @@
 
 - include: roles/slave/tasks/run.yml
   when: adept_context == 'run'
+
+- include: roles/slave/tasks/cleanup.yml
+  when: adept_context == 'cleanup'
