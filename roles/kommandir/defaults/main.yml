@@ -10,6 +10,7 @@ kommandir_openstack:
     auth_url:
     username:
     password:
+    # Name of the image, not UUID
     image:
     tenant_name:
     # Needed for older openstack CLI
