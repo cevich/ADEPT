@@ -37,7 +37,7 @@
     login_password: "{{ kommandir_openstack.password }}"
     login_tenant_name: "{{ kommandir_openstack.tenant_name }}"
     flavor_id: "3"
-    image_id: '{{ kommandir_openstack.image }}'
+    image_name: '{{ kommandir_openstack.image }}'
     name: '{{ kmndrname | quote }}'
     state: present
     user_data: |
