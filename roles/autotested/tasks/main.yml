@@ -7,10 +7,6 @@
 - name: Make sure docker client is working
   command: docker version
 
-- name: Base directory of Docker Autotest is defined
-  set_fact:
-    autotest_docker_path: "{{ autotest_dest_dir }}/client/tests/docker"
-
 - name: Autotest directory is removed
   file:
     path: "{{ autotest_dest_dir }}"
