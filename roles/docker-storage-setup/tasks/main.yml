@@ -1,39 +1,40 @@
 ---
 
-- name: docker service is stopped
-  service:
-    name: docker
-    state: stopped
-
-- name: Atomic storage commands are run
-  command: "atomic storage {{ item }}"
-  with_items: "{{ atomic_storage }}"
-
-- name: render sysconfig_dss_dest from template
-  template:
-    backup: True
-    dest: "{{ sysconfig_dss_dest }}"
-    src: "{{ sysconfig_dss_template }}"
-  when: sysconfig_dss_template != ""
-
 - block:
 
-    - name: Comment out all sysconfig_dss_dest lines
-      replace:
+    - name: docker service is stopped
+      service:
+        name: docker
+        state: stopped
+
+    - name: render sysconfig_dss_dest from template
+      template:
         backup: True
         dest: "{{ sysconfig_dss_dest }}"
-        regexp: "^(.*)"
-        replace: "# \\1"
+        src: "{{ sysconfig_dss_template }}"
+      when: sysconfig_dss_template != ""
 
-    - name: Add lines to sysconfig_dss_dest
-      lineinfile:
-        backup: False
-        dest: "{{ sysconfig_dss_dest }}"
-        line: "{{ item }}"
-      with_items: '{{ sysconfig_dss_lines }}'
+    - block:
 
-  when: sysconfig_dss_lines != []
+        - name: Comment out all sysconfig_dss_dest lines
+          replace:
+            backup: True
+            dest: "{{ sysconfig_dss_dest }}"
+            regexp: "^(.*)"
+            replace: "# \\1"
 
-- name: docker storage is (re)configured
-  command: docker-storage-setup
-  register: result
+        - name: Add lines to sysconfig_dss_dest
+          lineinfile:
+            backup: False
+            dest: "{{ sysconfig_dss_dest }}"
+            line: "{{ item }}"
+          with_items: '{{ sysconfig_dss_lines }}'
+
+      when: sysconfig_dss_lines != []
+
+    - name: docker storage is (re)configured
+      command: docker-storage-setup
+      register: result
+
+  when: sysconfig_dss_template != "" or
+        sysconfig_dss_lines != []

@@ -1,9 +1,5 @@
 ---
 
-# After stopping docker, these parameters will be fed to 'atomic storage'.
-atomic_storage:
-    - reset
-
 # Destination file for sysconfig_dss_lines or sysconfig_dss_template
 sysconfig_dss_dest: "/etc/sysconfig/docker-storage-setup"
 
