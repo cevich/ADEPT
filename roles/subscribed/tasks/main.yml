@@ -20,6 +20,8 @@
         rhsm.username != [] and
         rhsm.password is defined and
         rhsm.password != []
+  failed_when: result.rc != 0 and
+               not result.stderr | search("system is already registered")
   until: result | success
   retries: "{{ rhsm_retries | default(omit) }}"
   delay: "{{ rhsm_delay | default(omit) }}"
