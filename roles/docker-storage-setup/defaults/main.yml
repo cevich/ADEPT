@@ -1,8 +1,5 @@
 ---
 
-# Destination file for sysconfig_dss_lines or sysconfig_dss_template
-sysconfig_dss_dest: "/etc/sysconfig/docker-storage-setup"
-
 # Each item is a line of content for {{sysconfig_dss_template_dest}}
 # Any existing content will be commented out
 sysconfig_dss_lines: []
