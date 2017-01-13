@@ -45,9 +45,14 @@
 
       when: sysconfig_dss_lines != []
 
-    - name: docker storage is (re)configured
-      command: docker-storage-setup
-      register: result
+    # Necessary so docker / docker-latest service properly runs d-s-s
+    - name: The /var/lib/docker and docker-latest directories are empty
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "/var/lib/docker"
+        - "/var/lib/docker-latest"
 
   when: sysconfig_dss_template != "" or
         sysconfig_dss_lines != []
