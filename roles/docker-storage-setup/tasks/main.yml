@@ -7,29 +7,39 @@
         name: docker
         state: stopped
 
-    - debug:
-        var: "sysconfig_dss_dest"
-
-    - name: render sysconfig_dss_dest from template
+    - name: render sysconfig/d-s-s & latest, from template
       template:
         backup: True
-        dest: "{{ sysconfig_dss_dest }}"
+        dest: "{{ item }}"
         src: "{{ sysconfig_dss_template }}"
       when: sysconfig_dss_template != ""
+      with_items:
+        - "/etc/sysconfig/docker-storage-setup"
+        - "/etc/sysconfig/docker-latest-storage-setup"
 
     - block:
 
-        - name: Comment out all sysconfig_dss_dest lines
+        - name: Comment out all sysconfig/d-s-s & latest, lines
           replace:
             backup: True
-            dest: "{{ sysconfig_dss_dest }}"
+            dest: "{{ item }}"
             regexp: "^(.*)"
             replace: "# \\1"
+          with_items:
+            - "/etc/sysconfig/docker-storage-setup"
+            - "/etc/sysconfig/docker-latest-storage-setup"
 
-        - name: Add lines to sysconfig_dss_dest
+        - name: Add lines to sysconfig/d-s-s
           lineinfile:
             backup: False
-            dest: "{{ sysconfig_dss_dest }}"
+            dest: "/etc/sysconfig/docker-storage-setup"
+            line: "{{ item }}"
+          with_items: '{{ sysconfig_dss_lines }}'
+
+        - name: Add lines to sysconfig/d-s-s latest
+          lineinfile:
+            backup: False
+            dest: "/etc/sysconfig/docker-latest-storage-setup"
             line: "{{ item }}"
           with_items: '{{ sysconfig_dss_lines }}'
 
