@@ -14,4 +14,4 @@ stopped_services:
 
 sysconfig_docker_latest: True
 
-sysconfig_dss_template_dest: "/etc/sysconfig/docker-latest-storage-setup"
+sysconfig_dss_dest: "/etc/sysconfig/docker-latest-storage-setup"

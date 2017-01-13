@@ -7,6 +7,9 @@
         name: docker
         state: stopped
 
+    - debug:
+        var: "sysconfig_dss_dest"
+
     - name: render sysconfig_dss_dest from template
       template:
         backup: True
