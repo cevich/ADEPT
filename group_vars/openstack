@@ -39,8 +39,10 @@ adept_openstack:
                 "7.3": "rhel-atomic-cloud-7.3-released-latest"
         fedora:
                 "24": "Fedora-Cloud-24"
+                "25": "Fedora-Cloud-25"
         fedoratomic:
                 "24": "Fedora-Atomic-24"
+                "25": "Fedora-Atomic-25"
 
     # Userdata to supply to cloud-init
     userdata:
