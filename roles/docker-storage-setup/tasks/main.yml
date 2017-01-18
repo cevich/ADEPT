@@ -19,18 +19,17 @@
 
     - block:
 
-        - name: Comment out all sysconfig/d-s-s & latest, lines
-          replace:
-            backup: True
-            dest: "{{ item }}"
-            regexp: "^(.*)"
-            replace: "# \\1"
+        - name: Existing files are removed
+          file:
+            path: "{{ item }}"
+            state: absent
           with_items:
             - "/etc/sysconfig/docker-storage-setup"
             - "/etc/sysconfig/docker-latest-storage-setup"
 
         - name: Add lines to sysconfig/d-s-s
           lineinfile:
+            create: true
             backup: False
             dest: "/etc/sysconfig/docker-storage-setup"
             line: "{{ item }}"
@@ -38,6 +37,7 @@
 
         - name: Add lines to sysconfig/d-s-s latest
           lineinfile:
+            create: true
             backup: False
             dest: "/etc/sysconfig/docker-latest-storage-setup"
             line: "{{ item }}"
