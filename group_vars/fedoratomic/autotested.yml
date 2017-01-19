@@ -1,11 +1,15 @@
 ---
 
 docker_autotest:
+    # FIXME: This should be using the fedora image, but it's missing python2
+    # so a build_url should point at a dockerfile that takes care of this.
+    # For now, just use the CentOS image and pretend any userspace/kernel mismatch
+    # problems don't exist.
     test_image:
-        host: "docker.io"
+        host:
         user:
-        name: "fedora"
-        tag: "latest"
+        name:
+        tag:
         build_url:
     templates:
         - src: "{{ custom_subtests_ini_j2 | default('subtests.ini.j2') }}"
