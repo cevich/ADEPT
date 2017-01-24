@@ -6,10 +6,12 @@ RUN yum update -y && \
     # Keep every layer as clean (i.e. small) as possible
     yum clean all
 
+# N/B: Use Ansible 2.1.0 until 2.1.2 is available b/c of:
+#      https://github.com/ansible/ansible/issues/15915
+
 ADD /files/slave.rpms /root/
 
 RUN xargs -a /root/slave.rpms yum install -y && \
-    # Keep every layer as clean (i.e. small) as possible
     rm -f /root/slave.rpms && \
     rm -rf /usr/src /usr/share/doc && \
     yum clean all
