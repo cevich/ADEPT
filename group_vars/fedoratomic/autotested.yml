@@ -16,8 +16,7 @@ docker_autotest:
           dest: "{{ autotest_docker_path }}/config_custom/subtests.ini"
         - src: "{{ custom_control_ini_j2 | default('control.ini.j2') }}"
           dest: "{{ autotest_docker_path }}/config_custom/control.ini"
-    preserve_fqins:
-        - "docer.io/fedora:latest"
+    preserve_fqins: []
     preserve_cnames: []
     execute: true
     enable_bugzilla: true
