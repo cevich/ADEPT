@@ -48,18 +48,6 @@
   when: docker_autotest.enable_bugzilla is undefined or
         docker_autotest.enable_bugzilla
 
-- name: Custom configuration is cleared
-  file:
-  args:
-    path: "{{ autotest_docker_path }}/config_custom"
-    state: absent
-
-- name: Custom configuration directory exists
-  file:
-  args:
-    path: "{{ autotest_docker_path }}/config_custom"
-    state: directory
-
 - include: test_image_fqin.yml
 
 # Hook for inclusion of additional configuration templates/files
