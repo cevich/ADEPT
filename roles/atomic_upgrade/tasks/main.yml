@@ -45,6 +45,9 @@
       changed_when: atomic_host_upgrade.rc in [0,77]
       failed_when: atomic_host_upgrade.rc not in [0,77]  # BZ1313540
       until: atomic_host_upgrade | success
+      # Depending on networking, this could take a while.
+      async: '{{ async_poll_timeout }}'
+      poll: 10
       retries: 3
 
   always:
