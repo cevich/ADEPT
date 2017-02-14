@@ -42,11 +42,18 @@
     - name: Atomic host is updated to latest tree
       command: atomic host upgrade
       register: atomic_host_upgrade
-      changed_when: atomic_host_upgrade.rc in [0,77]
-      failed_when: atomic_host_upgrade.rc not in [0,77]  # BZ1313540
+      # Check in assert, changed_when/failed_when based on
+      # atomic_host_upgrade's rc key is not reliable.
+      # Sometimes the key doesn't exist at time of check.
+      ignore_errors: True
       # Depending on networking, this could take a while.
       async: '{{ async_poll_timeout }}'
       poll: 10
+
+    - assert:
+        that:
+            - 'atomic_host_upgrade.rc is defined'
+            - 'atomic_host_upgrade.rc in [0,77]'
 
   always:
 
