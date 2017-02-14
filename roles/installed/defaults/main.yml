@@ -10,6 +10,3 @@ rpms_installed: False
 # For use by other roles, bypasses reference to possibly overriden
 # installed_rpms
 _installed_rpms: []
-
-# Max time to poll for update/install results on remote host.
-async_poll_timeout: 300

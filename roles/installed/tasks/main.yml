@@ -73,9 +73,6 @@
         update_cache: true
       with_items: '{{ _installed_rpms }}'
       register: rpms_installed
-      # Depending on networking, this could take a while.
-      async: '{{ async_poll_timeout }}'
-      poll: 10
 
     - name: rpms_installed reflects changed status
       set_fact:
@@ -93,8 +90,6 @@
         disablerepo: '{{ _disablerepo }}'
       with_items: '{{ _installed_rpms }}'
       register: rpms_installed
-      async: '{{ async_poll_timeout }}'
-      poll: 10
 
     - name: rpms_installed reflects changed status
       set_fact:
