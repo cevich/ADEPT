@@ -50,6 +50,9 @@
       async: '{{ async_poll_timeout }}'
       poll: 10
 
+    - debug:
+        var: 'atomic_host_upgrade'
+
     - assert:
         that:
             - 'atomic_host_upgrade.rc is defined'
