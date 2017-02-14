@@ -1,3 +1,6 @@
 ---
 
 rpms_updated: False
+
+# Max time to poll for update/install results on remote host.
+async_poll_timeout: 300
