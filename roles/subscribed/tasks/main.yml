@@ -27,3 +27,7 @@
   delay: "{{ rhsm_delay | default(omit) }}"
 
 - debug: var=result
+
+- name: System is pinned to a specific release (no updates/installs past this version)
+  command: "subscription-manager release --set={{ rhsm.release }}"
+  when: rhsm.release is defined and rhsm.release not in [None,'', [], {}]

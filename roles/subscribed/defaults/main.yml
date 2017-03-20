@@ -10,6 +10,8 @@ rhsm:
     insecure:
     # Set true to unsubscribe system at end of testing
     unsubscribe: true
+    # If non-empty, pass as argument to ``subscription-manager release --set``
+    release:
 
 # Set the number of acceptable subscription failures
 rhsm_retries: '5'
