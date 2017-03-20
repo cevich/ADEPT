@@ -52,6 +52,25 @@ peon_defaults:
         - autotested
         - peons
 
+    rhel-7.2:
+      volume: "20"
+      version: '7.2'
+      groups:
+        - rhel
+        - subscribed
+        - autotested
+        - peons
+        - updated
+
+    rhelatomic-7.2:
+      version: '7.2'
+      groups:
+        - rhelatomic
+        - subscribed
+        - atomic_upgrade
+        - autotested
+        - peons
+
     fedora:
       volume: "20"
       version: "25"
