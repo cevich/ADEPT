@@ -31,28 +31,33 @@ peons:
     - name: "rhelatomic"
       defaults: "rhelatomic"
 
-    - name: "centos"
-      defaults: "centos"
+    # Upgrade testing
+    - name: "rhel-upgraded"
+      defaults: "rhel"
+      version: 7.2
 
-    - name: "centosatomic"
-      defaults: "centosatomic"
+    - name: "rhelatomic-upgraded"
+      defaults: "rhelatomic"
+      version: 7.2
 
-    # Docker latest
-    - name: "rhel_latest"
+    # Docker latest (overwrite default extra_groups)
+    - name: "rhel-dockerlatest"
       defaults: "rhel"
       extra_groups: ["docker-latest"]
 
-    - name: "rhelatomic_latest"
+    - name: "rhelatomic-dockerlatest"
       defaults: "rhelatomic"
       userdata: '{{ docker_latest_userdata }}'
       extra_groups: ["docker-latest"]
 
-    - name: "centos_latest"
-      defaults: "centos"
+    # Docker latest upgrade testing
+    - name: "rhel-upgraded-dockerlatest"
+      defaults: "rhel"
+      version: 7.2
       extra_groups: ["docker-latest"]
 
-    - name: "centosatomic_latest"
-      defaults: "centosatomic"
+    - name: "rhelatomic-upgraded-dockerlatest"
+      defaults: "rhelatomic"
+      version: 7.2
       userdata: '{{ docker_latest_userdata }}'
       extra_groups: ["docker-latest"]
-
