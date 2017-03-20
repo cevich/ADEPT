@@ -28,9 +28,10 @@ adept_openstack:
     # Mapping of image name + version to openstack images
     image_map:
         centos:
-                "7.2": "CentOS-Cloud-7"
+                "7.3": "CentOS-Cloud-7"
+                "7.2": "CentOS-Cloud-7.2"
         centosatomic:
-                "7.2": "CentOS-Atomic-7"
+                "7.3": "CentOS-Atomic-7"
         rhel:
                 "7.2": "rhel-7.2-server-x86_64-released"
                 "7.3": "rhel-7.3-server-x86_64-released"
