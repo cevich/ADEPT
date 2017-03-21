@@ -34,11 +34,11 @@ peons:
     # Upgrade testing
     - name: "rhel-upgraded"
       defaults: "rhel"
-      version: 7.2
+      version: "7.2"
 
     - name: "rhelatomic-upgraded"
       defaults: "rhelatomic"
-      version: 7.2
+      version: "7.2"
 
     # Docker latest (overwrite default extra_groups)
     - name: "rhel-dockerlatest"
@@ -53,11 +53,11 @@ peons:
     # Docker latest upgrade testing
     - name: "rhel-dockerlatest-upgraded"
       defaults: "rhel"
-      version: 7.2
+      version: "7.2"
       extra_groups: ["docker-latest"]
 
     - name: "rhelatomic-dockerlatest-upgraded"
       defaults: "rhelatomic"
-      version: 7.2
+      version: "7.2"
       userdata: '{{ docker_latest_userdata }}'
       extra_groups: ["docker-latest"]
