@@ -51,12 +51,12 @@ peons:
       extra_groups: ["docker-latest"]
 
     # Docker latest upgrade testing
-    - name: "rhel-upgraded-dockerlatest"
+    - name: "rhel-dockerlatest-upgraded"
       defaults: "rhel"
       version: 7.2
       extra_groups: ["docker-latest"]
 
-    - name: "rhelatomic-upgraded-dockerlatest"
+    - name: "rhelatomic-dockerlatest-upgraded"
       defaults: "rhelatomic"
       version: 7.2
       userdata: '{{ docker_latest_userdata }}'
