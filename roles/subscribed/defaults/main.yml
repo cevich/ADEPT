@@ -12,7 +12,13 @@ rhsm:
     unsubscribe: true
     # If non-empty, pass as argument to ``subscription-manager release --set``
     release:
+    # If account has multiple organizations (or you're using a sub-account)
+    # you must enter the org key (found by: subscription-manager orgs ...)
+    org:
+    # If for whatever reason rhsm thinks the system is already registered
+    # you can force registration by setting this true
+    force: False
 
 # Set the number of acceptable subscription failures
-rhsm_retries: '5'
-rhsm_delay: '30'
+rhsm_retries: '3'
+rhsm_delay: '10'
