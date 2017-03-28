@@ -51,52 +51,54 @@ ENABLE_HELP = True
 os_client_config = ValueError  # pylint: disable=C0103
 
 # Lock-down versions of os-client-config and all dependencies for stability
-PIP_REQUIREMENTS = [
-    "appdirs==1.4.3",
-    "Babel==2.4.0",
-    "cliff==2.5.0",
-    "cmd2==0.7.0",
-    "debtcollector==1.13.0",
-    "deprecation==1.0",
-    "funcsigs==1.0.2",
-    "functools32==3.2.3.post2",
-    "iso8601==0.1.11",
-    "jsonpatch==1.15",
-    "jsonpointer==1.10",
-    "jsonschema==2.6.0",
-    "keystoneauth1==2.19.0",
-    "monotonic==1.3",
-    "msgpack-python==0.4.7",
-    "netaddr==0.7.19",
-    "netifaces==0.10.5",
-    "openstacksdk==0.9.14",
-    "os-client-config==1.26.0",
-    "osc-lib==1.3.0",
-    "oslo.config==3.24.0",
-    "oslo.i18n==3.15.0",
-    "oslo.serialization==2.18.0",
-    "oslo.utils==3.25.0",
-    "packaging==16.8",
-    "pbr==2.0.0",
-    "positional==1.1.1",
-    "prettytable==0.7.2",
-    "pyparsing==2.2.0",
-    "python-cinderclient==2.0.1",
-    "python-glanceclient==2.6.0",
-    "python-keystoneclient==3.10.0",
-    "python-novaclient==7.1.0",
-    "python-openstackclient==3.9.0",
-    "pytz==2017.2",
-    "PyYAML==3.12",
-    "requests==2.13.0",
-    "requestsexceptions==1.2.0",
-    "rfc3986==0.4.1",
-    "simplejson==3.10.0",
-    "six==1.10.0",
-    "stevedore==1.21.0",
-    "unicodecsv==0.14.1",
-    "warlock==1.3.0",
-    "wrapt==1.10.10"]
+# and hashes to assure uncompromised contents
+PIP_REQUIREMENTS = """appdirs==1.4.3 --hash=sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e
+Babel==2.4.0 --hash=sha256:e86ca5a3a6bb64b9bbb62b9dac37225ec0ab5dfaae3c2492ebd648266468042f
+cliff==2.5.0 --hash=sha256:69be930f40402582a1807d76790cb2e578af7dc70651e0f9fcc600088ecbf99a
+cmd2==0.7.0 --hash=sha256:5ab76a1f07dd5fd1cc3c15ba4080265f33b80c7fd748d71bd69a51d60b30f51a
+debtcollector==1.13.0 --hash=sha256:a2dc44307da6f17432c63eb947b3bce0c43a9b3f4291fd62e9e6a3969f3c6645
+deprecation==1.0 --hash=sha256:36d2a2356ca89fb73f72bfb866a2f28e183535a7f131a3b34036bc48590165b6
+funcsigs==1.0.2 --hash=sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca
+functools32==3.2.3.post2 --hash=sha256:89d824aa6c358c421a234d7f9ee0bd75933a67c29588ce50aaa3acdf4d403fa0
+iso8601==0.1.11 --hash=sha256:c68dbd1b6ecc0c13c1d94116aec79d5d5c3bc7444f99159b968f12d83cbc7fa6
+jsonpatch==1.15 --hash=sha256:58ae029a97322a576d8ede954387e84fbdc4dde648a9f84222fdf8c0738ab44c
+jsonpointer==1.10 --hash=sha256:24073101a4ade32dd65fba6ba42d0dd4098b4e7628e34cdddfa8176c452b19cc
+jsonschema==2.6.0 --hash=sha256:000e68abd33c972a5248544925a0cae7d1125f9bf6c58280d37546b946769a08
+keystoneauth1==2.19.0 --hash=sha256:65f326456bcb0bb6bde03a23bb29f85fdb2df10a3e6b65f88a6536829983175d
+monotonic==1.3 --hash=sha256:a8c7690953546c6bc8a4f05d347718db50de1225b29f4b9f346c0c6f19bdc286
+msgpack-python==0.4.7 --hash=sha256:cc38b1e90b9f5ddc0ffee573bb686268ed95f68bca0e8cc953e32fdda98993bd
+netaddr==0.7.19 --hash=sha256:56b3558bd71f3f6999e4c52e349f38660e54a7a8a9943335f73dfc96883e08ca
+netifaces==0.10.5 --hash=sha256:59d8ad52dd3116fcb6635e175751b250dc783fb011adba539558bd764e5d628b
+openstacksdk==0.9.14 --hash=sha256:7d1a1fcf5586c6b16b409270d5b861d0969ac0a14a1a5ddfdf95df5be5daab89
+os-client-config==1.26.0 --hash=sha256:f9a14755f9e498eb5eef553b8b502a08a033fe3993c7152ce077696b1d37c4f4
+osc-lib==1.3.0 --hash=sha256:4817d2d7e3332809d822046297650fec70eceff628be419046ebd66577d16b03
+oslo.config==3.24.0 --hash=sha256:d79ece78ff3ff5dd075b50c2e69e4359a86546f9e9333bafe5220929549d5f5c
+oslo.i18n==3.15.0 --hash=sha256:4d01410167af8b874f44af8515218c3b18171be9796abc9f3d0cf4257b4cbcd4
+oslo.serialization==2.18.0 --hash=sha256:1fe5fba373f338402e14266c91d092a73297753ce306d3f1905c1079891fac33
+oslo.utils==3.25.0 --hash=sha256:714ee981dfd81c94f9bc16e54788a34d9f427152b082811d118e78b19a9d00c1
+packaging==16.8 --hash=sha256:99276dc6e3a7851f32027a68f1095cd3f77c148091b092ea867a351811cfe388
+pbr==2.0.0 --hash=sha256:d9b69a26a5cb4e3898eb3c5cea54d2ab3332382167f04e30db5e1f54e1945e45
+positional==1.1.1 --hash=sha256:ef845fa46ee5a11564750aaa09dd7db059aaf39c44c901b37181e5ffa67034b0
+prettytable==0.7.2 --hash=sha256:a53da3b43d7a5c229b5e3ca2892ef982c46b7923b51e98f0db49956531211c4f
+pyparsing==2.2.0 --hash=sha256:fee43f17a9c4087e7ed1605bd6df994c6173c1e977d7ade7b651292fab2bd010
+python-cinderclient==2.0.1 --hash=sha256:aa6c3614514d28bd13006a2220a559f10088ceb54b7506888131f95942c158bc
+python-glanceclient==2.6.0 --hash=sha256:e77e63de240f4e183a0960c83eb434774746156571c9ea7e7ef4421365b1a762
+python-keystoneclient==3.10.0 --hash=sha256:f30dd06d03f1f85af0cfa18c270e23d2ffd9e776c11c1b534f6ea503e4f31d80
+python-novaclient==7.1.0 --hash=sha256:ff46aabc20c39a9fad9ca7aa8f15fd5145852d7385a47e111df7bfd7cd106a65
+python-openstackclient==3.9.0 --hash=sha256:3c48e9bbdff8a7679f04fe6a03d609c75e597975f9f43de7ec001719ec554ad9
+pytz==2017.2 --hash=sha256:d1d6729c85acea5423671382868627129432fba9a89ecbb248d8d1c7a9f01c67
+PyYAML==3.12 --hash=sha256:592766c6303207a20efc445587778322d7f73b161bd994f227adaa341ba212ab
+requests==2.13.0 --hash=sha256:1a720e8862a41aa22e339373b526f508ef0c8988baf48b84d3fc891a8e237efb
+requestsexceptions==1.2.0 --hash=sha256:f4b43338e69bb7038d2a4ad8cce6b9240e2d272aaf437bd18a2dc9eba25a735c
+rfc3986==0.4.1 --hash=sha256:6823e63264be3da1d42b3ec0e393dc8e6d03fd5e28d4291b797c76cf33759061
+simplejson==3.10.0 --hash=sha256:953be622e88323c6f43fad61ffd05bebe73b9fd9863a46d68b052d2aa7d71ce2
+six==1.10.0 --hash=sha256:0ff78c403d9bccf5a425a6d31a12aa6b47f1c21ca4dc2573a7e2f32a97335eb1
+stevedore==1.21.0 --hash=sha256:a015fb150871247e385153e98cc03c373a857157628b4746bfdf8501e82e9a3d
+unicodecsv==0.14.1 --hash=sha256:018c08037d48649a0412063ff4eda26eaa81eff1546dbffa51fa5293276ff7fc
+warlock==1.3.0 --hash=sha256:d7403f728fce67ee2f22f3d7fa09c9de0bc95c3e7bcf6005b9c1962b77976a06
+wrapt==1.10.10 --hash=sha256:42160c91b77f1bc64a955890038e02f2f72986c01d462d53cb6cb039b995cdd9
+"""
+PIP_REQUIREMENTS = PIP_REQUIREMENTS.strip().splitlines()
 
 # No C/C++ compiler is available in this virtualenv
 PIP_ONLY_BINARY = [':all:']
@@ -104,6 +106,9 @@ PIP_ONLY_BINARY = [':all:']
 PIP_NO_BINARY = ['wrapt', 'PyYAML', 'positional', 'warlock',
                  'PrettyTable', 'cmd2', 'unicodecsv', 'simplejson',
                  'netifaces', 'deprecation', 'functools32']
+
+# Directory path relative to virt. env. dir for signaling completion
+PIP_CHECKPATH = 'lib/python2.7/site-packages/os_client_config'
 
 # Exit code to return when --help output is displayed (for unitesting)
 HELP_EXIT_CODE = 127
@@ -122,8 +127,8 @@ ansible_become: False
 ansible_connection: ssh
 """
 
-WORKSPACE_LOCKFILE_PREFIX = '.adept_workspace'
-GLOBAL_LOCKFILE_PREFIX = '.adept_global'
+WORKSPACE_LOCKFILE_PREFIX = '.adept_job_workspace'
+GLOBAL_LOCKFILE_PREFIX = '.adept_global_floatingip'
 
 class Singleton(object):
     """
@@ -408,6 +413,15 @@ class OpenstackREST(Singleton):
         except (KeyError, IndexError):
             return None
 
+    def create_floating_ip(self, net_id):
+        """
+        Create, and cache details about a new floating ip routed to net_id"""
+        floatingip = dict(floating_network_id=net_id)
+        self.service_request('network', '/v2.0/floatingips',
+                             "floatingip", method='post',
+                             post_json=dict(floatingip=floatingip))
+        return self.response_json['floating_ip_address']
+
     def attachments(self, name=None, uuid=None):
         """
         Cache details about server, return list of attached volume IDs
@@ -474,6 +488,12 @@ class TimeoutAction(object):
             time.sleep(self.sleep)
             result = self.am_done(*self._args, **self._dargs)
         return result
+
+    def timeout_remaining(self):
+        """Return the amount of time in seconds remaining before timeout"""
+        if self.time_out_at is None:
+            raise ValueError("%s() gas not been called" % self.__class__.__name__)
+        return float(self.time_out_at - time.time())
 
     def am_done(self, *args, **dargs):
         """
@@ -636,33 +656,35 @@ class TimeoutAssignFloatingIP(TimeoutAction):
 
     def am_done(self, server_id, net_name, net_id):
         """Return assigned floating IP for server or None if unassigned"""
+        # Assigned IPs can be stolen if two processes issue the assign-action
+        # for the same IP at close to the same time.  This is only
+        # only partly mitigated by locking between processes of this job.
+        # For complete protection, all provisioners, across all jobs should use
+        # a global file-lock, provided for here by --lockdir.  If unspecified
+        # only a job-local lock is used.
         try:
-            ip_addr = self.os_rest.server_ip(uuid=server_id, net_name=net_name)
-            logging.info("    IP %s assigned", ip_addr)
-            return ip_addr
+            with OpenstackLock().timeout_acquire_read(self.timeout_remaining()) as osl:
+                ip_addr = self.os_rest.server_ip(uuid=server_id, net_name=net_name)
+                logging.info("    IP %s assigned", ip_addr)
+                return ip_addr
         except (ValueError, IndexError, KeyError):
-            floating_ip = self.os_rest.floating_ip()  # Get dis-used IP
-            if not floating_ip:
-                logging.info("    creating new floating IP to %s", net_name)
-                floatingip = dict(floating_network_id=net_id)
-
-                self.os_rest.service_request('network', '/v2.0/floatingips',
-                                             "floatingip", method='post',
-                                             post_json=dict(floatingip=floatingip))
-                floating_ip = self.os_rest.response_json['floating_ip_address']
-
-            logging.info("    Assigning %s to server id %s",
-                         floating_ip, server_id)
-
-            addfloatingip = dict(address=floating_ip)
-            try:
-                self.os_rest.compute_request('/servers/%s/action' % server_id,
-                                             unwrap=None, method='post',
-                                             post_json=dict(addFloatingIp=addfloatingip))
-            except ValueError:
-                logging.info("    Assignment failed")
-
-            return None  # Assignment may have failed, another server snagged it.
+            with OpenstackLock().timeout_acquire_write(self.timeout_remaining()) as osl:
+                if osl is None:
+                    raise self.timeout_exception("Timeout acquiring lock")
+                floating_ip = self.os_rest.floating_ip()  # Get dis-used IP
+                if not floating_ip:  # Didn't get one, must create new
+                    logging.info("    creating new floating IP to %s", net_name)
+                    floating_ip = self.os_rest.create_floating_ip(net_id)
+                logging.info("    Assigning %s to server id %s",
+                             floating_ip, server_id)
+                addfloatingip = dict(address=floating_ip)
+                try:
+                    self.os_rest.compute_request('/servers/%s/action' % server_id,
+                                                 unwrap=None, method='post',
+                                                 post_json=dict(addFloatingIp=addfloatingip))
+                except ValueError:
+                    logging.info("    Assignment failed")
+                return None  # Check if ip successfully assigned
 
 
 class TimeoutAttachVolume(TimeoutAction):
@@ -902,14 +924,8 @@ def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
             TimeoutAttachVolume(name, server_id, int(size))()
 
         if not private:
-            # This can steal a floating IP out from another server
-            # if addFloatingIp POST happens concurrently.  It is
-            # only partly mitigated by locking between processes of this job.
-            with OpenstackLock().timeout_acquire_write(TimeoutAction.timeout) as oslock:
-                if oslock is None:
-                    raise ValueError("Timeout acquiring lock")
-                logging.info("Attempting to assign floating ip on network %s", router_name)
-                TimeoutAssignFloatingIP(server_id, router_name)()
+            logging.info("Attempting to assign floating ip on network %s", router_name)
+            TimeoutAssignFloatingIP(server_id, router_name)()
 
         discover(name=name, uuid=server_id, router_name=router_name, private=private)
 
@@ -1093,16 +1109,20 @@ def _pip_upgrade_install(venvdir, requirements, onlybin, nobin):
                                               env=environment,
                                               stdout=subprocess.PIPE,
                                               stderr=subprocess.STDOUT)
+    # Otherwise, quoting and line-length become a big problem
+    reqs_path = os.path.join(venvdir, 'requirements.txt')
+    with open(reqs_path, 'wb') as reqs:
+        reqs.writelines([req + '\n' for req in requirements])
     # Sometimes there are glitches, retry this a few times
     for tries in (1, 2, 3):
         try:
             logging.info("Upgrading pip (try %d).", tries)
             shell('pip install --upgrade pip')
             logging.info("Installing packages.")
-            pargs = ['pip', 'install']
+            pargs = ['pip', 'install', '--require-hashes']
             pargs += ['--only-binary', ','.join(onlybin)]
             pargs += ['--no-binary', ','.join(nobin)]
-            pargs += requirements
+            pargs += ['--requirement', reqs_path]
             shell(' '.join(pargs))
         # last exception will be raised after 3 tries
         except:  # pylint: disable=W0702
@@ -1125,21 +1145,23 @@ def activate_and_setup(namespace, venvdir, requirements, onlybin, nobin):
     """
 
     logging.info("Setting up python virtual environment under %s", venvdir)
-    # Only one concurrent process should do _pip_upgrade_install()
-    lockfile = Flock()  # No need to use global lock, a local one is fine
-    with lockfile.timeout_acquire_write(TimeoutAction.timeout) as vlock:
-        if vlock is None:
-            raise ValueError("Timeout acquiring lock")
-        try:
-            if os.path.isdir(venvdir):
-                logging.info("Found existing virtual environment")
-            else:
-                logging.info("Creating new virtual environment")
-                virtualenv.create_environment(venvdir, site_packages=False)
+    if not os.path.isdir(os.path.join(venvdir, namespace['PIP_CHECKPATH'])):
+        logging.info("Creating/updating virtual environment")
+        # Only one concurrent process should do _pip_upgrade_install()
+        lockfile = Flock()  # No need to use global lock, a local one is fine
+        with lockfile.timeout_acquire_write(TimeoutAction.timeout) as vlock:
+            if vlock is None:
+                raise ValueError("Timeout acquiring lock")
+            logging.debug("Lockfile %s", vlock.name)
+            try:
+                if not os.path.isdir(venvdir):
+                    virtualenv.create_environment(venvdir, site_packages=False)
                 _pip_upgrade_install(venvdir, requirements, onlybin, nobin)
-        except:
-            shutil.rmtree(venvdir, ignore_errors=True)
-            raise
+            except:
+                shutil.rmtree(venvdir, ignore_errors=True)
+                raise
+    else:
+        logging.info("Found existing virtual environment")
 
     logging.debug("Activating python virtual environment from %s", venvdir)
     old_file = namespace['__file__']  # activate_this checks __file__
@@ -1167,9 +1189,10 @@ if __name__ == '__main__':
         logging.error(EPILOG)
         sys.exit(2)
     TimeoutAction.timeout = _dargs['timeout']
+    # initialize default values for all locks
     Flock.def_path = workspace
     Flock.def_prefix = WORKSPACE_LOCKFILE_PREFIX
-    # initialize singleton
+    # initialize floating IP singleton
     if 'lockdir' in _dargs:
         OpenstackLock(os.path.join(_dargs['lockdir'],
                                    '%s.lock' % WORKSPACE_LOCKFILE_PREFIX))
@@ -1211,8 +1234,10 @@ if __name__ == '__main__':
     osc = os_client_config.OpenStackConfig()
     clouds = osc.get_cloud_names()
     os_cloud_name = original_environ.get('OS_CLOUD_NAME', osc.get_cloud_names()[0])
-
-    logging.info("Using cloud '%s' from %s", os_cloud_name, osc.config_filename)
+    if os_cloud_name:
+        logging.info("Using cloud '%s' from %s", os_cloud_name, osc.config_filename)
+    else:
+        os_cloud_name = 'default'
     cloud = osc.get_one_cloud(os_cloud_name)
     del os_cloud_name  # keep global namespace clean
     service_names = cloud.get_services()

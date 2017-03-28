@@ -53,7 +53,7 @@ XTN = 'xn'
 # to child processes, for security purposes.  Additional variables
 # can be set by some action items.
 SAFE_ENV_VARS = ('HOME', 'EDITOR', 'TERM', 'PATH', 'PYTHONPATH',
-                 'ANSIBLE_CONFIG', 'ANSIBLE_LIBRARY',
+                 'VIRTUAL_ENV', 'ANSIBLE_CONFIG', 'ANSIBLE_LIBRARY',
                  'ANSIBLE_INVENTORY', 'SSH_AUTH_SOCK',
                  'SSH_CONNECTION', 'SSH_TTY', 'TZ', 'USER',
                  'SHELL', 'ANSIBLE_HOST_KEY_CHECKING',
