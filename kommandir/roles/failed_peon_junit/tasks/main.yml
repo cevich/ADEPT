@@ -10,6 +10,7 @@
           # Not literally, rather the role that included failed_peon_junit
           - 'this_role | default() not in empty'
           - 'job_name | default() not in empty'
+          - 'hostvars.kommandir.ansible_date_time.date | default() not in empty'
 
   - name: Key variables are displayed
     debug:
