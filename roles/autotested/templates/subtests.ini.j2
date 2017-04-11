@@ -1,12 +1,12 @@
 # Docker Autotest, subtest configuration file template.
 
 {% if test_image_fqin is defined %}[docker_cli/create/create_remote_tag]
-config_version = 0.8.5
+config_version = 0.8.6
 remote_image_fqin = {{ test_image_fqin }}
 run_options_csv ={% endif %}
 
 [docker_cli/pull]
-config_version = 0.8.5
+config_version = 0.8.6
 docker_pull_timeout = 600
 subsubtests = good,wrong_tag,wrong_registry_addr
 # Use image from defaults.ini
@@ -18,7 +18,7 @@ run_options_csv =
 cmd = /bin/true{% endif %}
 
 [docker_cli/tag]
-config_version = 0.8.5
+config_version = 0.8.6
 tag_force = false
 gen_lower_only = True
 subsubtests = change_tag,change_repository,change_user,double_tag,double_tag_force
@@ -26,7 +26,7 @@ tag_repo_name_prefix = test
 # Use image from defaults.ini
 
 [docker_cli/pull]
-config_version = 0.8.5
+config_version = 0.8.6
 #: Maximal duration of the ``docker pull`` command
 docker_pull_timeout = 120.0
 subsubtests = good,wrong_tag,wrong_registry_addr
