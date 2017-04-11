@@ -7,17 +7,15 @@ docker_autotest_templates:
       dest: "{{ autotest_docker_path }}/config_custom/control.ini"
 
 docker_autotest:
-    # FIXME: This should be using the fedora image, but it's missing python2
-    # so a build_url should point at a dockerfile that takes care of this.
-    # For now, just use the CentOS image and pretend any userspace/kernel mismatch
-    # problems don't exist.
     test_image:
         host:
         user:
-        name:
-        tag:
-        build_url:
-    preserve_fqins: []
+        name: "fedora_python"
+        tag: "latest"
+        build_url: "https://raw.githubusercontent.com/cevich/autotest-docker-enabled-product-testing/devel/files/fedora_test_image.tar.gz"
+    preserve_fqins:
+        - "fedora_python:latest"
+        - "docker.io/fedora:latest"
     preserve_cnames: []
     execute: true
     enable_bugzilla: true
