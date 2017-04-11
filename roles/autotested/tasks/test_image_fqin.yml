@@ -34,17 +34,13 @@
 
 # Allows building a custom testing image from Dockerfile @ URL
 - name: Build Test Image
-  command: /usr/bin/docker run
-           {{ docker.build_args }}
-           {{ docker.build_fqin }}
-           --workdir /host/{{ autotest_docker_path }}
-           /usr/bin/docker build
+  command: /usr/bin/docker build
            --quiet
            --tag {{ test_image_fqin }}
            {{ docker_autotest.test_image.build_url }}
   when: test_image_fqin is defined and
         docker_autotest.test_image is defined and
-        docker_inspect_result|failed and
+        docker_inspect_result | failed and
         (docker_autotest.test_image.build_url is defined and
          docker_autotest.test_image.build_url != None and
          docker_autotest.test_image.build_url != "")
@@ -55,8 +51,8 @@
            {{ test_image_fqin }}
   when: test_image_fqin is defined and
         docker_autotest.test_image is defined and
-        docker_inspect_result|failed and
-        (docker_autotest.test_image.build_url is not defined or
+        docker_inspect_result | failed and
+        (docker_autotest.test_image.build_url is undefined or
          docker_autotest.test_image.build_url == None or
          docker_autotest.test_image.build_url == "")
 
