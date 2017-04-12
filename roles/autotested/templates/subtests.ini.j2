@@ -2,7 +2,7 @@
 
 {% if test_image_fqin is defined %}[docker_cli/create/create_remote_tag]
 config_version = 0.8.6
-remote_image_fqin = {{ test_image_fqin }}
+remote_image_fqin = {{ "docker.io/fedora:latest" if "Fedora" in ansible_distribution else "registery.access.redhat.com/rhel7/rhel:latest" }}
 run_options_csv ={% endif %}
 
 [docker_cli/pull]
@@ -13,7 +13,7 @@ subsubtests = good,wrong_tag,wrong_registry_addr
 
 {% if test_image_fqin is defined %}[docker_cli/run/run_remote_tag]
 config_version = 0.8.5
-remote_image_fqin = {{ test_image_fqin }}
+remote_image_fqin = {{ "docker.io/fedora:latest" if "Fedora" in ansible_distribution else "registery.access.redhat.com/rhel7/rhel:latest" }}
 run_options_csv =
 cmd = /bin/true{% endif %}
 
