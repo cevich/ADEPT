@@ -17,12 +17,6 @@ docker_autotest_timeout: 120
 # preserve upon.  More than likely they do not need to be modified
 # from default values unless you know what you're doing.
 
-# Command to use for retrieving preserve_fqins value
-preserve_fqins_cmd: ./config_value.py DEFAULTS preserve_fqins config_defaults/defaults.ini config_custom/defaults.ini
-
-# Command to use for retrieving preserve_cnames value
-preserve_cnames_cmd: ./config_value.py DEFAULTS preserve_cnames config_defaults/defaults.ini config_custom/defaults.ini
-
 # List of template module arg dictionaries, empty for none
 # e.g. - dest: "config_custom/tests.ini"
 #        src: "tests.ini.j2"

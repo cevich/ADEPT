@@ -20,7 +20,6 @@
         docker_autotest.test_image.name is defined and
         docker_autotest.test_image.name not in ['', None]
 
-
 # Image matching above name already exists on system, do not pull
 - name: Docker Autotest test image was previously built
   command: /usr/bin/docker inspect --format \{\{.Created\}\}
@@ -39,29 +38,5 @@
            --tag {{ test_image_fqin }}
            {{ docker_autotest.test_image.build_url }}
   when: test_image_fqin is defined and
-        docker_autotest.test_image is defined and
-        docker_inspect_result | failed and
-        (docker_autotest.test_image.build_url is defined and
-         docker_autotest.test_image.build_url != None and
-         docker_autotest.test_image.build_url != "")
-
-# Do NOT pull if test image is already on system
-- name: Test image has been pulled
-  command: /usr/bin/docker pull
-           {{ test_image_fqin }}
-  when: test_image_fqin is defined and
-        docker_autotest.test_image is defined and
-        docker_inspect_result | failed and
-        (docker_autotest.test_image.build_url is undefined or
-         docker_autotest.test_image.build_url == None or
-         docker_autotest.test_image.build_url == "")
-
-# For debugging
-- name: Docker images output is captured
-  command: /usr/bin/docker images --all
-  register: docker_images_output
-  ignore_errors: True
-  changed_when: false
-
-- debug: var=docker_images_output
-  when: docker_images_output is defined
+        docker_autotest.test_image.build_url is defined and
+        docker_autotest.test_image.build_url not in ['', None]
