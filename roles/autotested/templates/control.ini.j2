@@ -22,8 +22,10 @@ exclude = example,subexample,pretest_example,intratest_example,
           docker_cli/build/git_path,
 {% endif %}
 {% if not is_enterprise %}
-          {# We never test the RHEL base-image on CentOS #}
+          {# We never test the RHEL base-image on Fedora #}
           redhat/rhel_push_plugin,
+          redhat/packaging,
+          docker_test_images
 {% endif %}
 
 # Subtests/Sub-subtest to consider for inclusion before

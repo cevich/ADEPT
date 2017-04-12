@@ -36,116 +36,66 @@
     value: "@!NOVERSIONCHECK!@"
   when: defaults_needed
 
-- name: Defaults docker_repo_name is configured
+- name: Defaults test image options values are configured
   ini_file:
   args:
     dest: "{{ config_custom_defaults }}"
-    option: docker_repo_name
+    option: "{{ item.key }}"
     section: DEFAULTS
-    value: "{{ docker_autotest.test_image.name }}"
-  when: defaults_needed and
-        docker_autotest.test_image is defined and
-        docker_autotest.test_image.name is defined and
-        docker_autotest.test_image.name != None
+    value: "{{ item.value }}"
+  when: defaults_needed and test_image_fqin is defined
+  with_dict:
+    docker_registry_host: "{{ docker_autotest.test_image.host | default('') }}"
+    docker_registry_user: "{{ docker_autotest.test_image.user | default('') }}"
+    docker_repo_name: "{{ docker_autotest.test_image.name | default('') }}"
+    docker_repo_tag: "{{ docker_autotest.test_image.tag | default('') }}"
 
-- name: Defaults docker_repo_tag is configured
-  ini_file:
-  args:
-    dest: "{{ config_custom_defaults }}"
-    option: docker_repo_tag
-    section: DEFAULTS
-    value: "{{ docker_autotest.test_image.tag }}"
-  when: defaults_needed and
-        docker_autotest.test_image is defined and
-        docker_autotest.test_image.tag is defined and
-        docker_autotest.test_image.tag != None
-
-- name: Defaults docker_registry_host is configured
-  ini_file:
-  args:
-    dest: "{{ config_custom_defaults }}"
-    option: docker_registry_host
-    section: DEFAULTS
-    value: "{{ docker_autotest.test_image.host }}"
-  when: defaults_needed and
-        docker_autotest.test_image is defined and
-        docker_autotest.test_image.host is defined and
-        docker_autotest.test_image.host != None
-
-- name: Defaults docker_registry_user is configured
-  ini_file:
-  args:
-    dest: "{{ config_custom_defaults }}"
-    option: docker_registry_user
-    section: DEFAULTS
-    value: "{{ docker_autotest.test_image.user }}"
-  when: defaults_needed and
-        docker_autotest.test_image is defined and
-        docker_autotest.test_image.user is defined and
-        docker_autotest.test_image.user != None
-
-- name: Default image preserve CSV value is known
-  shell: "{{ preserve_fqins_cmd }}"
-  args:
-    chdir: "{{ autotest_docker_path }}"
-  register: _preserve_fqins_cmd
-  when: defaults_needed and
-        docker_autotest.preserve_fqins is defined and
-        docker_autotest.preserve_fqins != None
+- name: Buffer docker images output
+  shell: >
+    docker images --filter=dangling=false --format="{{ '{{' }}.Repository{{ '}}' }}:{{ '{{' }}.Tag{{ '}}' }}"
+  # fixup vim syntax-highlighting problem
+  #"
+  register: result
+  when: defaults_needed
 
 - name: Default image preserve CSV value is formatted
   set_fact:
-    preserve_fqins: "{{ _preserve_fqins_cmd.stdout |
-                        regex_replace('\\s*', '')
-                      }},{{
-                        docker_autotest.preserve_fqins |
-                        default([]) |
-                        join(',')
-                      }},"
-  when: defaults_needed and
-        docker_autotest.preserve_fqins is defined and
-        docker_autotest.preserve_fqins != None
+    _preserve_fqins: '{{ result.stdout_lines }}'
+  when: defaults_needed and result.stdout_lines
 
-- name: Default image preserve CSV value is configured
-  ini_file:
-  args:
-    dest: "{{ config_custom_defaults }}"
-    option: preserve_fqins
-    section: DEFAULTS
-    value: "{{ preserve_fqins | regex_replace(',,', ',') }},"
-  when: defaults_needed and
-        docker_autotest.preserve_fqins is defined and
-        docker_autotest.preserve_fqins != None
+- name: image preserve CSV value is ammended by docker_autotest.preserve_fqins
+  set_fact:
+    _preserve_fqins: '{{ _preserve_fqins | default([]) + docker_autotest.preserve_fqins  }}'
+  when: defaults_needed and docker_autotest.preserve_fqins is defined and
+        docker_autotest.preserve_fqins not in [None,'',[],{}]
 
-- name: Default container preserve CSV value is known
-  shell: "{{ preserve_cnames_cmd }}"
-  args:
-    chdir: "{{ autotest_docker_path }}"
-  register: _preserve_cnames_cmd
-  when: defaults_needed and
-        docker_autotest.preserve_cnames is defined and
-        docker_autotest.preserve_cnames != None
+- name: Buffer docker ps output
+  shell: >
+    docker ps --format="{{ '{{' }}.Names{{ '}}' }}"
+  # fixup vim syntax-highlighting problem
+  #"
+  register: result
+  when: defaults_needed
 
 - name: Default container preserve CSV value is formatted
   set_fact:
-    preserve_cnames: "{{ _preserve_cnames_cmd.stdout |
-                         regex_replace('\\s*', '')
-                      }},{{
-                         docker_autotest.preserve_cnames |
-                         default([]) |
-                         join(',')
-                      }},"
-  when: defaults_needed and
-        docker_autotest.preserve_cnames is defined and
-        docker_autotest.preserve_cnames != None
+    _preserve_cnames: '{{ result.stdout_lines }}'
+  when: defaults_needed and result.stdout_lines
 
-- name: Default container preserve CSV value is configured
+- name: container preserve CSV value is ammended by docker_autotest.preserve_cnames
+  set_fact:
+    _preserve_cnames: '{{ _preserve_cnames | default([]) + docker_autotest.preserve_cnames }}'
+  when: defaults_needed and docker_autotest.preserve_cnames is defined and
+        docker_autotest.preserve_cnames not in [None,'',[],{}]
+
+- name: Defaults image and container preserve options values are configured
   ini_file:
   args:
     dest: "{{ config_custom_defaults }}"
-    option: preserve_cnames
+    option: "{{ item.key }}"
     section: DEFAULTS
-    value: "{{ preserve_cnames | regex_replace(',,', ',') }}"
-  when: defaults_needed and
-        docker_autotest.preserve_cnames is defined and
-        docker_autotest.preserve_cnames != None
+    value: "{{ item.value }}"
+  when: defaults_needed and item.value not in [None,'',',',[],{}]
+  with_dict:
+    preserve_fqins: "{{ _preserve_fqins | default([]) | join(',') }}"
+    preserve_cnames: "{{ _preserve_cnames | default([]) | join(',') }}"
