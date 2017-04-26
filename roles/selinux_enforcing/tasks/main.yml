@@ -1,0 +1,17 @@
+---
+
+- name: SELinux is set to enforcing mode, now and on reboot.
+  selinux:
+    policy: targeted
+    state: enforcing
+  register: result
+
+- name: System should be relabeled when SELinux state changes
+  command: fixfiles onboot
+  when: result | changed
+
+- name: System needs rebooting when SELinux state changes
+  set_fact:
+    needs_reboot: True
+  when: result | changed
+

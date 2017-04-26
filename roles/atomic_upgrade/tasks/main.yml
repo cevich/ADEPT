@@ -34,10 +34,9 @@
 
 - block:
 
-    - name: Workaround BZ1290281
-      selinux:
-        policy: targeted
-        state: permissive
+    - name: Workaround old atomic command bug, fsetxattr/failure w/ /tmp symlink
+      # Don't touch /etc/sysconfig/selinux with ansible selinux module
+      command: setenforce 0
 
     - name: Atomic host is updated to latest tree
       command: atomic host upgrade
@@ -57,10 +56,8 @@
 
   always:
 
-    - name: Undo Workaround BZ1290281
-      selinux:
-        policy: targeted
-        state: enforcing
+    - name: Undo Workaround of old atomic command bug
+      command: setenforce 1
 
   when: _needs_upgrade
 
