@@ -40,6 +40,15 @@ peons:
       defaults: "rhelatomic"
       version: "7.2"
 
+    # Pre-release Testing
+    - name: "rhel-prerelease"
+      defaults: "rhel"
+      version: "7.4"
+      groups:
+        - rhel
+        - autotested
+        - peons
+
     # Docker latest (overwrite default extra_groups)
     - name: "rhel-dockerlatest"
       defaults: "rhel"
@@ -61,3 +70,13 @@ peons:
       version: "7.2"
       userdata: '{{ docker_latest_userdata }}'
       extra_groups: ["docker-latest"]
+
+    # Docker latest pre-release Testing
+    - name: "rhel-dockerlatest-prerelease"
+      defaults: "rhel"
+      version: "7.4"
+      groups:
+        - rhel
+        - autotested
+        - peons
+        - docker-latest
