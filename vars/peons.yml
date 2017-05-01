@@ -44,6 +44,10 @@ peons:
     - name: "rhel-prerelease"
       defaults: "rhel"
       version: "7.4"
+      groups:
+        - rhel
+        - autotested
+        - peons
 
     # Docker latest (overwrite default extra_groups)
     - name: "rhel-dockerlatest"
@@ -71,4 +75,8 @@ peons:
     - name: "rhel-dockerlatest-prerelease"
       defaults: "rhel"
       version: "7.4"
-      extra_groups: ["docker-latest"]
+      groups:
+        - rhel
+        - autotested
+        - peons
+        - docker-latest
