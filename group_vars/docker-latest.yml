@@ -1,9 +1,11 @@
 ---
 
+sysconfig_docker_latest: True
+
 enabled_services:
     - docker-latest
 
-restarted_services:
+started_services:
     - docker-latest
 
 disabled_services:
@@ -12,4 +14,5 @@ disabled_services:
 stopped_services:
     - docker
 
-sysconfig_docker_latest: True
+restarted_services: []
+reloaded_services: []

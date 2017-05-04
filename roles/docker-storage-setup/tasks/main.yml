@@ -1,58 +1,34 @@
 ---
 
-- block:
+- name: docker services are stopped
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - "docker"
+    - "docker-latest"
 
-    - name: docker service is stopped
-      service:
-        name: docker
-        state: stopped
+- name: Add lines to sysconfig/d-s-s
+  lineinfile:
+    create: true
+    backup: False
+    dest: "/etc/sysconfig/docker-storage-setup"
+    line: "{{ item }}"
+  with_items: '{{ sysconfig_dss_lines }}'
 
-    - name: render sysconfig/d-s-s & latest, from template
-      template:
-        backup: True
-        dest: "{{ item }}"
-        src: "{{ sysconfig_dss_template }}"
-      when: sysconfig_dss_template != ""
-      with_items:
-        - "/etc/sysconfig/docker-storage-setup"
-        - "/etc/sysconfig/docker-latest-storage-setup"
+- name: Add lines to sysconfig/d-s-s latest
+  lineinfile:
+    create: true
+    backup: False
+    dest: "/etc/sysconfig/docker-latest-storage-setup"
+    line: "{{ item }}"
+  with_items: '{{ sysconfig_dss_lines }}'
 
-    - block:
-
-        - name: Existing files are removed
-          file:
-            path: "{{ item }}"
-            state: absent
-          with_items:
-            - "/etc/sysconfig/docker-storage-setup"
-            - "/etc/sysconfig/docker-latest-storage-setup"
-
-        - name: Add lines to sysconfig/d-s-s
-          lineinfile:
-            create: true
-            backup: False
-            dest: "/etc/sysconfig/docker-storage-setup"
-            line: "{{ item }}"
-          with_items: '{{ sysconfig_dss_lines }}'
-
-        - name: Add lines to sysconfig/d-s-s latest
-          lineinfile:
-            create: true
-            backup: False
-            dest: "/etc/sysconfig/docker-latest-storage-setup"
-            line: "{{ item }}"
-          with_items: '{{ sysconfig_dss_lines }}'
-
-      when: sysconfig_dss_lines != []
-
-    # Necessary so docker / docker-latest service properly runs d-s-s
-    - name: The /var/lib/docker and docker-latest directories are empty
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - "/var/lib/docker"
-        - "/var/lib/docker-latest"
-
-  when: sysconfig_dss_template != "" or
-        sysconfig_dss_lines != []
+# Necessary so docker / docker-latest service properly runs d-s-s
+- name: The /var/lib/docker and docker-latest directories are empty
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "/var/lib/docker"
+    - "/var/lib/docker-latest"

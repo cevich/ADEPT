@@ -27,11 +27,6 @@ adept_openstack:
 
     # Mapping of image name + version to openstack images
     image_map:
-        centos:
-                "7.3": "CentOS-Cloud-7"
-                "7.2": "CentOS-Cloud-7.2"
-        centosatomic:
-                "7.3": "CentOS-Atomic-7"
         rhel:
                 "7.2": "rhel-7.2-server-x86_64-released"
                 "7.3": "rhel-7.3-server-x86_64-latest"
@@ -64,6 +59,10 @@ adept_openstack:
               primary-group: root
               homdir: /root
               system: true
+        # For all atomic-hosts, allow playbooks to configure storage first
+        bootcmd:
+            - cloud-init-per once instance systemctl disable docker
+            - cloud-init-per once instance systemctl disable docker-latest
     # Standard os-client-config 'cloud' dictionary as per
     # http://docs.openstack.org/developer/os-client-config/
     # Only one named-cloud is supported currently ('default')
