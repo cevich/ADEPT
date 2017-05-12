@@ -11,25 +11,15 @@
 
 - name: The WORKSPACE env. var is loaded into workspace variable
   set_fact:
-    workspace: '{{ lookup("env", "WORKSPACE") | default("/var/lib/workspace") }}'
-  when: workspace is undefined
+    workspace: '{{ lookup("env", "WORKSPACE") | default("/var/lib/workspace", True) }}'
 
 - name: The ADEPT_PATH env. var is loaded into adept_path variable
   set_fact:
     adept_path: '{{ lookup("env", "ADEPT_PATH") | default("/var/lib/adept", True) }}'
-  when: adept_path is undefined
 
 - name: The ADEPT_OPTIONAL env. var is buffered
   set_fact:
-    _adept_optional: '{{ lookup("env", "ADEPT_OPTIONAL") | trim }}'
-  when: adept_optional is undefined
-
-- name: The adept_optional variable is defined from buffer
-  set_fact:
-    adept_optional: '{{ _adept_optional | trim }}'
-  when: _adept_optional is defined and
-        _adept_optional != None and
-        _adept_optional != ''
+    adept_optional: '{{ lookup("env", "ADEPT_OPTIONAL") | trim }}'
 
 - name: The needs_reboot flag is set false
   set_fact:
@@ -37,3 +27,12 @@
 
 - include: ../../../roles/common/tasks/is_atomic.yml
 - include: ../../../roles/common/tasks/is_enterprise.yml
+
+- debug:
+    var: "item"
+  with_items:
+    - "workspace"
+    - "adept_path"
+    - "adept_optional"
+    - "is_atomic"
+    - "is_enterprise"
