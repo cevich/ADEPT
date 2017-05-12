@@ -29,7 +29,7 @@
 - include: ../../../roles/common/tasks/is_enterprise.yml
 
 - debug:
-    var: "item"
+    var: "{{ item }}"
   with_items:
     - "workspace"
     - "adept_path"
