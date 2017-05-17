@@ -1,11 +1,2 @@
 ---
 
-- name: Giblets in kommandir's workspace are removed
-  file:
-    path: "/var/lib/workspace/{{ item }}"
-    state: absent
-  # No reason to leave these around to soak up diskspace
-  with_items:
-    - "adept"
-    - "cache"
-    - "dockertest"
