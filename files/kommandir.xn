@@ -73,9 +73,6 @@
 
 # Ensure any changes are pulled back to aid debugging/reporting
 - playbook:
-    contexts:
-        - setup
-        - run
     filepath: $ADEPT_PATH/kommandir.yml
     varsfile: $WORKSPACE/variables.yml
     inventory: $WORKSPACE/inventory

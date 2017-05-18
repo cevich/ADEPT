@@ -40,3 +40,15 @@
     src: '{{ kommandir_workspace }}/adept/'
     rsync_opts: '{{ kommandir_sync_excludes }}'
   no_log: '{{ no_log_synchronize | default(true) }}'
+
+- name: Giblets in kommandir's workspace are removed during cleanup
+  file:
+    path: "{{ kommandir_workspace }}/{{ item }}"
+    state: absent
+  when: 'adept_context == "cleanup"'
+  ignore_errors: True  # Don't fail play on missing item
+  # No reason to leave these around to soak up diskspace
+  with_items:
+    - "adept"
+    - "cache"
+    - "dockertest"

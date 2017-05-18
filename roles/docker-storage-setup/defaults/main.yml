@@ -1,9 +1,4 @@
 ---
 
-# Each item is a line of content for {{sysconfig_dss_template_dest}}
-# Any existing content will be commented out
+# Each item is a line of content to APPEND onto /etc/sysconfig/d-s-s (and latest)
 sysconfig_dss_lines: []
-
-# Alternative to sysconfig_dss_lines if it is empty,
-# render from this template file instead
-sysconfig_dss_template: ""

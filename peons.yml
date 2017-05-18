@@ -62,12 +62,15 @@
 
     - sysconfig_docker
 
-    - role: docker-storage-setup
-      when: sysconfig_dss_lines != [] or sysconfig_dss_template != ""
+    - role: liverestore_enabled
+      when: '"liverestore" in group_names'
 
-    - services
+    - role: docker-storage-setup
+      when: sysconfig_dss_lines | default([]) != []
 
     - selinux_enforcing
+
+    - services
 
     - role: rebooted
       run_more_than_once: "baz"

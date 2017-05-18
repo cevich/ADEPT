@@ -1,19 +1,27 @@
 ---
 
-- name: DOCKERBINARY set to "docker-latest"
+- name: docker-latest related items in /etc/sysconfig/docker are un-commented
   replace:
     backup: True
     dest: /etc/sysconfig/docker
-    regexp: "^(#\\s*)?DOCKERBINARY=.*"
-    replace: "DOCKERBINARY=/usr/bin/docker-latest"
-  when: sysconfig_docker_latest is defined and
-        sysconfig_docker_latest
+    regexp: "^\\s*#\\s*({{ item }}=.+)"
+    replace: "\\1"
+  when: sysconfig_docker_latest | default(False)
+  with_items:
+    - 'DOCKERBINARY'
+    - 'DOCKERDBINARY'
+    - 'DOCKER_CONTAINERD_BINARY'
+    - 'DOCKER_CONTAINERD_SHIM_BINARY'
 
-- name: DOCKERBINARY commented out
+- name: docker-latest related items in /etc/sysconfig/docker are commented-out
   replace:
     backup: True
     dest: /etc/sysconfig/docker
-    regexp: "^(#\\s*)?(DOCKERBINARY=.*)"
-    replace: "# \\2"
-  when: sysconfig_docker_latest is defined and
-        not sysconfig_docker_latest
+    regexp: "^\\s*({{ item }}=.+)"
+    replace: "# COMMENTED BY ADEPT's sysconfig_docker role: \\1"
+  when: not (sysconfig_docker_latest | default(False))
+  with_items:
+    - 'DOCKERBINARY'
+    - 'DOCKERDBINARY'
+    - 'DOCKER_CONTAINERD_BINARY'
+    - 'DOCKER_CONTAINERD_SHIM_BINARY'

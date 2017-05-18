@@ -40,8 +40,10 @@
 
 - hosts: sync_out
   roles:
-    - kommandir
-    - sync_out
+    - role: kommandir
+      when: "adept_context != 'cleanup'"
+    - role: sync_out
+      when: "adept_context != 'cleanup'"
 
 - hosts: sync_back
   roles:

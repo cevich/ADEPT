@@ -14,8 +14,7 @@
 #                 and specifying alternate setups for specific peons.
 #   private: Use private / security mode when True
 #   volume: Optional, if non-empty, size (GB) of additional storage attach
-#   userdata: Optional, additional metadata to include with peon, cloud-specific
-#             (docker_latest_userdata defined globally for openstack clouds)
+#   userdata: Optional, alternative metadata to include with peon, cloud-specific
 
 peons:
     # Docker Current (default extra_groups == ["docker"])
@@ -47,7 +46,6 @@ peons:
 
     - name: "rhelatomic-dockerlatest"
       defaults: "rhelatomic"
-      userdata: '{{ docker_latest_userdata }}'
       extra_groups: ["docker-latest"]
 
     # Docker latest upgrade testing
@@ -59,5 +57,60 @@ peons:
     - name: "rhelatomic-dockerlatest-upgraded"
       defaults: "rhelatomic"
       version: "7.2"
-      userdata: '{{ docker_latest_userdata }}'
       extra_groups: ["docker-latest"]
+
+
+    ##### A separate/special job will test liverestore #####
+    # - name: "fedora"
+    #   defaults: "fedora"
+    #   extra_groups: ["liverestore"]
+
+    # - name: "fedoratomic"
+    #   defaults: "fedoratomic"
+    #   extra_groups: ["liverestore"]
+
+    # - name: "rhel"
+    #   defaults: "rhel"
+    #   version: "7.4"
+    #   extra_groups: ["liverestore"]
+
+    # # Need 7.4 atomic image
+    # - name: "rhelatomic"
+    #   defaults: "rhelatomic"
+    #   version: "7.4"
+    #   extra_groups: ["liverestore"]
+
+    # # docker-latest && liverestore
+
+    # - name: "rhel-dockerlatest"
+    #   defaults: "rhel"
+    #   version: "7.4"
+    #   extra_groups: ["docker-latest", "liverestore"]
+
+    # # Need 7.4 atomic image
+    # - name: "rhelatomic-dockerlatest"
+    #   defaults: "rhelatomic"
+    #   version: "7.4"
+    #   extra_groups: ["docker-latest", "liverestore"]
+    #
+    # # Upgrade testing
+    # - name: "rhel-upgraded"
+    #   defaults: "rhel"
+    #   version: "7.2"
+    #   extra_groups: ["liverestore"]
+
+    # - name: "rhelatomic-upgraded"
+    #   defaults: "rhelatomic"
+    #   version: "7.2"
+    #   extra_groups: ["liverestore"]
+
+    # # Docker latest upgrade testing
+    # - name: "rhel-dockerlatest-upgraded"
+    #   defaults: "rhel"
+    #   version: "7.2"
+    #   extra_groups: ["docker-latest", "liverestore"]
+
+    # - name: "rhelatomic-dockerlatest-upgraded"
+    #   defaults: "rhelatomic"
+    #   version: "7.2"
+    #   extra_groups: ["docker-latest", "liverestore"]
