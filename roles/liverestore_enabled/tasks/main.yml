@@ -15,18 +15,17 @@
     remote_src: True
     src: "{{ item }}"
     dest: "/etc/systemd/system/{{ item | basename() }}"
-  with_items:
-    - "/usr/lib/systemd/system/docker.service"
-    - "/usr/lib/systemd/system/docker-latest.service"
+  when: 'is_enterprise or not item | search("latest")'
+  with_fileglob:
+    - "/usr/lib/systemd/system/docker*.service"
 
 - name: The MountFlags=slave option is not present in customized unit files
   replace:
     dest: "{{ item }}"
     regexp: 'MountFlags=slave'
     replace: ''
-  with_items:
-    - "/etc/systemd/system/docker.service"
-    - "/etc/systemd/system/docker-latest.service"
+  with_fileglob:
+    - "/usr/lib/systemd/system/docker*.service"
 
 - name: Systemd is reloaded
   command: systemctl daemon-reload
