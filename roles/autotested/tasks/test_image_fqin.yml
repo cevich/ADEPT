@@ -20,17 +20,6 @@
         docker_autotest.test_image.name is defined and
         docker_autotest.test_image.name not in ['', None]
 
-# Image matching above name already exists on system, do not pull
-- name: Docker Autotest test image was previously built
-  command: /usr/bin/docker inspect --format \{\{.Created\}\}
-           {{ test_image_fqin }}
-  register: docker_inspect_result
-  ignore_errors: True
-  args:
-    warn: no
-  changed_when: false
-  when: test_image_fqin is defined
-
 # Allows building a custom testing image from Dockerfile @ URL
 - name: Build Test Image
   command: /usr/bin/docker build
