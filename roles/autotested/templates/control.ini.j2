@@ -6,15 +6,16 @@
 exclude = example,subexample,pretest_example,intratest_example,
           posttest_example,
           docker_cli/run_volumes,
-{# Atomic host does not have git #}
-          {% if is_atomic %}
+{% if is_atomic %}
+          {# Atomic host does not have git #}
           docker_cli/build/git_path,
 {% endif %}
 {% if not is_enterprise %}
           {# We never test the RHEL base-image on Fedora #}
           redhat/rhel_push_plugin,
           redhat/packaging,
-          docker_test_images
+          {# Fedora needs to build it's test-image, disable puller #}
+          docker_test_images/puller
 {% endif %}
 
 [Bugzilla]

@@ -1,9 +1,14 @@
 # Docker Autotest, subtest configuration file template.
 
-{% if test_image_fqin is defined %}[docker_cli/create/create_remote_tag]
+##### N/B: This file was auto-generated from the default jinja2 template
+#####      located in ADEPT's autotested role, under templates/subtests.ini.j2
+
+{% if test_image_fqin is defined %}
+##### test_image_fqin is defined
+[docker_cli/create/create_remote_tag]
 config_version = 0.8.6
 remote_image_fqin = {{ "docker.io/fedora:latest" if "Fedora" in ansible_distribution else "registry.access.redhat.com/rhel7/rhel:latest" }}
-run_options_csv ={% endif %}
+run_options_csv =
 
 [docker_cli/pull]
 config_version = 0.8.6
@@ -11,11 +16,12 @@ docker_pull_timeout = 600
 subsubtests = good,wrong_tag,wrong_registry_addr
 # Use image from defaults.ini
 
-{% if test_image_fqin is defined %}[docker_cli/run/run_remote_tag]
+[docker_cli/run/run_remote_tag]
 config_version = 0.8.5
 remote_image_fqin = {{ "docker.io/fedora:latest" if "Fedora" in ansible_distribution else "registry.access.redhat.com/rhel7/rhel:latest" }}
 run_options_csv =
-cmd = /bin/true{% endif %}
+cmd = /bin/true
+{% endif %}
 
 [docker_cli/tag]
 config_version = 0.8.6
@@ -34,6 +40,7 @@ subsubtests = good,wrong_tag,wrong_registry_addr
 docker_expected_exit_status = 0
 
 {% if is_enterprise %}
+##### is_enterprise == True
 [docker_cli/run/run_install]
 install_cmd = yum --disablerepo="*" --enablerepo="rhel-7-server-rpms" --assumeyes install iputils
 verify_cmd = ping -c 10 -q registry.access.redhat.com
@@ -41,4 +48,23 @@ verify_cmd = ping -c 10 -q registry.access.redhat.com
 [docker_cli/run/run_update]
 generate_generic = yes
 cmd = 'yum --disablerepo="*" --enablerepo="rhel-7-server-rpms" --assumeyes update'
+
+{% else %}
+##### is_enterprise == False (assume Fedora)
+[docker_test_images]
+# Fedora needs to build it's test-image, disable 'puller' sub-subtest
+subsubtests = builder
+extra_fqins_csv =
+# Make sure the default test image gets built
+build_name = localhost/fedora_python:latest
+# This only works with http-based URLs on Atomic (not git)
+build_dockerfile = https://raw.githubusercontent.com/cevich/autotest-docker-enabled-product-testing/devel/files/fedora_test_image.tar.gz
+build_opts_csv = --pull,--force-rm
+# Shouldn't be necessary, but make sure it gets there, always.
+update_defaults_ini = True
+
+[docker_cli/run/run_install]
+# Fedora is not using a RHEL base image, just assume it's repositories work normally.
+install_cmd = yum install --assumeyes yajl
+verify_cmd = bash -c "echo '[{}]' | json_verify -q"
 {% endif %}
