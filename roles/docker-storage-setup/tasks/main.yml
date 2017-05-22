@@ -4,6 +4,8 @@
   service:
     name: "{{ item }}"
     state: stopped
+  # There is no docker-latest on fedora
+  when: 'is_enterprise or item != "docker-latest"'
   with_items:
     - "docker"
     - "docker-latest"
