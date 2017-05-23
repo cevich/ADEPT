@@ -43,8 +43,8 @@ cmd = 'yum --disablerepo="*" --enablerepo="rhel-7-server-rpms" --assumeyes updat
 
 
 [docker_test_images]
-# Fedora needs to build it's test-image, disable 'puller' sub-subtest
-subsubtests = builder
+# Fedora needs to build it's test-image, disable 'puller' in control.ini
+subsubtests = builder,puller
 extra_fqins_csv =
 # Make sure the default test image gets built
 build_name = localhost/fedora_python:latest
