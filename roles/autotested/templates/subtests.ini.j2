@@ -3,44 +3,32 @@
 ##### N/B: This file was auto-generated from the default jinja2 template
 #####      located in ADEPT's autotested role, under templates/subtests.ini.j2
 
-{% if test_image_fqin is defined %}
-##### test_image_fqin is defined
-[docker_cli/create/create_remote_tag]
-config_version = 0.8.6
-remote_image_fqin = {{ "docker.io/fedora:latest" if "Fedora" in ansible_distribution else "registry.access.redhat.com/rhel7/rhel:latest" }}
-run_options_csv =
-
-[docker_cli/pull]
-config_version = 0.8.6
-docker_pull_timeout = 600
-subsubtests = good,wrong_tag,wrong_registry_addr
-# Use image from defaults.ini
-
-[docker_cli/run/run_remote_tag]
-config_version = 0.8.5
-remote_image_fqin = {{ "docker.io/fedora:latest" if "Fedora" in ansible_distribution else "registry.access.redhat.com/rhel7/rhel:latest" }}
-run_options_csv =
-cmd = /bin/true
-{% endif %}
-
-[docker_cli/tag]
-config_version = 0.8.6
-tag_force = false
-gen_lower_only = True
-subsubtests = change_tag,change_repository,change_user,double_tag,double_tag_force
-tag_repo_name_prefix = test
-# Use image from defaults.ini
-
-[docker_cli/pull]
-config_version = 0.8.6
-#: Maximal duration of the ``docker pull`` command
-docker_pull_timeout = 120.0
-subsubtests = good,wrong_tag,wrong_registry_addr
-#: Allow test to pass if actual result matches this PASS/FAIL value
-docker_expected_exit_status = 0
 
 {% if is_enterprise %}
 ##### is_enterprise == True
+
+[docker_cli/run/run_remote_tag]
+config_version = 0.8.6
+remote_image_fqin = {{ test_image_fqin }}
+run_options_csv =
+cmd = /bin/true
+
+[docker_cli/tag]
+subsubtests = change_tag,change_repository,change_user,double_tag,double_tag_force
+config_version = 0.8.6
+tag_force = false
+gen_lower_only = True
+tag_repo_name_prefix = adept
+docker_registry_host = {{ docker_autotest.test_image.host | default('',True) }}
+docker_registry_user = {{ docker_autotest.test_image.user | default('',True) }}
+docker_repo_name =  {{ docker_autotest.test_image.name }}
+docker_repo_tag = {{ docker_autotest.test_image.tag | default('',True) }}
+
+[docker_cli/create/create_remote_tag]
+config_version = 0.8.6
+remote_image_fqin = registry.access.redhat.com/rhel7/rhel:latest
+run_options_csv =
+
 [docker_cli/run/run_install]
 install_cmd = yum --disablerepo="*" --enablerepo="rhel-7-server-rpms" --assumeyes install iputils
 verify_cmd = ping -c 10 -q registry.access.redhat.com
@@ -49,11 +37,14 @@ verify_cmd = ping -c 10 -q registry.access.redhat.com
 generate_generic = yes
 cmd = 'yum --disablerepo="*" --enablerepo="rhel-7-server-rpms" --assumeyes update'
 
+
 {% else %}
 ##### is_enterprise == False (assume Fedora)
+
+
 [docker_test_images]
-# Fedora needs to build it's test-image, disable 'puller' sub-subtest
-subsubtests = builder
+# Fedora needs to build it's test-image, disable 'puller' in control.ini
+subsubtests = builder,puller
 extra_fqins_csv =
 # Make sure the default test image gets built
 build_name = localhost/fedora_python:latest
@@ -62,6 +53,28 @@ build_dockerfile = https://raw.githubusercontent.com/cevich/autotest-docker-enab
 build_opts_csv = --pull,--force-rm
 # Shouldn't be necessary, but make sure it gets there, always.
 update_defaults_ini = True
+
+[docker_cli/run/run_remote_tag]
+config_version = 0.8.6
+remote_image_fqin = "docker.io/fedora:latest"
+run_options_csv =
+cmd = /bin/true
+
+[docker_cli/tag]
+subsubtests = change_tag,change_repository,change_user,double_tag,double_tag_force
+config_version = 0.8.6
+tag_force = false
+gen_lower_only = True
+tag_repo_name_prefix = adept
+docker_registry_host = docker.io
+docker_registry_user =
+docker_repo_name = fedora
+docker_repo_tag = latest
+
+[docker_cli/create/create_remote_tag]
+config_version = 0.8.6
+remote_image_fqin = docker.io/fedora:latest
+run_options_csv =
 
 [docker_cli/run/run_install]
 # Fedora is not using a RHEL base image, just assume it's repositories work normally.
