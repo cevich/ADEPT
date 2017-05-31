@@ -65,10 +65,9 @@
             /usr/bin/docker rmi --force \
                                 adept_slave:latest;'
 
-# Prune 5-day old(er) files from workspace so it doesn't constantly fill up
+# Prune 1-day old(er) files from workspace so it doesn't constantly fill up
 - command:
     contexts:
         - cleanup
     filepath: /bin/find
-    arguments: "/mnt/workspaces -atime +5 -exec rm -f {} +"
-
+    arguments: "/mnt/workspaces -atime +1 -exec rm -f {} +"
