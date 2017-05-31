@@ -49,6 +49,5 @@
   ignore_errors: True  # Don't fail play on missing item
   # No reason to leave these around to soak up diskspace
   with_items:
-    - "adept"
     - "cache"
     - "dockertest"
