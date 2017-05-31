@@ -44,6 +44,7 @@
 - name: Giblets in kommandir's workspace are removed during cleanup
   file:
     path: "{{ kommandir_workspace }}/{{ item }}"
+    recurse: true
     state: absent
   when: 'adept_context == "cleanup"'
   ignore_errors: True  # Don't fail play on missing item
