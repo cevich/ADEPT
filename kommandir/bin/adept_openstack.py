@@ -10,6 +10,8 @@ Requires:
 *  RHEL/CentOS host w/ RPMs:
     * Python 2.7+
     * redhat-rpm-config (base repo)
+    * gcc
+    * glibc-devel
     * python-virtualenv or python2-virtualenv (EPEL repo)
 * Openstack credentials as per:
     https://docs.openstack.org/developer/os-client-config/
@@ -19,14 +21,15 @@ import sys
 import os
 import os.path
 import logging
+from importlib import import_module
+from imp import find_module
 import time
 import argparse
 import subprocess
-from tempfile import mkdtemp
 from base64 import b64encode
 import shutil
-import fcntl
 import virtualenv
+from flock import Flock
 
 # Operation is discovered by symlink name used to execute script
 ONLY_CREATE_NAME = 'openstack_exclusive_create.py'
@@ -50,52 +53,55 @@ ENABLE_HELP = True
 os_client_config = ValueError  # pylint: disable=C0103
 
 # Lock-down versions of os-client-config and all dependencies for stability
-PIP_REQUIREMENTS = [
-    "appdirs==1.4.3",
-    "Babel==2.4.0",
-    "cliff==2.5.0",
-    "cmd2==0.7.0",
-    "debtcollector==1.13.0",
-    "deprecation==1.0",
-    "funcsigs==1.0.2",
-    "functools32==3.2.3.post2",
-    "iso8601==0.1.11",
-    "jsonpatch==1.15",
-    "jsonpointer==1.10",
-    "jsonschema==2.6.0",
-    "keystoneauth1==2.19.0",
-    "monotonic==1.3",
-    "msgpack-python==0.4.7",
-    "netaddr==0.7.19",
-    "netifaces==0.10.5",
-    "openstacksdk==0.9.14",
-    "os-client-config==1.26.0",
-    "osc-lib==1.3.0",
-    "oslo.config==3.24.0",
-    "oslo.i18n==3.15.0",
-    "oslo.serialization==2.18.0",
-    "oslo.utils==3.25.0",
-    "packaging==16.8",
-    "pbr==2.0.0",
-    "positional==1.1.1",
-    "prettytable==0.7.2",
-    "pyparsing==2.2.0",
-    "python-cinderclient==2.0.1",
-    "python-glanceclient==2.6.0",
-    "python-keystoneclient==3.10.0",
-    "python-novaclient==7.1.0",
-    "python-openstackclient==3.9.0",
-    "pytz==2017.2",
-    "PyYAML==3.12",
-    "requests==2.13.0",
-    "requestsexceptions==1.2.0",
-    "rfc3986==0.4.1",
-    "simplejson==3.10.0",
-    "six==1.10.0",
-    "stevedore==1.21.0",
-    "unicodecsv==0.14.1",
-    "warlock==1.3.0",
-    "wrapt==1.10.10"]
+# and hashes to assure uncompromised contents
+PIP_REQUIREMENTS = """appdirs==1.4.3 --hash=sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e
+Babel==2.4.0 --hash=sha256:e86ca5a3a6bb64b9bbb62b9dac37225ec0ab5dfaae3c2492ebd648266468042f
+cliff==2.5.0 --hash=sha256:69be930f40402582a1807d76790cb2e578af7dc70651e0f9fcc600088ecbf99a
+cmd2==0.7.0 --hash=sha256:5ab76a1f07dd5fd1cc3c15ba4080265f33b80c7fd748d71bd69a51d60b30f51a
+debtcollector==1.13.0 --hash=sha256:a2dc44307da6f17432c63eb947b3bce0c43a9b3f4291fd62e9e6a3969f3c6645
+deprecation==1.0 --hash=sha256:36d2a2356ca89fb73f72bfb866a2f28e183535a7f131a3b34036bc48590165b6
+funcsigs==1.0.2 --hash=sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca
+functools32==3.2.3.post2 --hash=sha256:89d824aa6c358c421a234d7f9ee0bd75933a67c29588ce50aaa3acdf4d403fa0
+iso8601==0.1.11 --hash=sha256:c68dbd1b6ecc0c13c1d94116aec79d5d5c3bc7444f99159b968f12d83cbc7fa6
+jsonpatch==1.15 --hash=sha256:58ae029a97322a576d8ede954387e84fbdc4dde648a9f84222fdf8c0738ab44c
+jsonpointer==1.10 --hash=sha256:24073101a4ade32dd65fba6ba42d0dd4098b4e7628e34cdddfa8176c452b19cc
+jsonschema==2.6.0 --hash=sha256:000e68abd33c972a5248544925a0cae7d1125f9bf6c58280d37546b946769a08
+keystoneauth1==2.19.0 --hash=sha256:65f326456bcb0bb6bde03a23bb29f85fdb2df10a3e6b65f88a6536829983175d
+monotonic==1.3 --hash=sha256:a8c7690953546c6bc8a4f05d347718db50de1225b29f4b9f346c0c6f19bdc286
+msgpack-python==0.4.7 --hash=sha256:cc38b1e90b9f5ddc0ffee573bb686268ed95f68bca0e8cc953e32fdda98993bd
+netaddr==0.7.19 --hash=sha256:56b3558bd71f3f6999e4c52e349f38660e54a7a8a9943335f73dfc96883e08ca
+netifaces==0.10.5 --hash=sha256:59d8ad52dd3116fcb6635e175751b250dc783fb011adba539558bd764e5d628b
+openstacksdk==0.9.14 --hash=sha256:7d1a1fcf5586c6b16b409270d5b861d0969ac0a14a1a5ddfdf95df5be5daab89
+os-client-config==1.26.0 --hash=sha256:f9a14755f9e498eb5eef553b8b502a08a033fe3993c7152ce077696b1d37c4f4
+osc-lib==1.3.0 --hash=sha256:4817d2d7e3332809d822046297650fec70eceff628be419046ebd66577d16b03
+oslo.config==3.24.0 --hash=sha256:d79ece78ff3ff5dd075b50c2e69e4359a86546f9e9333bafe5220929549d5f5c
+oslo.i18n==3.15.0 --hash=sha256:4d01410167af8b874f44af8515218c3b18171be9796abc9f3d0cf4257b4cbcd4
+oslo.serialization==2.18.0 --hash=sha256:1fe5fba373f338402e14266c91d092a73297753ce306d3f1905c1079891fac33
+oslo.utils==3.25.0 --hash=sha256:714ee981dfd81c94f9bc16e54788a34d9f427152b082811d118e78b19a9d00c1
+packaging==16.8 --hash=sha256:99276dc6e3a7851f32027a68f1095cd3f77c148091b092ea867a351811cfe388
+pbr==2.0.0 --hash=sha256:d9b69a26a5cb4e3898eb3c5cea54d2ab3332382167f04e30db5e1f54e1945e45
+pip==9.0.1 --hash=sha256:690b762c0a8460c303c089d5d0be034fb15a5ea2b75bdf565f40421f542fefb0
+positional==1.1.1 --hash=sha256:ef845fa46ee5a11564750aaa09dd7db059aaf39c44c901b37181e5ffa67034b0
+prettytable==0.7.2 --hash=sha256:a53da3b43d7a5c229b5e3ca2892ef982c46b7923b51e98f0db49956531211c4f
+pyparsing==2.2.0 --hash=sha256:fee43f17a9c4087e7ed1605bd6df994c6173c1e977d7ade7b651292fab2bd010
+python-cinderclient==2.0.1 --hash=sha256:aa6c3614514d28bd13006a2220a559f10088ceb54b7506888131f95942c158bc
+python-glanceclient==2.6.0 --hash=sha256:e77e63de240f4e183a0960c83eb434774746156571c9ea7e7ef4421365b1a762
+python-keystoneclient==3.10.0 --hash=sha256:f30dd06d03f1f85af0cfa18c270e23d2ffd9e776c11c1b534f6ea503e4f31d80
+python-novaclient==7.1.0 --hash=sha256:ff46aabc20c39a9fad9ca7aa8f15fd5145852d7385a47e111df7bfd7cd106a65
+python-openstackclient==3.9.0 --hash=sha256:3c48e9bbdff8a7679f04fe6a03d609c75e597975f9f43de7ec001719ec554ad9
+pytz==2017.2 --hash=sha256:d1d6729c85acea5423671382868627129432fba9a89ecbb248d8d1c7a9f01c67
+PyYAML==3.12 --hash=sha256:592766c6303207a20efc445587778322d7f73b161bd994f227adaa341ba212ab
+requests==2.13.0 --hash=sha256:1a720e8862a41aa22e339373b526f508ef0c8988baf48b84d3fc891a8e237efb
+requestsexceptions==1.2.0 --hash=sha256:f4b43338e69bb7038d2a4ad8cce6b9240e2d272aaf437bd18a2dc9eba25a735c
+rfc3986==0.4.1 --hash=sha256:6823e63264be3da1d42b3ec0e393dc8e6d03fd5e28d4291b797c76cf33759061
+simplejson==3.10.0 --hash=sha256:953be622e88323c6f43fad61ffd05bebe73b9fd9863a46d68b052d2aa7d71ce2
+six==1.10.0 --hash=sha256:0ff78c403d9bccf5a425a6d31a12aa6b47f1c21ca4dc2573a7e2f32a97335eb1
+stevedore==1.21.0 --hash=sha256:a015fb150871247e385153e98cc03c373a857157628b4746bfdf8501e82e9a3d
+unicodecsv==0.14.1 --hash=sha256:018c08037d48649a0412063ff4eda26eaa81eff1546dbffa51fa5293276ff7fc
+warlock==1.3.0 --hash=sha256:d7403f728fce67ee2f22f3d7fa09c9de0bc95c3e7bcf6005b9c1962b77976a06
+wrapt==1.10.10 --hash=sha256:42160c91b77f1bc64a955890038e02f2f72986c01d462d53cb6cb039b995cdd9
+"""
+PIP_REQUIREMENTS = PIP_REQUIREMENTS.strip().splitlines()
 
 # No C/C++ compiler is available in this virtualenv
 PIP_ONLY_BINARY = [':all:']
@@ -121,16 +127,65 @@ ansible_become: False
 ansible_connection: ssh
 """
 
+WORKSPACE_LOCKFILE_PREFIX = '.adept_job_workspace'
+GLOBAL_LOCKFILE_PREFIX = '.adept_global_floatingip'
 
-class OpenstackREST(object):
+class Singleton(object):
     """
-    State full cache of Openstack REST API interactions.
+    Base class for singletons, every instantiated class is the same object
+
+    :param args: Positional arguments to pass to subclass ``__new__`` and ``__init__``
+    :param drgs: Keyword arguments to pass to subclass ``__new__`` and ``__init__``
+    """
+
+    # Singleton instance is stored here
+    _singleton = None
+
+    def __new__(cls, *args, **dargs):
+        if cls._singleton is None:
+            cls._singleton = super(Singleton, cls).__new__(cls, *args, **dargs)
+            cls._singleton.__new__init__(*args, **dargs)
+        return cls._singleton  # instance's ``__ini__()`` runs next
+
+    def __new__init__(self, *args, **dargs):
+        """
+        Creation-time abstraction for singleton, only happens once, ever.
+
+        :param args: Positional arguments to pass to subclass ``__new__`` and ``__init__``
+        :param drgs: Keyword arguments to pass to subclass ``__new__`` and ``__init__``
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def __clobber__(cls):
+        """
+        Provides a way to un-singleton the class, mostly just useful for unittesting.
+        """
+        cls._singleton = None
+
+
+class OpenstackLock(Singleton, Flock):
+    """
+    Singleton security around critical (otherwise) non-atomic Openstack operations
+    """
+
+    # Only initialize singleton once
+    # pylint: disable=W0231
+    def __init__(self, lockfilepath=None):
+        del lockfilepath
+
+    def __new__init__(self, lockfilepath=None):
+        super(OpenstackLock, self).__init__(lockfilepath)
+
+
+class OpenstackREST(Singleton):
+    """
+    State-full centralized cache of Openstack REST API interactions.
 
     :docs: https://developer.openstack.org/#api
+    :param service_sessions: Map of service names to service instances
+                             (from os-client-config cloud instance)
     """
-
-    # The singleton
-    _self = None
 
     # Cache of current and previous response instances and json() return.
     response_json = None
@@ -139,18 +194,19 @@ class OpenstackREST(object):
     # Useful for debugging purposes
     previous_responses = None
 
-
     # Current session object
     service_sessions = None
 
-    def __new__(cls, service_sessions=None):
-        if cls._self is None:  # Initialize singleton
-            if service_sessions is None:
-                raise ValueError("service_sessions must be passed the first time")
-            cls._self = super(OpenstackREST, cls).__new__(cls)
-            cls.service_sessions = service_sessions
-            cls.previous_responses = []
-        return cls._self  # return singleton
+    def __new__init__(self, service_sessions=None):
+        if service_sessions is None and self.service_sessions is None:
+            raise ValueError("service_sessions must be passed on first instantiation")
+        self.service_sessions = service_sessions
+
+    def __init__(self, service_sessions=None):
+        del service_sessions  # consumed by __new__
+        logging.debug('New %s created, wiping any previous REST API history.',
+                      self.__class__.__name__)
+        self.previous_responses = []
 
     def raise_if(self, true_condition, xception, msg):
         """
@@ -357,6 +413,15 @@ class OpenstackREST(object):
         except (KeyError, IndexError):
             return None
 
+    def create_floating_ip(self, net_id):
+        """
+        Create, and cache details about a new floating ip routed to net_id"""
+        floatingip = dict(floating_network_id=net_id)
+        self.service_request('network', '/v2.0/floatingips',
+                             "floatingip", method='post',
+                             post_json=dict(floatingip=floatingip))
+        return self.response_json['floating_ip_address']
+
     def attachments(self, name=None, uuid=None):
         """
         Cache details about server, return list of attached volume IDs
@@ -390,6 +455,7 @@ class TimeoutAction(object):
     """
 
     sleep = 1  # Sleep time per iteration, avoids busy-waiting.
+    # N/B: timeout value referenced outside of class (I know I'm lazy)
     timeout = DEFAULT_TIMEOUT  # (seconds)
     time_out_at = None  # absolute
     timeout_exception = RuntimeError
@@ -422,6 +488,12 @@ class TimeoutAction(object):
             time.sleep(self.sleep)
             result = self.am_done(*self._args, **self._dargs)
         return result
+
+    def timeout_remaining(self):
+        """Return the amount of time in seconds remaining before timeout"""
+        if self.time_out_at is None:
+            raise ValueError("%s() gas not been called" % self.__class__.__name__)
+        return float(self.time_out_at - time.time())
 
     def am_done(self, *args, **dargs):
         """
@@ -522,7 +594,7 @@ class TimeoutCreate(TimeoutAction):
                         "     primary-group: root\n"
                         "     homedir: /root\n"
                         "     system: true\n" % str(auth_key_lines))
-        logging.debug("Userdata: %s", userdata)
+        logging.debug("\nUserdata: %s", userdata)
 
         server_json = dict(
             name=name,
@@ -584,33 +656,35 @@ class TimeoutAssignFloatingIP(TimeoutAction):
 
     def am_done(self, server_id, net_name, net_id):
         """Return assigned floating IP for server or None if unassigned"""
+        # Assigned IPs can be stolen if two processes issue the assign-action
+        # for the same IP at close to the same time.  This is only
+        # only partly mitigated by locking between processes of this job.
+        # For complete protection, all provisioners, across all jobs should use
+        # a global file-lock, provided for here by --lockdir.  If unspecified
+        # only a job-local lock is used.
         try:
-            ip_addr = self.os_rest.server_ip(uuid=server_id, net_name=net_name)
-            logging.info("    IP %s assigned", ip_addr)
-            return ip_addr
+            with OpenstackLock().timeout_acquire_read(self.timeout_remaining()) as osl:
+                ip_addr = self.os_rest.server_ip(uuid=server_id, net_name=net_name)
+                logging.info("    IP %s assigned", ip_addr)
+                return ip_addr
         except (ValueError, IndexError, KeyError):
-            floating_ip = self.os_rest.floating_ip()  # Get dis-used IP
-            if not floating_ip:
-                logging.info("    creating new floating IP to %s", net_name)
-                floatingip = dict(floating_network_id=net_id)
-
-                self.os_rest.service_request('network', '/v2.0/floatingips',
-                                             "floatingip", method='post',
-                                             post_json=dict(floatingip=floatingip))
-                floating_ip = self.os_rest.response_json['floating_ip_address']
-
-            logging.info("    Assigning %s to server id %s",
-                         floating_ip, server_id)
-
-            addfloatingip = dict(address=floating_ip)
-            try:
-                self.os_rest.compute_request('/servers/%s/action' % server_id,
-                                             unwrap=None, method='post',
-                                             post_json=dict(addFloatingIp=addfloatingip))
-            except ValueError:
-                logging.info("    Assignment failed")
-
-            return None  # Assignment may have failed, another server snagged it.
+            with OpenstackLock().timeout_acquire_write(self.timeout_remaining()) as osl:
+                if osl is None:
+                    raise self.timeout_exception("Timeout acquiring lock")
+                floating_ip = self.os_rest.floating_ip()  # Get dis-used IP
+                if not floating_ip:  # Didn't get one, must create new
+                    logging.info("    creating new floating IP to %s", net_name)
+                    floating_ip = self.os_rest.create_floating_ip(net_id)
+                logging.info("    Assigning %s to server id %s",
+                             floating_ip, server_id)
+                addfloatingip = dict(address=floating_ip)
+                try:
+                    self.os_rest.compute_request('/servers/%s/action' % server_id,
+                                                 unwrap=None, method='post',
+                                                 post_json=dict(addFloatingIp=addfloatingip))
+                except ValueError:
+                    logging.info("    Assignment failed")
+                return None  # Check if ip successfully assigned
 
 
 class TimeoutAttachVolume(TimeoutAction):
@@ -695,7 +769,7 @@ class TimeoutDeleteVolume(TimeoutAction):
             volume_ids = self.os_rest.volume_list()
             if volume_id not in volume_ids:
                 # Gone now, whew! this is okay
-                logging.warning(self.vanish_fmt, volume_id, xcept)
+                logging.debug(self.vanish_fmt, volume_id, xcept)
                 # Stub volume_details to satisfy original caller and identify race
                 return dict(id=volume_id, attachments=[], sentinel=self._sentinel)
             else:
@@ -721,7 +795,7 @@ class TimeoutDeleteVolume(TimeoutAction):
                 self.os_rest.volume_request('/volumes/%s' % volume_id,
                                             unwrap=None, method='delete')
             except Exception, xcept:
-                logging.warning(self.vanish_fmt, volume_id, xcept)
+                logging.debug(self.vanish_fmt, volume_id, xcept)
                 return volume_details
             return None  # try again
 
@@ -812,7 +886,8 @@ def destroy(name=None, uuid=None, **dargs):
 
 # Arguments come from argparse, listing them all for clarity of intent
 def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
-           private=False, router_name=None, size=None, userdata_filepath=None):
+           private=False, router_name=None, size=None,
+           userdata_filepath=None, **dargs):
     """
     Create a new VM with name and authorized_keys containing pub_key_files.
 
@@ -822,8 +897,12 @@ def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
     :param flavor: Name of the openstack VM flavor to use
     :param private: When False, assign a floating IP to VM.
     :param router_name: When private==False, router name to use, or None for first-found.
+    :param size: Optional size (gigabytes) volume to attach to VM
+    :param userdata_filepath: Optional full path to YAML file containing userdata and,
+                              optional ``{auth_key_lines}`` token (JSON).
+    :param dargs: Additional parsed arguments, possibly not relevant.
     """
-
+    del dargs  # not used
     pubkeys = []
     for pub_key_file in pub_key_files:
         logging.info("Loading public key file: %s", pub_key_file)
@@ -852,8 +931,11 @@ def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
 
     # Must not leak servers or volumes, original exception will be re-raised
     except Exception, xcept:
-        logging.error("Create threw %s", xcept)
-        destroy(name, server_id)
+        logging.error("Create threw %s, attempting to destroy VM.", xcept)
+        try:
+            destroy(name, server_id)
+        finally:
+            raise
 
 def parse_args(argv, operation='help'):
     """
@@ -897,6 +979,10 @@ def parse_args(argv, operation='help'):
                             help=('Path to filename containing cloud-config userdata'
                                   ' YAML to use instead of default (Optional).'))
 
+        parser.add_argument('--lockdir', '-l', default='', type=str,
+                            help=('Absolute path to directory where global lock file'
+                                  ' should be created/used.'))
+
     # All operations get these
     parser.add_argument('--verbose', '-v', default=False,
                         action='store_true',
@@ -925,13 +1011,6 @@ def parse_args(argv, operation='help'):
     args = parser.parse_args(argv)
     logging.debug("Parsed arguments: %s", args)
 
-    # Verbose was already processed in __main__, only exists here for --help
-    del args.verbose
-
-    # Consume this one right here
-    TimeoutAction.timeout = args.timeout
-    del args.timeout
-
     # Encode as dictionary, makes parameter passing easier to unitest
     dargs = dict([(n, getattr(args, n))
                   for n in args.__dict__.keys()  # no better way to do ths
@@ -942,12 +1021,15 @@ def parse_args(argv, operation='help'):
         dargs['pub_key_files'] = dargs['pubkey']  # Can't use dest (above)
         del dargs['pubkey']
 
+    # Add operation for reference
+    dargs['operation'] = operation
+
     logging.info("Processed arguments: %s", dargs)
 
     return dargs
 
 
-def main(argv, service_sessions):
+def main(argv, dargs, service_sessions):
     """
     Contains all primary calls for script for easier unit-testing
 
@@ -956,24 +1038,23 @@ def main(argv, service_sessions):
                              to request-like session instances
     :returns: Exit code integer
     """
-    basename = os.path.basename(argv[0])
-    if basename in (DISCOVER_CREATE_NAME, ONLY_CREATE_NAME):
-        dargs = parse_args(argv, 'discover')
+    if dargs['operation'] in ('discover', 'create', 'exclusive'):
         logging.info('Attempting to find VM %s.', dargs['name'])
         # The general exception is re-raised on secondary exception
         try:
             OpenstackREST(service_sessions)
             discover(**dargs)
-            if basename == ONLY_CREATE_NAME:  # no exception == found VM
+            if dargs['operation'] == 'exclusive':  # no exception == found VM
                 logging.error("Found existing vm %s, refusing to re-create!"
                               "  Exiting non-zero.", dargs['name'])
                 sys.exit(1)
         except IndexError, xcept:
+            # Different requirements from discover (yes, this is a bad design)
+            dargs = parse_args(argv, 'create')
             # Not an error (yet), will try creating VM next
             logging.warning("Failed to find existing VM: %s.", dargs['name'])
             logging.debug("%s: %s", xcept.__class__.__name__, str(xcept))
             try:
-                dargs = parse_args(argv, 'create')
                 OpenstackREST(service_sessions)
                 logging.info('Attempting to create new VM %s.', dargs['name'])
                 create(**dargs)
@@ -983,15 +1064,10 @@ def main(argv, service_sessions):
                 logging.error(xcept)
                 logging.error("Creation exception:")
                 raise
-    elif basename == DESTROY_NAME:
-        dargs = parse_args(argv, 'destroy')
+    elif dargs['operation'] == 'destroy':
         OpenstackREST(service_sessions)
         logging.info("Destroying VM %s", dargs['name'])
         destroy(**dargs)
-    else:
-        logging.error("Script was not called as %s, %s, or %s", *ALLOWED_NAMES)
-        parse_args(argv, 'help')
-
 
 
 def api_debug_dump():
@@ -1007,11 +1083,11 @@ def api_debug_dump():
             # These are useful for creating unitest data + debugging unittests
             lines[-1]['sequence_number'] = seq_num
             seq_num += 10
-        except ValueError:
+        except (ValueError, AttributeError):
             pass
-    basename = os.path.basename(sys.argv[0])
-    prefix = basename.split('.', 1)[0]
-    filepath = os.path.join(os.environ['WORKSPACE'], '.virtualenv',
+    _basename = os.path.basename(sys.argv[0])
+    prefix = _basename.split('.', 1)[0]
+    filepath = os.path.join(workspace, '.virtualenv',
                             '%s_api_responses.json' % prefix)
     # Don't fail main operations b/c missing module
     import json as simplejson
@@ -1022,25 +1098,76 @@ def api_debug_dump():
 
 def _pip_upgrade_install(venvdir, requirements, onlybin, nobin):
     bindir = os.path.join(venvdir, 'bin')
-    environment = os.environ.copy()
-    # Fool pip into only touching files under this
-    environment['VIRTUAL_ENV'] = venvdir
-    # Pip doesn't work well when imported as a module in this use-case.
-    # Executing it under a shell also allows hiding it's stdout/stderr
-    # unless there's a problem.
-    shell = lambda cmd: subprocess.check_call(os.path.join(bindir, cmd),
-                                              close_fds=True, shell=True,
-                                              env=environment,
-                                              stdout=subprocess.PIPE,
-                                              stderr=subprocess.STDOUT)
-    logging.info("Upgrading pip.")
-    shell('pip install --upgrade pip')
-    logging.info("Installing packages.")
-    pargs = ['pip', 'install']
+    # Otherwise, quoting and line-length become a big problem
+    reqs_path = os.path.join(venvdir, 'requirements.txt')
+    with open(reqs_path, 'wb') as reqs:
+        reqs.writelines([req + '\n' for req in requirements])
+
+    # Need a new-ish version that supports --require-hashes
+    pargs = [os.path.join(bindir, 'pip'), 'install',
+             '--upgrade', '--force-reinstall']
+    logging.debug(subprocess.check_output(pargs + ['pip>=8.0.2'],
+                                          close_fds=True, env=os.environ,
+                                          stderr=subprocess.STDOUT))
+    pargs += ['--require-hashes']
     pargs += ['--only-binary', ','.join(onlybin)]
     pargs += ['--no-binary', ','.join(nobin)]
-    pargs += requirements
-    shell(' '.join(pargs))
+    pargs += ['--requirement', reqs_path]
+    # Sometimes there are glitches, retry this a few times
+    tries = 0
+    for tries in xrange(3):
+        logging.info("Installing packages (try %d): %s", tries, ' '.join(pargs))
+        try:
+            logging.debug(subprocess.check_output(pargs,
+                                                  close_fds=True, env=os.environ,
+                                                  stderr=subprocess.STDOUT))
+        # last exception will be raised after 3 tries
+        except:  # pylint: disable=W0702
+            continue
+        break
+    if tries >= 2:
+        raise
+    _, pathname, _ = find_module('os_client_config')
+    if pathname.startswith(venvdir):
+        return import_module('os_client_config')
+    raise RuntimeError("Unable to import os_client_config %s from virt. env. %s"
+                       % (pathname, venvdir))
+
+
+def _install(venvdir):
+    sfx = "virtual environment under %s" % venvdir
+    try:
+        if not os.path.isdir(venvdir):
+            logging.info("Setting up new %s", sfx)
+            virtualenv.create_environment(venvdir, site_packages=False)
+        else:
+            logging.info("Using existing %s", sfx)
+    except:
+        shutil.rmtree(venvdir, ignore_errors=True)
+        raise
+
+
+def _activate(namespace, venvdir):
+    logging.info("Activating %s", venvdir)
+    old_file = namespace['__file__']  # activate_this checks __file__
+    try:
+        namespace['__file__'] = os.path.join(venvdir, 'bin', 'activate_this.py')
+        execfile(namespace['__file__'], namespace)
+    finally:
+        namespace['__file__'] = old_file
+    # No idea why it doesn't set these
+    os.environ['PYTHONHOME'] = os.environ['VIRTUAL_ENV'] = venvdir
+
+
+def _setup(venvdir, requirements, onlybin, nobin):
+    try:
+        _, pathname, _ = find_module('os_client_config')
+    except ImportError:
+        pathname = ''
+    if pathname.startswith(venvdir):
+        return import_module('os_client_config')
+    else:
+        return _pip_upgrade_install(venvdir, requirements, onlybin, nobin)
 
 
 def activate_and_setup(namespace, venvdir, requirements, onlybin, nobin):
@@ -1054,90 +1181,113 @@ def activate_and_setup(namespace, venvdir, requirements, onlybin, nobin):
                     magic item ':all:' wildcard (overriden by ``nobin``)
     :param nobin: List of pip packages to build and install (overrides onlybin)
     """
-
-    # They do exactly what they say pylint: disable=C0111
-    def lock_file(filename, mode=fcntl.LOCK_EX):
-        lockfile = open(filename, "w")
-        fcntl.lockf(lockfile, mode)
-        return lockfile
-
-    def unlock_file(lockfile):
-        fcntl.lockf(lockfile, fcntl.LOCK_UN)
-        lockfile.close()
-
-    logging.info("Setting up python virtual environment under %s", venvdir)
-    # Only one concurrent process should do _pip_upgrade_install()
-    lockfile = lock_file("%s_lock" % venvdir)
-    try:
-        if os.path.isdir(venvdir):
-            logging.info("Found existing virtual environment")
+    fmt = "Timeout acquiring %s lock"
+    lockfile = Flock()  # Only need a local-workspace lock
+    with lockfile.timeout_acquire_write(TimeoutAction.timeout) as vlock:
+        if vlock is None:
+            raise RuntimeError(fmt, "write")
+        _install(venvdir)
+    with lockfile.timeout_acquire_read(TimeoutAction.timeout) as vlock:
+        if vlock is None:
+            raise RuntimeError(fmt, "read")
+        _activate(namespace, venvdir)
+    with lockfile.timeout_acquire_read(TimeoutAction.timeout) as vlock:
+        if vlock is None:
+            raise RuntimeError(fmt, "read")
+        try:
+            _, pathname, _ = find_module('os_client_config')
+        except ImportError:
+            pathname = ''
+        if pathname.startswith(venvdir):
+            return import_module('os_client_config')
         else:
-            logging.info("Creating new virtual environment")
-            virtualenv.create_environment(venvdir, site_packages=False)
-            _pip_upgrade_install(venvdir, requirements, onlybin, nobin)
-    except:
-        shutil.rmtree(venvdir, ignore_errors=True)
-        raise
-    finally:
-        unlock_file(lockfile)
-
-    logging.debug("Activating python virtual environment from %s", venvdir)
-    old_file = namespace['__file__']  # activate_this checks __file__
-    try:
-        namespace['__file__'] = os.path.join(venvdir, 'bin', 'activate_this.py')
-        execfile(__file__, namespace, namespace)
-    finally:
-        namespace['__file__'] = old_file
+            with lockfile.timeout_acquire_write(TimeoutAction.timeout) as vlock:
+                if vlock is None:
+                    raise RuntimeError(fmt, "read")
+                return _setup(venvdir, requirements, onlybin, nobin)
 
 
 if __name__ == '__main__':
-    LOGGER = logging.getLogger()
-    if [arg for arg in sys.argv if arg == '-v' or arg == '--verbose']:
-        # Lower to DEBUG for massively detailed output
-        LOGGER.setLevel(logging.DEBUG)
-        VERBOSE = True
+    # Parse arguments
+    basename = os.path.basename(sys.argv[0])
+    if basename == DISCOVER_CREATE_NAME:
+        _dargs = parse_args(sys.argv, 'discover')
+    elif basename == ONLY_CREATE_NAME:
+        _dargs = parse_args(sys.argv, 'exclusive')
+    elif basename == DESTROY_NAME:
+        _dargs = parse_args(sys.argv, 'destroy')
+    else:
+        logging.error("Script was not called as %s, %s, or %s", *ALLOWED_NAMES)
+        parse_args(sys.argv, 'help')  # exits
+    del basename  # keep global namespace clean
+
+    workspace = os.environ.get('WORKSPACE')
+    if workspace is None:
+        logging.error(EPILOG)
+        sys.exit(2)
+    os.chdir(workspace)
+    # Control location of caching
+    os.environ['HOME'] = workspace
+    for _name in os.environ.keys():
+        if _name.startswith('XDG'):
+            del os.environ[_name]
+
+    # initialize default values for all locks
+    TimeoutAction.timeout = _dargs['timeout']  # locks cheat and use this
+    Flock.def_path = workspace
+    Flock.def_prefix = WORKSPACE_LOCKFILE_PREFIX
+
+    # initialize global lock singleton
+    if 'lockdir' in _dargs:
+        OpenstackLock(os.path.join(_dargs['lockdir'],
+                                   '%s.lock' % WORKSPACE_LOCKFILE_PREFIX))
+    else:
+        OpenstackLock(os.path.join(workspace,
+                                   '%s.lock' % GLOBAL_LOCKFILE_PREFIX))
+
+    # Allow early debugging/verbose mode
+    logger = logging.getLogger()
+    if _dargs['verbose']:
+        logger.setLevel(logging.DEBUG)
     else:
         # Lower to INFO level and higher for general details
-        LOGGER.setLevel(logging.INFO)
-        VERBOSE = False
-    del LOGGER # keep global namespace clean
+        logger.setLevel(logging.INFO)
+    del logger  # keep global namespace clean
 
     # N/B: Any/All names used here are in the global scope
     # pylint: disable=C0103
-    workspace = os.environ.get('WORKSPACE')
-    if workspace is None:
-        raise RuntimeError("Environment variable WORKSPACE is not set,"
-                           " it must be a temporary, writeable directory.")
-
-    # pip and os-client-config behavior depends on these
-    os.environ['HOME'] = workspace
-    os.chdir(workspace)
-
-    activate_and_setup(globals(),
-                       os.path.join(workspace, '.virtualenv'),
-                       PIP_REQUIREMENTS,
-                       PIP_ONLY_BINARY,
-                       PIP_NO_BINARY)
-
-    logging.info("Loading openstack client config module")
-    os_client_config = __import__('os_client_config')
+    os_client_config = activate_and_setup(globals(),
+                                          os.path.join(workspace, '.virtualenv'),
+                                          PIP_REQUIREMENTS,
+                                          PIP_ONLY_BINARY,
+                                          PIP_NO_BINARY)
+    logging.info("Loaded %s", os.path.dirname(os_client_config.__file__))
+    # Shut down the most noisy loggers
+    for noisy_logger in ('stevedore.extension',
+                         'keystoneauth.session',
+                         'requests.packages.urllib3.connectionpool'):
+        shut_me_up = logging.getLogger(noisy_logger)
+        shut_me_up.setLevel(logging.WARNING)
 
     # OpenStackConfig() obliterates os.environ for security reasons
     original_environ = os.environ.copy()
     osc = os_client_config.OpenStackConfig()
     clouds = osc.get_cloud_names()
     os_cloud_name = original_environ.get('OS_CLOUD_NAME', osc.get_cloud_names()[0])
+    if os_cloud_name:
+        logging.info("Using cloud '%s' from %s", os_cloud_name, osc.config_filename)
+    else:
+        os_cloud_name = 'default'
 
-    logging.info("Using cloud '%s' from %s", os_cloud_name, osc.config_filename)
     cloud = osc.get_one_cloud(os_cloud_name)
+    del os_cloud_name  # keep global namespace clean
     service_names = cloud.get_services()
     logging.debug("Initializing openstack services: %s", service_names)
     sessions = dict([(svc, cloud.get_session_client(svc))
                      for svc in service_names])
+    del cloud  # keep global namespace clean
     try:
-        main(sys.argv, sessions)
-        if VERBOSE:
-            api_debug_dump()
+        main(sys.argv, _dargs, sessions)
     finally:
-        if VERBOSE:
+        if _dargs['verbose']:
             api_debug_dump()
