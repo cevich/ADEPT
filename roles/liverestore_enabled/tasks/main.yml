@@ -19,11 +19,11 @@
   with_fileglob:
     - "/usr/lib/systemd/system/docker*.service"
 
-- name: The MountFlags=slave option is not present in customized unit files
+- name: The MountFlags=slave option is replaced with KillMode=process in unit files
   replace:
     dest: "{{ item }}"
     regexp: 'MountFlags=slave'
-    replace: ''
+    replace: 'KillMode=process'
   with_fileglob:
     - "/usr/lib/systemd/system/docker*.service"
 
