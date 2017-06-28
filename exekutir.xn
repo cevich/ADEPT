@@ -78,6 +78,10 @@
 - variable: {"name":"OS_REGION_NAME","from_env":"OS_REGION_NAME","default":""}
 - variable: {"name":"OS_CLOUD_NAME","from_env":"OS_CLOUD_NAME","default":""}
 
+# Display what we got
+- command:
+    filepath: /bin/env
+
 # For all contexts, exit non-zero immediatly on failure.
 # Transition summary:
 #   setup & run:
