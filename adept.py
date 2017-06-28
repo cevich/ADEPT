@@ -598,7 +598,14 @@ class Command(ActionBase):
         cwd_default = self.popen_dargs.get('cwd', self.parameters.workspace)
         self.popen_dargs['cwd'] = cwd_default
         self.process_global_vars()
-        child_proc = subprocess.Popen(**self.popen_dargs)
+        try:
+            child_proc = subprocess.Popen(**self.popen_dargs)
+        except OSError, xcept:
+            if xcept.errno != 2:
+                raise
+            else:
+                raise OSError("[Errno 2] No such file or directory: %s"
+                              % self.popen_dargs['executable'])
         # No need to display them if they're headed to a file
         if child_proc.stderr or child_proc.stdout:
             sys.stderr.write('stdout/stderr =\n')
