@@ -21,6 +21,8 @@ import sys
 import os
 import os.path
 import logging
+from importlib import import_module
+from imp import find_module
 import time
 import argparse
 import subprocess
@@ -78,6 +80,7 @@ oslo.serialization==2.18.0 --hash=sha256:1fe5fba373f338402e14266c91d092a73297753
 oslo.utils==3.25.0 --hash=sha256:714ee981dfd81c94f9bc16e54788a34d9f427152b082811d118e78b19a9d00c1
 packaging==16.8 --hash=sha256:99276dc6e3a7851f32027a68f1095cd3f77c148091b092ea867a351811cfe388
 pbr==2.0.0 --hash=sha256:d9b69a26a5cb4e3898eb3c5cea54d2ab3332382167f04e30db5e1f54e1945e45
+pip==9.0.1 --hash=sha256:690b762c0a8460c303c089d5d0be034fb15a5ea2b75bdf565f40421f542fefb0
 positional==1.1.1 --hash=sha256:ef845fa46ee5a11564750aaa09dd7db059aaf39c44c901b37181e5ffa67034b0
 prettytable==0.7.2 --hash=sha256:a53da3b43d7a5c229b5e3ca2892ef982c46b7923b51e98f0db49956531211c4f
 pyparsing==2.2.0 --hash=sha256:fee43f17a9c4087e7ed1605bd6df994c6173c1e977d7ade7b651292fab2bd010
@@ -145,7 +148,7 @@ class Singleton(object):
         if cls._singleton is None:
             cls._singleton = super(Singleton, cls).__new__(cls, *args, **dargs)
             cls._singleton.__new__init__(*args, **dargs)
-        return cls._singleton  # instance's ``__ini__()`` runs next
+        return cls._singleton  # instance's ``__init__()`` runs next
 
     def __new__init__(self, *args, **dargs):
         """
@@ -1098,38 +1101,76 @@ def api_debug_dump():
 
 def _pip_upgrade_install(venvdir, requirements, onlybin, nobin):
     bindir = os.path.join(venvdir, 'bin')
-    environment = os.environ.copy()
-    # Fool pip into only touching files under this
-    environment['VIRTUAL_ENV'] = venvdir
-    # Pip doesn't work well when imported as a module in this use-case.
-    # Executing it under a shell also allows hiding it's stdout/stderr
-    # unless there's a problem.
-    shell = lambda cmd: subprocess.check_call(os.path.join(bindir, cmd),
-                                              close_fds=True, shell=True,
-                                              env=environment,
-                                              stdout=subprocess.PIPE,
-                                              stderr=subprocess.STDOUT)
     # Otherwise, quoting and line-length become a big problem
     reqs_path = os.path.join(venvdir, 'requirements.txt')
     with open(reqs_path, 'wb') as reqs:
         reqs.writelines([req + '\n' for req in requirements])
+
+    # Need a new-ish version that supports --require-hashes
+    pargs = [os.path.join(bindir, 'pip'), 'install',
+             '--upgrade', '--force-reinstall']
+    logging.debug(subprocess.check_output(pargs + ['pip>=8.0.2'],
+                                          close_fds=True, env=os.environ,
+                                          stderr=subprocess.STDOUT))
+    pargs += ['--require-hashes']
+    pargs += ['--only-binary', ','.join(onlybin)]
+    pargs += ['--no-binary', ','.join(nobin)]
+    pargs += ['--requirement', reqs_path]
     # Sometimes there are glitches, retry this a few times
-    for tries in (1, 2, 3):
+    tries = 0
+    for tries in xrange(3):
+        logging.info("Installing packages (try %d): %s", tries, ' '.join(pargs))
         try:
-            logging.info("Upgrading pip (try %d).", tries)
-            shell('pip install --upgrade pip')
-            logging.info("Installing packages.")
-            pargs = ['pip', 'install', '--require-hashes']
-            pargs += ['--only-binary', ','.join(onlybin)]
-            pargs += ['--no-binary', ','.join(nobin)]
-            pargs += ['--requirement', reqs_path]
-            shell(' '.join(pargs))
+            logging.debug(subprocess.check_output(pargs,
+                                                  close_fds=True, env=os.environ,
+                                                  stderr=subprocess.STDOUT))
         # last exception will be raised after 3 tries
         except:  # pylint: disable=W0702
             continue
+        break
+    if tries >= 2:
+        raise
+    _, pathname, _ = find_module('os_client_config')
+    if pathname.startswith(venvdir):
+        return import_module('os_client_config')
+    raise RuntimeError("Unable to import os_client_config %s from virt. env. %s"
+                       % (pathname, venvdir))
+
+
+def _install(venvdir):
+    sfx = "virtual environment under %s" % venvdir
+    try:
+        if not os.path.isdir(venvdir):
+            logging.info("Setting up new %s", sfx)
+            virtualenv.create_environment(venvdir, site_packages=False)
         else:
-            return
-    raise
+            logging.info("Using existing %s", sfx)
+    except:
+        shutil.rmtree(venvdir, ignore_errors=True)
+        raise
+
+
+def _activate(namespace, venvdir):
+    logging.info("Activating %s", venvdir)
+    old_file = namespace['__file__']  # activate_this checks __file__
+    try:
+        namespace['__file__'] = os.path.join(venvdir, 'bin', 'activate_this.py')
+        execfile(namespace['__file__'], namespace)
+    finally:
+        namespace['__file__'] = old_file
+    # No idea why it doesn't set these
+    os.environ['PYTHONHOME'] = os.environ['VIRTUAL_ENV'] = venvdir
+
+
+def _setup(venvdir, requirements, onlybin, nobin):
+    try:
+        _, pathname, _ = find_module('os_client_config')
+    except ImportError:
+        pathname = ''
+    if pathname.startswith(venvdir):
+        return import_module('os_client_config')
+    else:
+        return _pip_upgrade_install(venvdir, requirements, onlybin, nobin)
 
 
 def activate_and_setup(namespace, venvdir, requirements, onlybin, nobin):
@@ -1143,36 +1184,34 @@ def activate_and_setup(namespace, venvdir, requirements, onlybin, nobin):
                     magic item ':all:' wildcard (overriden by ``nobin``)
     :param nobin: List of pip packages to build and install (overrides onlybin)
     """
-
-    logging.info("Setting up python virtual environment under %s", venvdir)
-    if not os.path.isdir(os.path.join(venvdir, namespace['PIP_CHECKPATH'])):
-        logging.info("Creating/updating virtual environment")
-        # Only one concurrent process should do _pip_upgrade_install()
-        lockfile = Flock()  # No need to use global lock, a local one is fine
-        with lockfile.timeout_acquire_write(TimeoutAction.timeout) as vlock:
-            if vlock is None:
-                raise ValueError("Timeout acquiring lock")
-            logging.debug("Lockfile %s", vlock.name)
-            try:
-                if not os.path.isdir(venvdir):
-                    virtualenv.create_environment(venvdir, site_packages=False)
-                _pip_upgrade_install(venvdir, requirements, onlybin, nobin)
-            except:
-                shutil.rmtree(venvdir, ignore_errors=True)
-                raise
-    else:
-        logging.info("Found existing virtual environment")
-
-    logging.debug("Activating python virtual environment from %s", venvdir)
-    old_file = namespace['__file__']  # activate_this checks __file__
-    try:
-        namespace['__file__'] = os.path.join(venvdir, 'bin', 'activate_this.py')
-        execfile(__file__, namespace, namespace)
-    finally:
-        namespace['__file__'] = old_file
+    fmt = "Timeout acquiring %s lock"
+    lockfile = Flock()  # Only need a local-workspace lock
+    with lockfile.timeout_acquire_write(TimeoutAction.timeout) as vlock:
+        if vlock is None:
+            raise RuntimeError(fmt, "write")
+        _install(venvdir)
+    with lockfile.timeout_acquire_read(TimeoutAction.timeout) as vlock:
+        if vlock is None:
+            raise RuntimeError(fmt, "read")
+        _activate(namespace, venvdir)
+    with lockfile.timeout_acquire_read(TimeoutAction.timeout) as vlock:
+        if vlock is None:
+            raise RuntimeError(fmt, "read")
+        try:
+            _, pathname, _ = find_module('os_client_config')
+        except ImportError:
+            pathname = ''
+        if pathname.startswith(venvdir):
+            return import_module('os_client_config')
+        else:
+            with lockfile.timeout_acquire_write(TimeoutAction.timeout) as vlock:
+                if vlock is None:
+                    raise RuntimeError(fmt, "read")
+                return _setup(venvdir, requirements, onlybin, nobin)
 
 
-if __name__ == '__main__':
+# N/B: Any/All names used here are in the global scope
+if __name__ == '__main__':  # pylint: disable=C0103
     # Parse arguments
     basename = os.path.basename(sys.argv[0])
     if basename == DISCOVER_CREATE_NAME:
@@ -1184,24 +1223,32 @@ if __name__ == '__main__':
     else:
         logging.error("Script was not called as %s, %s, or %s", *ALLOWED_NAMES)
         parse_args(sys.argv, 'help')  # exits
+    del basename  # keep global namespace clean
+
     workspace = os.environ.get('WORKSPACE')
     if workspace is None:
         logging.error(EPILOG)
         sys.exit(2)
-    TimeoutAction.timeout = _dargs['timeout']
+    os.chdir(workspace)
+    # Control location of caching
+    os.environ['HOME'] = workspace
+    for _name in os.environ:
+        if _name.startswith('XDG'):
+            del os.environ[_name]
+
     # initialize default values for all locks
+    TimeoutAction.timeout = _dargs['timeout']  # locks cheat and use this
     Flock.def_path = workspace
     Flock.def_prefix = WORKSPACE_LOCKFILE_PREFIX
-    # initialize floating IP singleton
+
+    # initialize global lock singleton
     if 'lockdir' in _dargs:
         OpenstackLock(os.path.join(_dargs['lockdir'],
                                    '%s.lock' % WORKSPACE_LOCKFILE_PREFIX))
     else:
         OpenstackLock(os.path.join(workspace,
                                    '%s.lock' % GLOBAL_LOCKFILE_PREFIX))
-    # pip and os-client-config behavior depends on these
-    os.environ['HOME'] = workspace
-    os.chdir(workspace)
+
     # Allow early debugging/verbose mode
     logger = logging.getLogger()
     if _dargs['verbose']:
@@ -1209,18 +1256,20 @@ if __name__ == '__main__':
     else:
         # Lower to INFO level and higher for general details
         logger.setLevel(logging.INFO)
-    del logger # keep global namespace clean
+    del logger  # keep global namespace clean
 
-    # N/B: Any/All names used here are in the global scope
-    # pylint: disable=C0103
-    activate_and_setup(globals(),
-                       os.path.join(workspace, '.virtualenv'),
-                       PIP_REQUIREMENTS,
-                       PIP_ONLY_BINARY,
-                       PIP_NO_BINARY)
-
-    logging.info("Loading openstack client config module")
-    os_client_config = __import__('os_client_config')
+    os_client_config = activate_and_setup(globals(),
+                                          os.path.join(workspace, '.virtualenv'),
+                                          PIP_REQUIREMENTS,
+                                          PIP_ONLY_BINARY,
+                                          PIP_NO_BINARY)
+    logging.info("Loaded %s", os.path.dirname(os_client_config.__file__))
+    # Shut down the most noisy loggers
+    for noisy_logger in ('stevedore.extension',
+                         'keystoneauth.session',
+                         'requests.packages.urllib3.connectionpool'):
+        shut_me_up = logging.getLogger(noisy_logger)
+        shut_me_up.setLevel(logging.WARNING)
 
     # Shut down the most noisy loggers
     for noisy_logger in ('stevedore.extension',
@@ -1238,6 +1287,7 @@ if __name__ == '__main__':
         logging.info("Using cloud '%s' from %s", os_cloud_name, osc.config_filename)
     else:
         os_cloud_name = 'default'
+
     cloud = osc.get_one_cloud(os_cloud_name)
     del os_cloud_name  # keep global namespace clean
     service_names = cloud.get_services()
