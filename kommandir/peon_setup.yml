@@ -106,3 +106,6 @@
 
     - role: autotested
       when: '"autotested" in group_names and docker_autotest is defined'
+
+    - role: touchstone
+      touch_touchstone: True
