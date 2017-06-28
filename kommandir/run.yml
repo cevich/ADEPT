@@ -8,4 +8,7 @@
   roles:
     - common
     - peon_common
-    - autotested
+    - role: touchstone
+      touch_touchstone: False
+    - role: autotested
+      when: stone_touched
