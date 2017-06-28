@@ -13,18 +13,29 @@ Prerequisites
 
 *  Red Hat based host (RHEL_, CentOS_, Fedora_, etc), subscribed and fully updated.
 *  Python 2.7
-*  PyYAML 3.10
+*  PyYAML 3.10 or later
+*  libselinux-python 2.0 or later
+*  rsync 2.5 or later
 *  Ansible_ 2.1 or later
 *  Ansible_ 2.3 or later is required if the Kommandir node will be local (i.e. "nocloud")
 *  Root access **not** required
 
+Testing/Development
+--------------------
+
+*  python-unittest2 1.0 or later
+*  python2-mock 1.8 or later
+*  pylint 1.4 or later
+*  python-virtualenv or python2-virtualenv
+
 Openstack support:
 -------------------
 
-* redhat-rpm-config (rpm)
-* gcc
-* python-virtualenv or python2-virtualenv (EPEL rpm)
-* `Openstack client config credentials`_
+*  redhat-rpm-config (rpm)
+*  gcc
+*  python-virtualenv or python2-virtualenv (EPEL rpm)
+*  openssl-devel
+*  `Openstack client config credentials`_
 
 .. _Ansible: http://docs.ansible.com/index.html
 .. _RHEL: http://www.redhat.com/rhel
