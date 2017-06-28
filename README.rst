@@ -14,8 +14,8 @@ Prerequisites
 *  Red Hat based host (RHEL_, CentOS_, Fedora_, etc), subscribed and fully updated.
 *  Python 2.7
 *  PyYAML 3.10
-*  Ansible_ 2.1 or later (up to but excluding 2.3)
-*  Ansible_ 2.2 is required if the Kommandir node will be local (i.e. "nocloud")
+*  Ansible_ 2.1 or later
+*  Ansible_ 2.3 or later is required if the Kommandir node will be local (i.e. "nocloud")
 *  Root access **not** required
 
 Openstack support:
