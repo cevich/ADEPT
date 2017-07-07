@@ -19,20 +19,28 @@
   when: adept_debug
   with_items: ["uuid","kommandir_workspace","group_names","hostvars.exekutir.workspace","ansible_user","ansible_ssh_user","no_log_synchronize"]
 
-- name: Root access is required for non-nocloud kommandirs
-  assert:
-    that:
-        - 'ansible_user is undefined or ansible_user == "root"'
-        - 'ansible_ssh_user is undefined or ansible_ssh_user == "root"'
-        - 'ansible_user is defined or ansible_ssh_user is defined'
-  when: "'nocloud' not in group_names"
+- block:
 
-# User's home dir as remote workspace prevents clashes between concurrent jobs
-# and allows job.xn + playbooks to not run with root access.
-- name: A user named uuid exists on remote kommandir to seperate concurrent run's data.
-  user:
-    name: "{{ uuid }}"
-    state: present
+  - name: Root access is required for non-nocloud kommandirs
+    assert:
+      that:
+          - 'ansible_user is undefined or ansible_user == "root"'
+          - 'ansible_ssh_user is undefined or ansible_ssh_user == "root"'
+          - 'ansible_user is defined or ansible_ssh_user is defined'
+
+  # User's home dir as remote workspace prevents clashes between concurrent jobs
+  # and allows job.xn + playbooks to not run with root access.
+  - name: A user named uuid exists on remote kommandir to seperate concurrent run's data.
+    user:
+      name: "{{ uuid }}"
+      state: present
+
+  - name: A world-writeable /var/lock/adept directory exists
+    file:
+      path: "/var/lock/adept"
+      mode: 0777
+      state: directory
+
   when: "'nocloud' not in group_names"
 
 - name: Kommandir's extra_kommandir_setup command is executed
