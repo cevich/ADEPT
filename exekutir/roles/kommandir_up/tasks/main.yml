@@ -44,4 +44,4 @@
 
 - name: Kommandir's facts are gathered
   setup:
-    gather_subset: 'network'
+    gather_subset: 'facter'

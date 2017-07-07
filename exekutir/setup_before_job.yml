@@ -1,7 +1,6 @@
 ---
 
 - hosts: exekutir
-  gather_subset: 'network'
   vars_files:
       - exekutir_vars.yml
   pre_tasks:
@@ -38,7 +37,6 @@
 
 # All kommandir's
 - hosts: kommandir
-  gather_subset: 'network'
   vars_files:  # Still running from exekutir
       - exekutir_vars.yml
   roles:

@@ -8,7 +8,6 @@
     - meta: clear_host_errors
 
 - hosts: kommandir:!nocloud
-  gather_subset: 'network'
   vars_files:
       - exekutir_vars.yml
   roles:
@@ -19,7 +18,6 @@
       meta: refresh_inventory
 
 - hosts: exekutir
-  gather_subset: 'network'
   vars_files:
       - exekutir_vars.yml
   roles:
