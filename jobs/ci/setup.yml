@@ -9,11 +9,11 @@
     - assert:
         that:
             - 'uuid == "something_i_made_up_for_ci"'
-            - 'repo_rpms == []'
-            - 'enable_repos == []'
-            - 'disable_repos == []'
-            - 'install_rpms == []'
-            - 'git_cache_args == []'
+            - 'repo_rpms is undefined'
+            - 'enable_repos is undefined'
+            - 'disable_repos is undefined'
+            - 'install_rpms is undefined'
+            - 'git_cache_args is undefined'
             - 'some_magic_variable_for_testing == "value_for_magic_variable"'
             - 'adept_context in ["setup", "run", "cleanup"]'
   roles:

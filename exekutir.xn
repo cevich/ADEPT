@@ -66,6 +66,11 @@
     name: "ANSIBLE_CONFIG"
     value: "$WORKSPACE/ansible.cfg"
 
+# Force ansible to run in color-mode
+- variable:
+    name: "TERM"
+    value: "ansi"
+
 # Support pass-through of openstack env. vars if they're set.
 # These will be preferred over clouds.yml, so only use one method.
 # TODO: kommandir/inventory/group_vars/openstack cloud_environment needs tweaking
@@ -159,7 +164,7 @@
                     -o "PasswordAuthentication=no" \
                     -o "StrictHostKeyChecking=no" \
                     -o "UserKnownHostsFile=/dev/null" \
-                    -o "SendEnv=OS_AUTH_URL OS_TENANT_ID OS_TENANT_NAME OS_PROJECT_NAME OS_USERNAME OS_PASSWORD OS_REGION_NAME OS_CLOUD_NAME" \
+                    -o "SendEnv=OS_AUTH_URL OS_TENANT_ID OS_TENANT_NAME OS_PROJECT_NAME OS_USERNAME OS_PASSWORD OS_REGION_NAME OS_CLOUD_NAME TERM" \
                     -o "User=$UUID" \
                     -i "$WORKSPACE/ssh/exekutir_key" \
                     "$KOMMANDIR_HOST" \

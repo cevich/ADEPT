@@ -17,12 +17,13 @@
         - 'uuid is defined'
         - 'adept_path is defined'
         - 'no_log_synchronize is defined'
+        - 'kommandir_vars_exclude_keys | default() not in empty'
 
 - name: Key variables are displayed
   debug:
     var: "{{ item }}"
   when: adept_debug
-  with_items: ["kommandir_workspace","adept_path","ansible_private_key_file","no_log_synchronize"]
+  with_items: ["kommandir_workspace","adept_path","ansible_private_key_file","no_log_synchronize","kommandir_vars_exclude_keys"]
 
 - name: Exekutir's synchronization source directory exists for kommandir's workspace
   file:
@@ -120,63 +121,51 @@
 #      e.g. if install_rpms is overriden by exekutir_vars.yml it will
 #           clobber that same variable for EVERY peon, when kommandir's
 #           job.xn runs, and playbooks haul in kommandir_vars.yml
-#- name: _SOME_ exekutir_vars.yml values are allowed to leak into kommandir_vars.yml
-- block:
 
-  - name: Exekutir's exekutir_vars.yml is buffered for overriding kommandir_vars.yml
-    set_fact:
-      result: '{{ lookup("file", "{{ workspace }}/exekutir_vars.yml") }}'
+- name: Kommandir's kommandir_vars.yml exists
+  file:
+    path: "{{ kommandir_workspace }}/kommandir_vars.yml"
+    state: touch
 
-  - name: Buffer excludes variables kommandir allowed to override
-    set_fact:
-      result: '{{ result | regex_replace("({{ item }}:.*)", "") }}'
-    # Always ignore these overrides from exekutir_vars.yml
-    # Workaround ansible 2.1 bug in from_yaml
-    with_items:
-      # Don't share cleanup_assertions/workspace_keep/extra_workspace_keep/cleanup_globs
-      - >
-        {{ lookup("file", workspace ~
-                  "/roles/workspace_cleanup/defaults/main.yml")
-                  | from_yaml | to_json | from_json | list }}
-      # Don't share install_rpms/repo_rpms/enable_repos/disable_repos
-      - >
-        {{ lookup("file", workspace ~
-                  "/roles/installed/defaults/main.yml")
-                  | from_yaml | to_json | from_json | list }}
-      - ['compatible_ansible_minimum', 'compatible_ansible_maximum', 'ansible_version']
-      - ['extra_kommandir_setup', 'extra_exekutir_setup', 'job_path', 'kommandir_groups']
-      - ['public_peons', 'stonith', 'kommandir_name_prefix']
+- name: Kommandir's kommandir_vars.yml is buffered
+  set_fact:
+    result: '{{ lookup("file", kommandir_workspace ~ "/kommandir_vars.yml")
+                | from_yaml | to_json | from_json }}'
 
-  - name: Kommandir's kommandir_vars.yml file is marked as ansible managed
-    lineinfile:
-      dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
-      insertbefore: BOF  # Last defined key wins
-      line: "##### ANSIBLE MANAGED FILE ({{ role_path }})"
-      create: True  # Guarantee from this point firward, it always exists
+- name: Kommandir's kommandir_vars.yml does not exist
+  file:
+    path: "{{ kommandir_workspace }}/kommandir_vars.yml"
+    state: absent
 
-  - name: Kommandir's kommandir_vars.yml may differ except for values from Exekutir
-    lineinfile:
-      dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
-      regexp: '^{{ item.key }}:.*'
-      line: '{{ item.key }}: {{ item.value }}'
-    # Workaround ansible 2.1 bug in from_yaml
-    with_dict: |
-      {{ lookup("file", kommandir_workspace ~ "/kommandir_vars.yml") |
-         from_yaml | to_json | from_json |
-         combine( result | from_yaml | to_json | from_json ) }}
+- debug: var=result
 
-  - name: Kommandir's kommandir_vars.yml excludes some exekutir-only items
-    lineinfile:
-      dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
-      regexp: '^{{ item }}:.*'
-      state: absent
-    with_items:
-      - extra_exekutir_setup
-      - job_path
-      - kommandir_groups
-      - stonith
+- name: Kommandir's kommandir_vars.yml is re-written except excluded values
+  lineinfile:
+    path: "{{ kommandir_workspace }}/kommandir_vars.yml"
+    regexp: '^{{ item.key }}:.*'
+    line: '{{ item.key }}: {{ item.value }}'
+    create: True
+  when: item.key not in kommandir_vars_exclude_keys
+  with_dict: "{{ result }}"
 
-  # End of block
+- name: Kommandir's kommandir_vars.yml file hard-codes important runtime values
+  lineinfile:
+    dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
+    regexp: '^{{ item.key }}:.*'
+    line: '{{ item.key }}: {{ item.value }}'
+  with_dict:
+    uuid: "{{ uuid }}"
+    job_name: "{{ job_name }}"
+    adept_debug: "{{ adept_debug }}"
+    cleanup: "{{ cleanup | default(True) }}"
+    no_log_synchronize: "{{ no_log_synchronize | default(True) }}"
+    global_lockdir: '{{ "/var/lock/adept" if "nocloud" not in hostvars.kommandir.group_names else None }}'
+
+- name: Kommandir's kommandir_vars.yml file is marked as ansible managed
+  lineinfile:
+    dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
+    insertbefore: BOF  # Last defined key wins
+    line: "##### ANSIBLE MANAGED FILE ({{ role_path }})"
 
 - name: If Exekutir's workspace has a cache directory, assume it's pre-populated for use
   file:
