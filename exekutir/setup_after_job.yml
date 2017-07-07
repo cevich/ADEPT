@@ -2,14 +2,12 @@
 
 # Some Exekutir variable values are referenced by kommandir
 - hosts: all
-  gather_subset: 'network'
   vars_files:
       - exekutir_vars.yml
   roles:
     - common
 
 - hosts: kommandir:!nocloud
-  gather_subset: 'network'
   vars_files:
       - exekutir_vars.yml
   roles:

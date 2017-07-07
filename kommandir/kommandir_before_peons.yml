@@ -10,7 +10,7 @@
   pre_tasks:
     - name: Gather kommandir facs exclusive of other inventory hosts
       setup:
-        gather_subset: 'network'
+        gather_subset: 'facter'
   roles:
     - common
     - role: ansible_versioned
