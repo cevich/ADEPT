@@ -1,0 +1,7 @@
+---
+
+# Defines minimum (exclusive) ansible version required
+compatible_ansible_minimum:
+
+# Defines maximum (inclusive) ansible version required
+compatible_ansible_maximum:
