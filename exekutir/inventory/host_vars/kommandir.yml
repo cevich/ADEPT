@@ -25,6 +25,9 @@ install_rpms:
     - PyYAML
     - python-virtualenv
     - gcc
+    - redhat-rpm-config
+    - openssl-devel
+    - libffi-devel
     - ansible
 
 git_cache_args:
