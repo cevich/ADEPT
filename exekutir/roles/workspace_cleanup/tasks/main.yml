@@ -17,7 +17,7 @@
 - name: The result variable lists 'workspace/*' when cleanup_globs is empty
   set_fact:
     result:
-        - '{{ workspace }}/*'
+        - '*'
   when: cleanup_globs | default() in empty
 
 - name: The result variable buffers the cleanup_globs variable
