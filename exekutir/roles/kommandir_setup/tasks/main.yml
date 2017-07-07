@@ -14,3 +14,14 @@
   cron:
     special_time: daily
     job: /bin/find /home -atime +{{ purge_home_days|int() }} -exec rm -f {} +
+
+- name: SSHd is configured to accept OS_* and TERM environment vars
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    block: "AcceptEnv OS_AUTH_URL OS_TENANT_ID OS_TENANT_NAME OS_PROJECT_NAME OS_USERNAME OS_PASSWORD OS_REGION_NAME OS_CLOUD_NAME TERM"
+
+- name: sshd service is restarted
+  service:
+    name: sshd
+    enabled: true
+    state: restarted
