@@ -4,23 +4,30 @@
     that:
         - 'docker_autotest is defined'
 
-- name: Docker Autotest test image known in fqin format
-  set_fact:
-    # Must be all one string. Host, User, and Tag are optional.
-    test_image_fqin: >
-      {%- if docker_autotest.test_image.host | default() not in empty -%}\
-          {{ docker_autotest.test_image.host }}/\
-      {%- endif -%}\
-      \
-      {%- if docker_autotest.test_image.user | default() not in empty -%}\
-          {{ docker_autotest.test_image.user }}/\
-      {%- endif -%}\
-      \
-      {{ docker_autotest.test_image.name }}\
-      \
-      {%- if docker_autotest.test_image.tag | default() not in empty -%}\
-        :{{ docker_autotest.test_image.tag }}\
-      {%- endif -%}
+- block:
+
+    - name: Docker Autotest test image known in fqin format
+      set_fact:
+        # Must be all one string. Host, User, and Tag are optional.
+        test_image_fqin: >
+          {%- if docker_autotest.test_image.host | default() not in empty -%}
+              {{ docker_autotest.test_image.host }}/
+          {%- endif -%}
+
+          {%- if docker_autotest.test_image.user | default() not in empty -%}
+              {{ docker_autotest.test_image.user }}/
+          {%- endif -%}
+
+          {{ docker_autotest.test_image.name }}
+
+          {%- if docker_autotest.test_image.tag | default() not in empty -%}
+            :{{ docker_autotest.test_image.tag }}
+          {%- endif -%}
+
+    - name: FQIN image format doesn't begin/end in a newline
+      set_fact:
+        test_image_fqin: "{{ test_image_fqin | trim() }}"
+
   when: docker_autotest.test_image is defined and
         docker_autotest.test_image.name | default() not in empty
 
