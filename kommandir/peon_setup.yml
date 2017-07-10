@@ -2,7 +2,7 @@
 
 # N/B: This file can be overwritten by a copy from job_path.
 
-- hosts: peons:!nocloud
+- hosts: peons:!recycled
   gather_facts: False  # Need peon_pre_raw_cmds run first
   # Outside of debug-mode, run all peons as fast as possible
   strategy: "{{ 'linear' if adept_debug else 'free' }}"
@@ -96,6 +96,14 @@
       when: not hostvars[inventory_hostname].stone_touched and
             sysconfig_dss_lines | default([]) != []
 
+
+- hosts: peons
+  gather_facts: False  # Need peon_pre_raw_cmds run first
+  # Outside of debug-mode, run all peons as fast as possible
+  strategy: "{{ 'linear' if adept_debug else 'free' }}"
+  vars_files:
+      - kommandir_vars.yml
+  roles:
     - selinux_enforcing
 
     - services
