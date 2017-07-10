@@ -982,7 +982,7 @@ def parse_args(argv, operation='help'):
                             help=('Path to filename containing cloud-config userdata'
                                   ' YAML to use instead of default (Optional).'))
 
-        parser.add_argument('--lockdir', '-l', default='', type=str,
+        parser.add_argument('--lockdir', '-l', default=None, type=str,
                             help=('Absolute path to directory where global lock file'
                                   ' should be created/used.'))
 
@@ -1242,7 +1242,7 @@ if __name__ == '__main__':  # pylint: disable=C0103
     Flock.def_prefix = WORKSPACE_LOCKFILE_PREFIX
 
     # initialize global lock singleton
-    if 'lockdir' in _dargs:
+    if bool(_dargs.get('lockldir')):
         OpenstackLock(os.path.join(_dargs['lockdir'],
                                    '%s.lock' % WORKSPACE_LOCKFILE_PREFIX))
     else:
