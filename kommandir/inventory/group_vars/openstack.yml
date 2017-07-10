@@ -40,6 +40,7 @@ cloud_provisioning_command:
     command: >
         bin/openstack_exclusive_create.py \
             {{ "--verbose" if adept_debug == True else "" }} \
+            {{ "--lockdir=" ~ hostvars.kommandir.global_lockdir if hostvars.kommandir.global_lockdir|default() not in empty else ""}} \
             --image {{ peon_image }} \
             --flavor {{ peon_flavor }} \
             {{ "--private" if public_peons is undefined or public_peons != True else "" }} \
