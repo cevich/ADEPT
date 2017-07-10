@@ -27,6 +27,8 @@ Testing/Development
 *  python2-mock 1.8 or later
 *  pylint 1.4 or later
 *  python-virtualenv or python2-virtualenv
+*  Optional (for building documentation), ``make``, ``python-sphinx``,
+   and ``docutils`` or equivalent for your platform.
 
 Openstack support:
 -------------------

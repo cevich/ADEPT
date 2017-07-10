@@ -101,6 +101,7 @@ Openstack Example
    output, and retain runtime-workspace files instead of removing them.
 
     ::
+
         (from the adept repository root)
 
         $ export WORKSPACE=/tmp/workspace
