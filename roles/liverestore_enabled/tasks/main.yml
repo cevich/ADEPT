@@ -1,6 +1,6 @@
 ---
 
-- name: docker/docker-latest services are stopped
+- name: docker services are stopped
   service:
     name: "{{ item }}"
     state: stopped
@@ -10,45 +10,22 @@
     - "docker"
     - "docker-latest"
 
-- name: The docker/docker-latest systemd unit config. drop-directory exists
-  file:
-    path: "/etc/systemd/system/{{ item }}.service.d"
-    state: directory
-  when: 'is_enterprise or item != "docker-latest"'
-  with_items:
-    - "docker"
-    - "docker-latest"
+- name: Copy systemd unit files for customization
+  copy:
+    remote_src: True
+    src: "{{ item }}"
+    dest: "/etc/systemd/system/{{ item | basename() }}"
+  when: 'is_enterprise or not item | search("latest")'
+  with_fileglob:
+    - "/usr/lib/systemd/system/docker*.service"
 
-- name: The docker/docker-latest config. drop-file is marked ansible-managed
-  blockinfile:
-    path: "/etc/systemd/system/{{ item }}.service.d/liverestore.conf"
-    create: True
-  when: 'is_enterprise or item != "docker-latest"'
-  with_items:
-    - "docker"
-    - "docker-latest"
-
-- name: docker/docker-latest config. drop-file's MountFlags option is cleared
-  inifile:
-    path: "/etc/systemd/system/{{ item }}.service.d/liverestore.conf"
-    group: "Service"
-    option: "MountFlags"
-    value: ""
-  when: 'is_enterprise or item != "docker-latest"'
-  with_items:
-    - "docker"
-    - "docker-latest"
-
-- name: docker/docker-latest config. drop-file's KillMode option is set
-  inifile:
-    path: "/etc/systemd/system/{{ item }}.service.d/liverestore.conf"
-    group: "Service"
-    option: "KillMode"
-    value: "process"
-  when: 'is_enterprise or item != "docker-latest"'
-  with_items:
-    - "docker"
-    - "docker-latest"
+- name: The MountFlags=slave option is replaced with KillMode=process in unit files
+  replace:
+    dest: "{{ item }}"
+    regexp: 'MountFlags=slave'
+    replace: 'KillMode=process'
+  with_fileglob:
+    - "/usr/lib/systemd/system/docker*.service"
 
 - name: Systemd is reloaded
   command: systemctl daemon-reload
