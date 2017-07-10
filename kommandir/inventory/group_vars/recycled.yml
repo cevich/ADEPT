@@ -1,0 +1,11 @@
+---
+
+# Members of this group are assumed to already exist with details in their host_vars file.
+
+cloud_environment:
+
+cloud_asserts:
+
+cloud_provisioning_command:
+
+cloud_destruction_command:
