@@ -10,7 +10,7 @@
   pre_tasks:
     - name: Gather kommandir facs exclusive of other inventory hosts
       setup:
-        gather_subset: 'network'
+        gather_subset: 'facter'
   roles:
     # Needed to group/add all peons
     - common
@@ -47,6 +47,6 @@
   pre_tasks:
     - name: Gather kommandir facs exclusive of other inventory hosts
       setup:
-        gather_subset: 'network'
+        gather_subset: 'facter'
   roles:
     - workspace_cleanup

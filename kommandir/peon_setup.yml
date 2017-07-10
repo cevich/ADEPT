@@ -21,7 +21,7 @@
       with_items: "{{ result.results }}"
       when: adept_debug
     - setup:
-        gather_subset: []
+        gather_subset: 'facter'
   roles: # N/B: failed_peon_junit role applied via role dependencies
     - common
     - peon_common
