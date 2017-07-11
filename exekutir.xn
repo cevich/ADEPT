@@ -21,8 +21,21 @@
                "${ADEPT_PATH}/exekutir/"*;
             echo "-----";
             EXEKUTIR_VARS="${WORKSPACE}/exekutir_vars.yml"
+            if [ ! -r "$EXEKUTIR_VARS" ];
+            then
+                echo "Creating a default exekutir_vars.yml file in workspace";
+                cat << EOF > "$EXEKUTIR_VARS";
+        ---
+        # Default exekutir_vars.yml created by exekutir.xn
+        job_path: $ADEPT_PATH/jobs/quickstart
+        kommandir_groups:
+            - nocloud
+        uuid: "x$RANDOM"
+        git_cache_args:
+        EOF
+            fi;
             echo "Contents of $EXEKUTIR_VARS";
-            [ ! -r "$EXEKUTIR_VARS" ] || cat "$EXEKUTIR_VARS";
+            cat "$EXEKUTIR_VARS";
             # Ansible requires ssh keys be setup ahead of time.  Create them if they
             # dont already exist, otherwise copy them to a standard place
             # from the $ANSIBLE_PRIVATE_KEY_FILE variable if it was exported.

@@ -123,10 +123,11 @@
 #           clobber that same variable for EVERY peon, when kommandir's
 #           job.xn runs, and playbooks haul in kommandir_vars.yml
 
-- name: Kommandir's kommandir_vars.yml exists
-  file:
-    path: "{{ kommandir_workspace }}/kommandir_vars.yml"
-    state: touch
+- name: Kommandir's kommandir_vars.yml exists as a YAML dictionary
+  lineinfile:
+    dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
+    line: 'uuid: will_be_replaced'
+    create: True
 
 - name: Kommandir's kommandir_vars.yml is buffered
   set_fact:

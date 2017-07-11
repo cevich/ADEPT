@@ -48,14 +48,23 @@ Openstack support:
 Quickstart
 ===========
 
+This demonstration doesn't do anything extraordinarily useful, however it does
+demonstrate ADEPT's essential purpose:  **Setup an initial state, execute
+nested playbooks, maintain the state, and reqire only a very small number
+of dependencies**
+
+In this case, the nested playbooks reside under ``jobs/quickstart``.  One
+playbook is executed for each transition (``setup``, ``run``, ``cleanup``),
+however in this case they're all the same.
+
 ::
 
     # Optional: set $ANSIBLE_PRIVATE_KEY_FILE
     # if unset, a new temporary key will be generated in workspace
-    $ export ANSIBLE_PRIVATE_KEY_FILE=$HOME/.ssh/id_rsa
+    $ export ANSIBLE_PRIVATE_KEY_FILE="$HOME/.ssh/id_rsa"
 
     # Create a place for runtime details and results to be stored
-    $ export WORKSPACE=$(mktemp -d --suffix=.workspace)
+    $ export WORKSPACE="$(mktemp -d --suffix=.workspace)"
 
     # Run the ADEPT-three-step (keyboard finger-dance)
     $ ./adept.py setup $WORKSPACE exekutir.xn
@@ -63,6 +72,11 @@ Quickstart
     $ ./adept.py cleanup $WORKSPACE exekutir.xn
 
 **Notes:**
+
+#. Useful output files should be recorded under ``$WORKSPACE/results/``.
+
+#. Nearly everything runs from a copy of the source in ``$WORKSPACE``
+   created during ``setup``.
 
 #. To see select debugging output (select variable values and infos),
    append ``-e adept_debug=true`` onto any of the ``adept.py`` lines above.
@@ -72,9 +86,6 @@ Quickstart
 
 #. To see massive amounts of ugly details, append one or more ``--verbose``,
    options onto any of the ``adept.py`` lines above.
-
-#. To run a different job, simply override the path on __each__ of the
-   ``adept.py`` lines above.  e.g. ``./adept.py ... -e job_path=jobs/basic``
 
 .. The current documentation section begins next
 
