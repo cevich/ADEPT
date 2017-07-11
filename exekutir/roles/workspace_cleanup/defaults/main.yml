@@ -1,43 +1,9 @@
 ---
 
-# List of items that must be true before the role continues
-cleanup_assertions:
-    - 'empty is defined'
-    - 'inventory_hostname == "exekutir"'
-    - 'workspace is defined'
-    - 'kommandir_workspace is defined'
-    - 'workspace_keep is defined'
-    - 'extra_workspace_keep is defined'
-    - 'cleanup_globs is defined'
-
-# List of file/directory names to NOT remove
-# from exekutir's copy of kommandir's workspace
-workspace_keep:
-    # Directory containing most important things
-    - "{{ kommandir_workspace }}/results"
-    # Record of IPs / uuids
-    - "{{ kommandir_workspace }}/inventory"
-    # Exekutir + Kommandir + job overriden variables
-    - "{{ kommandir_workspace }}/kommandir_vars.yml"
-    # Exekutir workspace items...
-    - "{{ workspace }}/kommandir_workspace"
-    - "{{ workspace }}/inventory"
-    # symlink to kommandir_workspace/results"
-    - "{{ workspace }}/results"
-    - "{{ workspace }}/exekutir_setup_after_job.exit"
-    - "{{ workspace }}/exekutir_run_after_job.exit"
-    # Special case (see exekutir.xn)
-    - "{{ workspace }}/exekutir_cleanup_before_job.exit"
-    - "{{ workspace }}/exekutir_cleanup_after_job.exit"
-    # From execution of kommandir_workspace/job.xn (see exekutir.xn)
-    - "{{ workspace }}/kommandir_setup.exit"
-    - "{{ workspace }}/kommandir_run.exit"
-    - "{{ workspace }}/kommandir_cleanup.exit"
-    # Exekutir overriden variables"
-    - "{{ workspace }}/exekutir_vars.yml"
-
-# Additional file/directory names to NOT remove (combined with the list above)
-extra_workspace_keep: []
-
-# List of globs to remove (workspace/* if empty)
+# List of globs, relative to workspace to remove, if non-empty.
 cleanup_globs: []
+
+# List of absolute paths to always filter out of list formed from cleanup_globs
+cleanup_filter:
+    - "{{ workspace }}"
+    - '{{ workspace ~ "/results" }}'
