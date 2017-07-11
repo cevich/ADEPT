@@ -1,0 +1,16 @@
+---
+
+- hosts: kommandir
+  vars_files:
+      - kommandir_vars.yml
+  roles:
+    - common
+  post_tasks:
+    - set_fact:
+        result: "This is the {{ adept_context }}.yml playbook executing from a copy of jobs/quickstart/"
+    - lineinfile:
+        dest: "{{ workspace }}/results/{{ adept_context }}.txt"
+        line: "{{ result }}"
+        create: true
+    - debug:
+        var: "result"

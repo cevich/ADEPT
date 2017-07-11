@@ -1,0 +1,5 @@
+This job ({{ job_name }}) is intended to demonstrate
+some basic features of ADEPT when no exekutir_vars.yml
+file is present in the workspace.
+
+(src: {{ job_path }}/{{ job_docs_template_src }})
