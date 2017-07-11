@@ -18,6 +18,7 @@
         - 'adept_path is defined'
         - 'no_log_synchronize is defined'
         - 'kommandir_vars_exclude_keys | default() not in empty'
+        - 'kommandir_vars_copy_keys | default() not in empty'
 
 - name: Key variables are displayed
   debug:
@@ -137,8 +138,6 @@
     path: "{{ kommandir_workspace }}/kommandir_vars.yml"
     state: absent
 
-- debug: var=result
-
 - name: Kommandir's kommandir_vars.yml is re-written except excluded values
   lineinfile:
     path: "{{ kommandir_workspace }}/kommandir_vars.yml"
@@ -148,18 +147,25 @@
   when: item.key not in kommandir_vars_exclude_keys
   with_dict: "{{ result }}"
 
-- name: Kommandir's kommandir_vars.yml file hard-codes important runtime values
+- name: Exekutir's exekutir_vars.yml is buffered
+  set_fact:
+    result: '{{ lookup("file", workspace ~ "/exekutir_vars.yml")
+                | from_yaml | to_json | from_json }}'
+
+- name: Kommandir's kommandir_vars.yml file hard-codes some values from exekutir_vars.yml
   lineinfile:
     dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
-    regexp: '^{{ item.key }}:.*'
-    line: '{{ item.key }}: {{ item.value }}'
-  with_dict:
-    uuid: "{{ uuid }}"
-    job_name: "{{ job_name }}"
-    adept_debug: "{{ adept_debug }}"
-    cleanup: "{{ cleanup | default(True) }}"
-    no_log_synchronize: "{{ no_log_synchronize | default(True) }}"
-    global_lockdir: '{{ "/var/lock/adept" if "nocloud" not in hostvars.kommandir.group_names else None }}'
+    regexp: '^{{ item }}:.*'
+    line: '{{ item }}: {{ result[item] | default(hostvars.exekutir[item]) }}'
+  when: item in result or item in hostvars.exekutir
+  with_items: "{{ kommandir_vars_copy_keys }}"
+
+- name: Remote kommandir's kommandir_vars.yml file hard-codes the global_lockdir location
+  lineinfile:
+    dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
+    regexp: '^global_lockdir.*'
+    line: 'global_lockdir: "/var/lock/adept"'
+  when: '"nocloud" not in kommandir_groups'
 
 - name: Kommandir's kommandir_vars.yml file is marked as ansible managed
   lineinfile:

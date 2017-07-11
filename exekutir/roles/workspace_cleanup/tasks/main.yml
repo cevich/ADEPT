@@ -1,55 +1,52 @@
 ---
 
-################################################################
-# N/B: This may be running on an old (2.1)  version of ansible #
-################################################################
+# The only purpose of this role is to give an oportunity to remove
+# any possibly sensitive files (cloud.yml, rhsm passwords, etc)
+# from the workspace.  It does nothing unless 'cleanup_globs' is
+# defined or if adept_debug is enabled.
 
 # This needs to be configurable so role can be shared with kommandir
 - assert:
-    that: '{{ cleanup_assertions | default([]) }}'
+    that:
+      - 'empty is defined'
+      - 'workspace is defined'
+      - 'cleanup_globs is defined'
+      - 'cleanup_filter is defined'
 
 - name: Key variables are displayed
   debug:
     var: "{{ item }}"
   when: adept_debug
-  with_items: ["workspace_keep", "extra_workspace_keep", "cleanup_globs"]
+  with_items: ["workspace", "cleanup_globs", "cleanup_filter"]
 
-- name: The result variable lists 'workspace/*' when cleanup_globs is empty
-  set_fact:
-    result:
-        - '*'
-  when: cleanup_globs | default() in empty
+- block:
 
-- name: The result variable buffers the cleanup_globs variable
-  set_fact:
-    result: "{{ cleanup_globs }}"
-  when: not cleanup_globs | default() in empty
+  - name: Full paths to files/dirs to be cleaned are found & buffered
+    find:
+      follow: True
+      hidden: True
+      paths:
+          - "{{ workspace }}"
+      patterns: "{{ cleanup_globs }}"
+      recurse: True
+    register: result
 
-- name: All workspace items matching result glob list are recursively found
-  find:
-    follow: True
-    hidden: True
-    paths:
-        - "{{ workspace }}"
-    patterns: "{{ result }}"
-    recurse: True
-  register: result
+  - name: The workspace directory, and results subdirectory is excluded from the list of paths
+    set_fact:
+      # if cleanup_filter evaluates to False, use the empty-list default
+      result: '{{ result.files | map(attribute="path") |
+                  difference(cleanup_filter | default([], True)) }}'
 
-- name: Result list formed without workspace or kommandir_workspace
-  set_fact:
-    result: '{{ result.files | map(attribute="path") | difference([workspace, kommandir_workspace]) }}'
+  - name: Items that would have been removed are listed
+    debug:
+      var: "result"
+    when: adept_debug
 
-- name: Unnecessary items removed from workspace if not listed in workspace_keep
-  file:
-    path: "{{ item }}"
-    state: absent
-  when: not adept_debug and item | search(workspace | regex_escape())
-  # Can't easily do globbing, next best thing is to NOT delete
-  # things known to be useful later.
-  with_items: '{{ result | difference(workspace_keep | union(extra_workspace_keep)) }}'
+  - name: Unnecessary items removed from workspace
+    file:
+      path: "{{ item }}"
+      state: absent
+    when: not adept_debug
+    with_items: '{{ result }}'
 
-- name: Items that would have been removed are listed if adept_debug enabled
-  debug:
-    var: "item"
-  when: adept_debug
-  with_items: '{{ result | difference(workspace_keep | union(extra_workspace_keep)) }}'
+  when: cleanup_globs | default() not in empty
