@@ -18,6 +18,3 @@ too_old: 3
 
 # Path to file/dir on kommandir with ctime stamp indicating creation-time
 epoch_path: "/var/lib/cloud/instance/boot-finished"
-
-# When true, force destruction of kommandir, despite it's age
-stonith: True
