@@ -813,12 +813,12 @@ class Variable(ActionBase):
                 self.yamlerr('executing',
                              'environment variable %s does not exist '
                              'in environment' % self._from_env)
-            elif self._default is not None:
-                value = self._default  # default
-            else:
+            elif os.environ.get(self._from_env, '').strip() != '':
                 value = os.environ[self._from_env].strip()
+            else:
+                value = self._default  # default
             # Don't allow empty values from environment, only empty defaults
-            if self._default is None and value == '':
+            if self._default is None and value in [None, '']:
                 self.yamlerr('executing',
                              'environment variable %s is empty'
                              % self._from_env)
