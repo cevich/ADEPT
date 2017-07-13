@@ -81,9 +81,10 @@ class TestContentRegexs(TestCaseBase):
     regexes = (re.compile(r'/usr/bin/bash'),
                re.compile(r'/usr/bin/sh'),
                re.compile(r'/usr/bin/cp'),
-               re.compile(r' /bin/test'),
                re.compile(r'/usr/bin/mkdir'),
                re.compile(r'/usr/bin/python'),
+               re.compile(r' /bin/test'),
+               re.compile(r' /bin/env'),
               )
     # If non-None, contain iterable of relative paths to files
     check_files = None
