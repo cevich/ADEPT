@@ -98,7 +98,7 @@
 
 # Display what we got
 - command:
-    filepath: /bin/env
+    filepath: /usr/bin/env
 
 # For all contexts, exit non-zero immediatly on failure.
 # Transition summary:
