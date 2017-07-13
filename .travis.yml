@@ -20,7 +20,7 @@ env:
     global:
         - TYPOS="komandir executir ecoh roel fixup! squash! FIXME id_rsa '<<<<<<<' '=======' '>>>>>>>'"
         - PATH="$PATH:$VIRTUAL_ENV/bin"
-        - ANSIBLE_VERSION=2.1
+        - ANSIBLE_VERSION=2.3
 
 install:
     # These seem to match up roughly with behavior on RHEL 7
