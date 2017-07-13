@@ -29,7 +29,7 @@
     - "docker-latest"
 
 - name: docker/docker-latest config. drop-file's MountFlags option is cleared
-  inifile:
+  ini_file:
     path: "/etc/systemd/system/{{ item }}.service.d/liverestore.conf"
     group: "Service"
     option: "MountFlags"
@@ -40,7 +40,7 @@
     - "docker-latest"
 
 - name: docker/docker-latest config. drop-file's KillMode option is set
-  inifile:
+  ini_file:
     path: "/etc/systemd/system/{{ item }}.service.d/liverestore.conf"
     group: "Service"
     option: "KillMode"
