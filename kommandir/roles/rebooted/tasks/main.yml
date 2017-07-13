@@ -31,9 +31,9 @@
 
   when: needs_reboot == True
 
+- name: Peon is accessable after reboot
+  include: "{{ playbook_dir }}/roles/peon_up/tasks/main.yml"
+
 - name: needs_reboot flag is set false
   set_fact:
     needs_reboot: False
-
-- name: Peon is accessable after reboot
-  include: "{{ playbook_dir }}/roles/peon_up/tasks/main.yml"

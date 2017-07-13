@@ -21,6 +21,7 @@ kommandir_vars_exclude_keys:
 # on the current exekutir values if defined (except global_lockdir
 # which is always overriden)
 kommandir_vars_copy_keys:
+  - "public_peons"
   - "cleanup_globs"
   - "uuid"
   - "job_name"

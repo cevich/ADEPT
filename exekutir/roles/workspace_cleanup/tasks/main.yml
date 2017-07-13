@@ -40,13 +40,13 @@
   - name: Items that would have been removed are listed
     debug:
       var: "result"
-    when: adept_debug
+    when: adept_debug or 'nocloud' in hostvars.kommandir.group_names
 
   - name: Unnecessary items removed from workspace
     file:
       path: "{{ item }}"
       state: absent
-    when: not adept_debug
+    when: not adept_debug and 'nocloud' not in hostvars.kommandir.group_names
     with_items: '{{ result }}'
 
   when: cleanup_globs | default() not in empty
