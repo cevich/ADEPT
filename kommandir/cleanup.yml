@@ -15,32 +15,18 @@
     # Needed to group/add all peons
     - common
 
-- hosts: all  # Include kommandir, so if all peons fail, clear_host_errors still works
-  gather_facts: False
-  vars_files:
-      - kommandir_vars.yml
-  roles:
-    - role: peon_up
-      reboot_context: "Cleanup"
-      when: inventory_hostname != "kommandir"
-
-    - role: unsubscribed
-      when: cleanup and
-            inventory_hostname != "kommandir" and
-            "subscribed" in group_names
-  post_tasks:
-    - meta: clear_host_errors
-
 - hosts: peons
-  # Can't assume hosts are reachable
   gather_facts: False
   vars_files:
       - kommandir_vars.yml
   roles:
     - common
     - peon_common
+    - role: unsubscribed
+      when: cleanup and
+            "subscribed" in group_names
     - role: peon_destroyed
-      when: cleanup | default(True)
+      when: 'cleanup | default(True) and inventory_hostname != "kommandir"'
 
 - hosts: kommandir
   # Can't assume all hosts are reachable
