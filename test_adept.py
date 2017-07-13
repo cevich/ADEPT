@@ -1177,9 +1177,9 @@ class TestVariable(TestCaseBase):
             for safe in self.uut.SAFE_ENV_VARS:
                 test_var = self.uut.Variable(123, name="foo", from_env=safe)
                 self.assertEqual(test_var(), 0)  # side effects!!!!
-                if test_var.global_vars['foo'] != self.env[safe]:
+                if test_var.global_vars.get('foo') != self.env[safe]:
                     self.trace()
-                self.assertEqual(test_var.global_vars['foo'], self.env[safe])
+                self.assertEqual(test_var.global_vars.get('foo'), self.env[safe])
 
             self.uut.ActionBase.global_vars = {}
             for value in ('foo', 'bar', 'baz'):
@@ -1189,6 +1189,21 @@ class TestVariable(TestCaseBase):
             self.assertEqual(self.uut.ActionBase.global_vars,
                              {'BAZ': 'baz', 'FOO': 'foo', 'BAR': 'bar'})
 
+    def test_default(self):
+        """Verify action behaves as documented, using default value"""
+        # Prevent __call__ from printing out a bunch of crap
+        mock_call = lambda mockself: mockself.action()
+        mock_env = {'bar': 'baz'}
+        with patch.object(self.uut.ActionBase, '__call__', mock_call), patch.dict(self.uut.os.environ, mock_env, clear=True):
+
+            self.uut.ActionBase.global_vars = {}
+            test_var = self.uut.Variable(123, name="foo", from_env="foo", default='bar')
+            self.assertEqual(test_var(), 0)  # side effects!!!!
+            self.assertEqual(test_var.global_vars.get('foo'), 'bar')
+
+            test_var = self.uut.Variable(123, name="bar", from_env="bar", default='')
+            self.assertEqual(test_var(), 0)  # side effects!!!!
+            self.assertEqual(test_var.global_vars.get('bar'), 'baz')
 
 
 if __name__ == '__main__':
