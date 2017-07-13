@@ -5,6 +5,8 @@ use_dnf: True
 installed_rpms:
     - docker
     - atomic
+    - runc
+    - "{{ 'oci-umount' if ansible_distribution_major_version | int > 25 else 'runc' }}"
     - docker-selinux
     - procps
     - tar
