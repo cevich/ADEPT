@@ -9,6 +9,8 @@ installed_enablerepo:
 installed_rpms:
     - docker
     - docker-latest
+    - runc
+    - oci-umount
     - atomic
     - docker-selinux
     - procps
