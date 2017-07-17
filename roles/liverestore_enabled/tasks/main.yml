@@ -31,7 +31,7 @@
 - name: docker/docker-latest config. drop-file's MountFlags option is cleared
   ini_file:
     dest: "/etc/systemd/system/{{ item }}.service.d/liverestore.conf"
-    group: "Service"
+    section: "Service"
     option: "MountFlags"
     value: ""
   when: 'is_enterprise or item != "docker-latest"'
@@ -42,7 +42,7 @@
 - name: docker/docker-latest config. drop-file's KillMode option is set
   ini_file:
     dest: "/etc/systemd/system/{{ item }}.service.d/liverestore.conf"
-    group: "Service"
+    section: "Service"
     option: "KillMode"
     value: "process"
   when: 'is_enterprise or item != "docker-latest"'
