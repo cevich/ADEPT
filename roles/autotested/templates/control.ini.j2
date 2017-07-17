@@ -5,7 +5,7 @@
 # e.g. "docker_cli/run,docker_cli/attach/no_stdin"
 exclude = example,subexample,pretest_example,intratest_example,
           posttest_example,
-          docker_cli/run_volumes,
+          docker_cli/run_volumes/volumes_rw,
 {% if is_atomic %}
           {# Atomic host does not have git #}
           docker_cli/build/git_path,
