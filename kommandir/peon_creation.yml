@@ -14,3 +14,15 @@
             "recycled" not in group_names
     - role: peon_up
       reboot_context: "creation"
+  post_tasks:
+    - name: Some hosts may need ansible-dependencies installed before anything else happens.
+      raw: "{{ item }}"  # raw commands don't require python
+      args:
+        executable: "/bin/bash"
+      register: result
+      with_items: '{{ peon_pre_raw_cmds | default([]) }}'
+    - name: Peon's peon_pre_raw_cmds results are displayed
+      debug:
+          var: "item.stdout_lines"
+      with_items: "{{ result.results }}"
+      when: adept_debug

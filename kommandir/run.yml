@@ -9,6 +9,6 @@
     - common
     - peon_common
     - role: touchstone
-      touch_touchstone: False
+      touchstone_filepath: "/var/lib/autotested_touchstone"
     - role: autotested
       when: stone_touched
