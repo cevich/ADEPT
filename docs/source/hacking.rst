@@ -56,31 +56,29 @@ prerequisites listed for both Kommandir and Exekutir systems.
     Checking contents of test_file_from_cleanup.txt
     All checks pass
 
-
 Local Kommandir
 ----------------
 
-Having a Kommandir (a.k.a. "Slave") node is useful in production because it offloads
+Having a *kommandir* (a.k.a. "Slave") node is useful in production because it offloads
 much of the grunt-work onto a dedicated system, with dedicated resources.  It also
 decouples the job environment/setup from the execution environment.  Using one
 only makes sense in production-environments where the 5-minute setup cost can
 be spread over tens or hundreds of jobs.
 
-However, for local testing/development purposes, the extra Kommandir setup time
-can be excessive.  If the local system (the Exekutir) meets all the chosen cloud,
-Kommandir, and job prerequisites, it's possible to use the Exekutir also as the
-Kommandir.  Note however, the Kommandir's ``job.xn`` transition file and playbooks will
+However, for local testing/development purposes, the extra *kommandir* setup time
+can be excessive.  If the local system (the *exekutir*) meets all the chosen cloud,
+*kommandir*, and job :ref:`Prerequisites`, it's possible to use the *exekutir* also as the
+*kommandir*.  Note however, the *kommandir's* ``job.xn`` transition file and playbooks will
 still run from a dedicated workspace (created by the Exekutir).
 
-Set the Exekutir's ``kommandir_groups`` (list) variable to include "nocloud"
+Set the Exekutir's ``kommandir_groups`` (list) variable to include ``nocloud``
 and enable the flag to create peons with cloud-external IP addresses.
 e.g. In ``exekutir_vars.yml``:
 
 ::
 
- kommandir_groups:
-     - nocloud
- public_peons: True
+    kommandir_groups: ["nocloud"]
+    public_peons: True
 
 Avoid repeating any context transition more than once, against the same
 workspace.  The same advice applies to recycling ``uuid`` values.  Both
@@ -90,59 +88,51 @@ the ``cleanup`` context, then start over again with ``setup`` against
 a fresh workspace.
 
 
-Openstack Example
+Openstack Cloud
 ------------------
 
-#. Create a local workspace directory, and populating the
-   Exekutir's variables.  In this example, the default (bundled) peon
-   definitions are used (from ``kommandir/inventory/host_vars/``).
-   All Peon's are members of the ``openstack`` group and use predefined
-   image names.  Other options are set to enable subscriptions, use verbose
-   output, and retain runtime-workspace files instead of removing them.
+This is the default, if no ``kommandir_groups`` are specified.  I implies
+that you've either set the ``$OS_*`` environment variables correctly,
+or dropped a ``clouds.yml`` file in the workspace (see below).
+
+
+#. Create a local workspace directory, and setup your openstack credentials
+   via the standard ``os-client-config`` file ``clouds.yml`` as show below.  Most of the
+   options are specific to the particular openstack setup.  The file
+   `format and options are documented here`_.
+
+    .. include:: ex_ws_setup.inc
+
+    .. include:: clouds_yml.inc
+
+#. Populate the *exekutir's* variables.  In this example, the default (bundled) *peon*
+   definitions are used (from ``kommandir/inventory/host_vars/``). The other values
+   select the job, name the kommandir VM, enable debugging and setup subscriptions.
+   The final value makes sure the *kommandir* VM has access to the same cloud for
+   creating the *peons*
 
     ::
 
-        (from the adept repository root)
-
-        $ export WORKSPACE=/tmp/workspace
-        $ rm -rf $WORKSPACE
-        $ mkdir -p $WORKSPACE
         $ cat << EOF > $WORKSPACE/exekutir_vars.yml
         ---
         job_path: $PWD/jobs/basic
         kommandir_name_prefix: "$USER"
-        kommandir_groups:
-            - nocloud
-        public_peons: True
         adept_debug: True
-        workspace_cleanup_enabled: False
-        no_log_synchronize: False
         rhsm:
             username: nobody@example.com
             password: thepassword
+        extra_kommandir_setup:
+            command: >
+                cp "{{ hostvars.exekutir.workspace }}/clouds.yml"
+                   "{{ hostvars.exekutir.kommandir_workspace }}/"
         EOF
 
-#. Setup your openstack cloud name (``default`` in this case) and credentials.
-   You may either use the standard ``$OS_*`` variables, or the simpler
-   ``os-client-config`` file ``clouds.yml`` as show below.  Most of these
+#. Setup your openstack credentials via the standard
+   ``os-client-config`` file ``clouds.yml`` as show below.  Most of the
    options are specific to the particular openstack setup.  The file
    `format and options are documented here`_.
 
-    ::
-
-        $ cat << EOF > $WORKSPACE/clouds.yml
-        ---
-        clouds:
-            default:
-                auth_type: thepassword
-                auth:
-                    auth_url: http://example.com/v2.0
-                    password: foobar
-                    tenant_name: baz
-                    username: snafu
-                regions:
-                    - Oz
-                verify: False
+    .. include:: clouds_yml.inc
 
 #. Apply the ADEPT ``setup`` context.  Once this completes, a copy of all runtime
    source material will have been transferred to the workspace.  This includes
@@ -150,67 +140,15 @@ Openstack Example
    manual changes made to the source, will not be reflected at runtime unless
    they are manually copied into the correct workspace location.
 
-    ::
-
-        $ ./adept.py setup $WORKSPACE exekutir.xn
-
-        localhost ######################################
-        Parameters:
-            optional = ''
-            xn = 'exekutir.xn'
-            workspace = '/tmp/workspace'
-            context = 'setup'
-
-        ...cut...many...lines...
+    .. include:: adept_setup.inc
 
 #. Apply the ADEPT ``run`` context and/or inspect the workspace state.
 
-    ::
-
-        $ ./adept.py run $WORKSPACE exekutir.xn
-
-        localhost ######################################
-        Parameters:
-            optional = ''
-            xn = 'exekutir.xn'
-            workspace = '/tmp/workspace'
-            context = 'run'
-
-        ...cut...many...lines...
+    .. include:: adept_run.inc
 
 #. Whether or not ``setup`` or ``run`` were successful, always apply ``cleanup``
    to release cloud resources.
 
-    ::
-
-        $ ./adept.py cleanup $WORKSPACE exekutir.xn
-
-        localhost ######################################
-        Parameters:
-            optional = ''
-            xn = 'exekutir.xn'
-            workspace = '/tmp/workspace'
-            context = 'cleanup'
-
-        ...cut...many...lines...
-
-        $ ls $WORKSPACE
-
-        ansible.cfg             exekutir_ansible.log           roles
-        cache                   exekutir_setup_after_job.exit  run_after_job.yml
-        callback_plugins        exekutir_vars.yml              run_before_job.yml
-        cleanup_after_job.yml   inventory                      setup_after_job.yml
-        cleanup_before_job.yml  kommandir_setup.exit           setup_before_job.yml
-        clouds.yml              kommandir_workspace            ssh
-        dockertest              results
+    .. include:: adept_cleanup.inc
 
 .. _`format and options are documented here`: https://docs.openstack.org/developer/os-client-config/
-
-
-Helpful References
-------------------------
-
-*  split-up host/group variables http://docs.ansible.com/ansible/intro_inventory.html#splitting-out-host-and-group-specific-data
-*  magic variables http://docs.ansible.com/ansible/playbooks_variables.html#magic-variables-and-how-to-access-information-about-other-hosts
-*  scoping http://docs.ansible.com/ansible/playbooks_variables.html#variable-scopes (esp. need a blurb about silent-read-only)
-*  roles http://docs.ansible.com/ansible/playbooks_roles.html#roles
