@@ -444,6 +444,10 @@ class Command(ActionBase):
 
     def __str__(self, additional=None):
         mine = {'cmd': " ".join(self.popen_dargs['args'])}
+        newcmd = mine['cmd'].splitlines()
+        if len(newcmd) > 4:
+            newcmd[2:-2] = ["<...truncated...>"]
+            mine['cmd'] = "\n".join(newcmd)
         if additional:
             mine.update(additional)
         for fname in ('stdout', 'stderr', 'exit'):

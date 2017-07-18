@@ -124,24 +124,12 @@
     line: 'uuid: will_be_replaced'
     create: True
 
-- name: Kommandir's kommandir_vars.yml is buffered
-  set_fact:
-    result: '{{ lookup("file", kommandir_workspace ~ "/kommandir_vars.yml")
-                | from_yaml | to_json | from_json }}'
-
-- name: Kommandir's kommandir_vars.yml does not exist
-  file:
-    path: "{{ kommandir_workspace }}/kommandir_vars.yml"
-    state: absent
-
-- name: Kommandir's kommandir_vars.yml is re-written except excluded values
+- name: Kommandir's kommandir_vars.yml excludes certain restricted values
   lineinfile:
     path: "{{ kommandir_workspace }}/kommandir_vars.yml"
-    regexp: '^{{ item.key }}:.*'
-    line: '{{ item.key }}: {{ item.value }}'
-    create: True
-  when: item.key not in kommandir_vars_exclude_keys
-  with_dict: "{{ result }}"
+    regexp: '^{{ item }}:.*'
+    state: absent
+  with_items: "{{ kommandir_vars_exclude_keys }}"
 
 - name: Exekutir's exekutir_vars.yml is buffered
   set_fact:
