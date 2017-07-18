@@ -42,6 +42,7 @@
             echo "-----";
             echo "Creating $WORKSPACE/ssh";
             mkdir -p "ssh";
+            rm -rf ".ssh";
             ln -sf "ssh" ".ssh";
             echo "-----";
             EXEKUTIR_KEY="ssh/exekutir_key"
@@ -62,8 +63,9 @@
             fi;
             echo "-----";
             echo "Fixing $WORKSPACE/ssh permissions";
+            chmod 600 "$WORKSPACE/ssh/"*;
             chmod 700 "$WORKSPACE/ssh";
-            chmod 600 "$WORKSPACE/ssh/"*;'
+            '
 
 # Set global variables from file contents or default values.
 # These are available to both commands (as env. vars) and in
@@ -79,26 +81,28 @@
     name: "ANSIBLE_CONFIG"
     value: "$WORKSPACE/ansible.cfg"
 
-# Force ansible to run in color-mode
+# Pass along terminal type
 - variable:
     name: "TERM"
-    value: "ansi"
+    from_env: "TERM"
+    default: "dumb"
+
+# Display what we got (excluding sensitive values, below)
+- command:
+    filepath: "/bin/bash"
+    arguments: -c 'env | egrep -iv "(OS_.*)|(.*PASSWORD.*)|(.*USERNAME.*)";'
 
 # Support pass-through of openstack env. vars if they're set.
 # These will be preferred over clouds.yml, so only use one method.
 # TODO: kommandir/inventory/group_vars/openstack cloud_environment needs tweaking
-- variable: {"name":"OS_AUTH_URL","from_env":"OS_AUTH_URL","default":""}
 - variable: {"name":"OS_TENANT_ID","from_env":"OS_TENANT_ID","default":""}
 - variable: {"name":"OS_TENANT_NAME","from_env":"OS_TENANT_NAME","default":""}
 - variable: {"name":"OS_PROJECT_NAME","from_env":"OS_PROJECT_NAME","default":""}
 - variable: {"name":"OS_USERNAME","from_env":"OS_USERNAME","default":""}
-- variable: {"name":"OS_PASSWORD","from_env":"OS_PASSWORD","default":""}
 - variable: {"name":"OS_REGION_NAME","from_env":"OS_REGION_NAME","default":""}
 - variable: {"name":"OS_CLOUD_NAME","from_env":"OS_CLOUD_NAME","default":""}
-
-# Display what we got
-- command:
-    filepath: /usr/bin/env
+- variable: {"name":"OS_AUTH_URL","from_env":"OS_AUTH_URL","default":""}
+- variable: {"name":"OS_PASSWORD","from_env":"OS_PASSWORD","default":""}
 
 # For all contexts, exit non-zero immediatly on failure.
 # Transition summary:
@@ -205,10 +209,6 @@
     filepath: "${WORKSPACE}/${ADEPT_CONTEXT}_after_job.yml"
     inventory: "${WORKSPACE}/inventory"
     exitfile: "${WORKSPACE}/exekutir_${ADEPT_CONTEXT}_after_job.exit"
-
-- command:
-    filepath: /bin/echo
-    arguments: "############# $ADEPT_CONTEXT Concluded #############"
 
 # Pass up any non-zero exit from exekutir (sync or locking problem)
 # N/B: Zero exit continues to process tasks, non-zero exit stops immediatly with that code

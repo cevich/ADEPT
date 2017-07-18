@@ -2,6 +2,9 @@
 
 docker_autotest_timeout: 30
 
+# Alternate control template for Autotested role (from kommandir's workspace)
+control_template_path: "{{ workspace }}/templates/control.ini.j2"
+
 job_subthings: >
     docker_cli/dockerhelp,
     docker_cli/version,
