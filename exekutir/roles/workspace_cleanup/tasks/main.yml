@@ -1,5 +1,9 @@
 ---
 
+################################################################
+# N/B: This may be running on an old (2.1)  version of ansible #
+################################################################
+
 # The only purpose of this role is to give an oportunity to remove
 # any possibly sensitive files (cloud.yml, rhsm passwords, etc)
 # from the workspace.  It does nothing unless 'cleanup_globs' is
