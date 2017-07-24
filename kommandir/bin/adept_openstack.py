@@ -21,6 +21,7 @@ import sys
 import os
 import os.path
 import logging
+import random
 from importlib import import_module
 from imp import find_module
 import time
@@ -196,6 +197,8 @@ class OpenstackREST(Singleton):
     response_code = None
     # Useful for debugging purposes
     previous_responses = None
+
+    float_ip_selector = staticmethod(random.choice)
 
     # Current session object
     service_sessions = None
@@ -406,13 +409,19 @@ class OpenstackREST(Singleton):
 
     def floating_ip(self):
         """
-        Cache list of floating IPs, return first un-assigned or None
+        Cache list of floating IPs, return random un-assigned or None
 
         :returns: IP address string or None
         """
         self.service_request('network', '/v2.0/floatingips', 'floatingips')
         try:
-            return self.child_search('status', value='DOWN')["floating_ip_address"]
+            # child_search() always/only returns first, match.  Use float_ip_selector() instead.
+            search_list = self.response_json
+            self.raise_if(search_list is None,
+                          TypeError, "No requests have been made/cached")
+            found = [child for child in search_list if child.get('status') == 'DOWN']
+            self.raise_if(not found, IndexError, 'Could not find available floating IP')
+            return self.float_ip_selector(found).get('floating_ip_address')
         except (KeyError, IndexError):
             return None
 
@@ -657,8 +666,7 @@ class TimeoutAssignFloatingIP(TimeoutAction):
         logging.info("Router %s maps to network id %s", net_name, net_id)
         super(TimeoutAssignFloatingIP, self).__init__(server_id, net_name, net_id)
 
-    def am_done(self, server_id, net_name, net_id):
-        """Return assigned floating IP for server or None if unassigned"""
+    def _am_done(self, server_id, net_name, net_id):
         # Assigned IPs can be stolen if two processes issue the assign-action
         # for the same IP at close to the same time.  This is only
         # only partly mitigated by locking between processes of this job.
@@ -689,6 +697,13 @@ class TimeoutAssignFloatingIP(TimeoutAction):
                     logging.info("    Assignment failed")
                 return None  # Check if ip successfully assigned
 
+    def am_done(self, server_id, net_name, net_id):
+        """Return assigned floating IP for server or None if unassigned"""
+        # Do this twice to try and catch race where multiple POSTs to
+        # '/servers/blah/action' happen at the same time (person or machine)
+        if self._am_done(server_id, net_name, net_id):
+            return self._am_done(server_id, net_name, net_id)
+        # else return None amd try again
 
 class TimeoutAttachVolume(TimeoutAction):
     """
@@ -1041,6 +1056,7 @@ def main(argv, dargs, service_sessions):
                              to request-like session instances
     :returns: Exit code integer
     """
+    random.seed()
     if dargs['operation'] in ('discover', 'create', 'exclusive'):
         logging.info('Attempting to find VM %s.', dargs['name'])
         # The general exception is re-raised on secondary exception
