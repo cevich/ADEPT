@@ -354,6 +354,8 @@ class TestDiscoverCreateDestroyBase(TestCaseBase):
             self.uut.OpenstackREST._self = None
             # Initialize singleton with fake sessions
             self.uut.OpenstackREST(FakeServiceSessions(self.fake_session))
+            # Disable random floating-ip selection
+            self.uut.OpenstackREST.float_ip_selector = staticmethod(lambda iplist: iplist[0])
 
     def fake_time(self, sleep=1):
         """Return fake_time_value after incrementing it by 1"""
@@ -438,10 +440,10 @@ class TestDiscoverCreate(TestDiscoverCreateDestroyBase):
         self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
 
     def test_floating(self):
-        """Verify new creation works including new floating ip"""
+        """Verify new creation works after floating ip is stolen during assignment"""
         with self.patched:
             self.uut.create(*self.create_args)
-        self.certify_stdout('foobar', '4.5.6.7')
+        self.certify_stdout('foobar', '8.9.0.1')
         self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
 
     def test_found(self):
