@@ -70,4 +70,4 @@
     - name: Undo Workaround of old atomic command bug
       command: setenforce 1
 
-  when: result.rc == 0
+  when: result == True

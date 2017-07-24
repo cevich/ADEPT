@@ -36,6 +36,10 @@
   strategy: "{{ 'linear' if adept_debug else 'free' }}"
   vars_files:
       - kommandir_vars.yml
+  pre_tasks:
+      - debug:
+          msg: "Warning: Free strategy in use, output sequence may not match reported TASK"
+        when: not adept_debug
   roles: # N/B: failed_peon_junit role applied via role dependencies
     - role: rawhide
       when: not hostvars[inventory_hostname].stone_touched and
@@ -55,7 +59,6 @@
             parted_cmds | default() not in empty
 
     - role: rebooted
-      # Workaround "feature" of role only being applied once per play
       reboot_context: "beginning"
       when: needs_reboot == True
 
@@ -65,6 +68,10 @@
   strategy: "{{ 'linear' if adept_debug else 'free' }}"
   vars_files:
       - kommandir_vars.yml
+  pre_tasks:
+      - debug:
+          msg: "Warning: Free strategy in use, output sequence may not match reported TASK"
+        when: not adept_debug
   roles: # N/B: failed_peon_junit role applied via role dependencies
 
     - role: lvm
@@ -99,6 +106,10 @@
   strategy: "{{ 'linear' if adept_debug else 'free' }}"
   vars_files:
       - kommandir_vars.yml
+  pre_tasks:
+      - debug:
+          msg: "Warning: Free strategy in use, output sequence may not match reported TASK"
+        when: not adept_debug
   roles: # N/B: failed_peon_junit role applied via role dependencies
 
     - role: sysconfig_docker
@@ -116,6 +127,10 @@
   strategy: "{{ 'linear' if adept_debug else 'free' }}"
   vars_files:
       - kommandir_vars.yml
+  pre_tasks:
+      - debug:
+          msg: "Warning: Free strategy in use, output sequence may not match reported TASK"
+        when: not adept_debug
   roles:
     - selinux_enforcing
 
@@ -132,6 +147,10 @@
   strategy: "{{ 'linear' if adept_debug else 'free' }}"
   vars_files:
       - kommandir_vars.yml
+  pre_tasks:
+      - debug:
+          msg: "Warning: Free strategy in use, output sequence may not match reported TASK"
+        when: not adept_debug
   roles:
 
     - role: autotested
