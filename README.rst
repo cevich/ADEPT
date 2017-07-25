@@ -6,7 +6,7 @@ ADEPT includes a python program, a collection of ansible playbooks, and
 related configurations.  Together, they help orchestrate a complete
 run of Docker Autotest over one or more local or cloud-based systems.
 
-.. The quickstart section begins next
+.. _prerequisites:
 
 Prerequisites
 ==============
@@ -17,7 +17,8 @@ Prerequisites
 *  libselinux-python 2.0 or later
 *  rsync 2.5 or later
 *  Ansible_ 2.1 or later
-*  Ansible_ 2.3 or later is required if the Kommandir node will be local (i.e. "nocloud")
+*  Ansible_ 2.3 or later is required if a
+   slave (a.k.a. *kommandir*) is not used (i.e. ``kommandir_groups: ["nocloud"]``)
 *  Root access **not** required
 
 Testing/Development
@@ -49,9 +50,10 @@ Quickstart
 ===========
 
 This demonstration doesn't do anything extraordinarily useful, however it does
-demonstrate ADEPT's essential purpose:  **Setup an initial state, execute
-nested playbooks, maintain the state, and reqire only a very small number
-of dependencies**
+demonstrate ADEPT's essential purpose:
+
+    *Setup an initial state, execute nested playbooks, maintain the state,
+    and reqire only a very small number of dependencies*
 
 In this case, the nested playbooks reside under ``jobs/quickstart``.  One
 playbook is executed for each transition (``setup``, ``run``, ``cleanup``),
@@ -87,7 +89,7 @@ however in this case they're all the same.
 #. To see massive amounts of ugly details, append one or more ``--verbose``,
    options onto any of the ``adept.py`` lines above.
 
-.. The current documentation section begins next
+.. _latest_documentation:
 
 Latest Documentation
 ======================

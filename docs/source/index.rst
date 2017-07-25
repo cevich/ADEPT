@@ -7,19 +7,25 @@
 
    README
    introduction
-   overview
-   topology
    definitions
+   topology
+   overview
    hacking
    variables
+   examples
+   reference
 
 .. include:: README.rst
-   :end-before: The quickstart section begins next
+   :end-before: _prerequisites:
 
 .. include:: introduction.rst
 
 .. include:: ../../README.rst
-   :start-after: The quickstart section begins next
+   :start-after: _latest_documentation:
+
+.. include:: definitions.rst
+
+.. include:: topology.rst
 
 .. include:: overview.rst
 
@@ -27,10 +33,13 @@
 
 .. include:: variables.rst
 
+.. include:: examples.rst
 
-Additional Documentation
-=========================
+.. include:: reference.rst
 
-Autotest documentation is available at: http://autotest.readthedocs.org/en/latest/
+Indices and tables
+==================
 
-Docker Autotest documentation is available at: http://docker-autotest.readthedocs.org/en/latest/
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
