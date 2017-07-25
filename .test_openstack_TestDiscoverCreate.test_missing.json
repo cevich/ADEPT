@@ -287,6 +287,37 @@
     "status_code": 200
   },
   {
+    "GET": "http://1.2.3.4/servers/102f1788-3b0a-4a37-aecc-547996c1db08",
+    "response": {
+      "server": {
+        "OS-EXT-STS:power_state": 1,
+        "OS-EXT-STS:vm_state": "active",
+        "addresses": {
+          "network_name": [
+            {
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1b:51:76",
+              "OS-EXT-IPS:type": "fixed",
+              "addr": "5.4.3.2",
+              "version": 4
+            },
+            {
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1b:51:77",
+              "OS-EXT-IPS:type": "floating",
+              "addr": "4.5.6.7",
+              "version": 4
+            }
+          ]
+        },
+        "id": "102f1788-3b0a-4a37-aecc-547996c1db08",
+        "name": "foobar",
+        "os-extended-volumes:volumes_attached": [],
+        "status": "ACTIVE"
+      }
+    },
+    "sequence_number": 117,
+    "status_code": 200
+  },
+  {
     "GET": "http://1.2.3.4/servers",
     "response": {
       "servers": [

@@ -313,6 +313,74 @@
   },
   {
     "POST": "http://1.2.3.4/servers/102f1788-3b0a-4a37-aecc-547996c1db08/action",
+    "sequence_number": 112,
+    "status_code": 202
+  },
+  {
+    "GET": "http://1.2.3.4/servers/102f1788-3b0a-4a37-aecc-547996c1db08",
+    "response": {
+      "server": {
+        "OS-EXT-STS:power_state": 1,
+        "OS-EXT-STS:vm_state": "active",
+        "addresses": {
+          "network_name": [
+            {
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1b:51:76",
+              "OS-EXT-IPS:type": "fixed",
+              "addr": "5.4.3.2",
+              "version": 4
+            }
+          ]
+        },
+        "id": "102f1788-3b0a-4a37-aecc-547996c1db08",
+        "name": "foobar",
+        "os-extended-volumes:volumes_attached": [],
+        "status": "ACTIVE"
+      }
+    },
+    "sequence_number": 116,
+    "status_code": 200
+  },
+  {
+    "GET": "http://1.2.3.4/v2.0/floatingips",
+    "response": {
+      "floatingips": [
+        {
+          "fixed_ip_address": "3.4.5.6",
+          "floating_ip_address": "192.168.1.1",
+          "floating_network_id": "the_network_id",
+          "id": "floating_id",
+          "port_id": "the_port_id",
+          "router_id": "some_number",
+          "status": "ACTIVE",
+          "tenant_id": "something"
+        },
+        {
+          "fixed_ip_address": null,
+          "floating_ip_address": "8.9.0.1",
+          "floating_network_id": "the_network_id",
+          "id": "another_floating_id",
+          "port_id": null,
+          "router_id": null,
+          "status": "DOWN"
+        },
+        {
+          "fixed_ip_address": "4.5.6.7",
+          "floating_ip_address": "4.5.6.7",
+          "floating_network_id": "the_network_id",
+          "id": "floating_id2",
+          "port_id": "the_port_id",
+          "router_id": "some_number",
+          "status": "ACTIVE",
+          "tenant_id": "stolen"
+        }
+      ]
+    },
+    "sequence_number": 118,
+    "status_code": 200
+  },
+  {
+    "POST": "http://1.2.3.4/servers/102f1788-3b0a-4a37-aecc-547996c1db08/action",
     "sequence_number": 120,
     "status_code": 202
   },
@@ -331,9 +399,9 @@
               "version": 4
             },
             {
-              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1b:51:77",
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1b:51:78",
               "OS-EXT-IPS:type": "floating",
-              "addr": "4.5.6.7",
+              "addr": "8.9.0.1",
               "version": 4
             }
           ]
@@ -344,24 +412,7 @@
         "status": "ACTIVE"
       }
     },
-    "sequence_number": 116,
-    "status_code": 200
-  },
-  {
-    "GET": "http://1.2.3.4/servers",
-    "response": {
-      "servers": [
-        {
-          "id": "102f1788-3b0a-4a37-aecc-547996c1db08",
-          "name": "foobar"
-        },
-        {
-          "id": "547996c1db08",
-          "name": "anotherone"
-        }
-      ]
-    },
-    "sequence_number": 118,
+    "sequence_number": 122,
     "status_code": 200
   },
   {
@@ -379,9 +430,9 @@
               "version": 4
             },
             {
-              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1b:51:77",
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1b:51:78",
               "OS-EXT-IPS:type": "floating",
-              "addr": "4.5.6.7",
+              "addr": "8.9.0.1",
               "version": 4
             }
           ]
@@ -392,7 +443,55 @@
         "status": "ACTIVE"
       }
     },
-    "sequence_number": 120,
+    "sequence_number": 124,
+    "status_code": 200
+  },
+  {
+    "GET": "http://1.2.3.4/servers",
+    "response": {
+      "servers": [
+        {
+          "id": "102f1788-3b0a-4a37-aecc-547996c1db08",
+          "name": "foobar"
+        },
+        {
+          "id": "547996c1db08",
+          "name": "anotherone"
+        }
+      ]
+    },
+    "sequence_number": 218,
+    "status_code": 200
+  },
+  {
+    "GET": "http://1.2.3.4/servers/102f1788-3b0a-4a37-aecc-547996c1db08",
+    "response": {
+      "server": {
+        "OS-EXT-STS:power_state": 1,
+        "OS-EXT-STS:vm_state": "active",
+        "addresses": {
+          "network_name": [
+            {
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1b:51:76",
+              "OS-EXT-IPS:type": "fixed",
+              "addr": "5.4.3.2",
+              "version": 4
+            },
+            {
+              "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1b:51:78",
+              "OS-EXT-IPS:type": "floating",
+              "addr": "8.9.0.1",
+              "version": 4
+            }
+          ]
+        },
+        "id": "102f1788-3b0a-4a37-aecc-547996c1db08",
+        "name": "foobar",
+        "os-extended-volumes:volumes_attached": [],
+        "status": "ACTIVE"
+      }
+    },
+    "sequence_number": 220,
     "status_code": 200
   }
 ]
