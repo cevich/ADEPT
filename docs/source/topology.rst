@@ -22,6 +22,8 @@ Systems
                            \
                             -> peon
 
+.. _directory_layout:
+
 Directory Layout
 ------------------
 
