@@ -1,9 +1,5 @@
 ---
 
-- assert:
-    that:
-      - 'empty is defined'
-
 - name: Add lines to sysconfig/d-s-s
   lineinfile:
     create: true
