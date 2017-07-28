@@ -28,6 +28,14 @@
         - "groups.peons is defined"
         - 'no_log_synchronize | default() not in empty'
 
+- name: Results sub-directory for exists for inventory_hostname
+  file:
+  args:
+    path: "{{ hostvars.kommandir.workspace }}/results/{{ inventory_hostname }}"
+    state: directory
+  when: 'adept_context == "setup" and inventory_hostname != "kommandir"'
+  delegate_to: kommandir
+
 - block:  # when: inventory_hostname == "kommandir"
 
     - name: The kommandir is always a member of the nocloud group
@@ -44,15 +52,16 @@
       # This one is really noisy
       no_log: '{{ no_log_synchronize }}'
 
-  when: 'inventory_hostname == "kommandir"'
+    - name: Kommandir's hostvars are logged into results dir
+      blockinfile:
+        block: |
+          ---
+          {{ hostvars.kommandir | to_nice_yaml }}
+        create: True
+        marker: "##### ANSIBLE MANAGED FILE ({{ role_path }})"
+        path: "{{ hostvars.kommandir.workspace }}/results/kommandir_facts.yml"
 
-- name: Results sub-directory for exists for inventory_hostname
-  file:
-  args:
-    path: "{{ hostvars.kommandir.workspace }}/results/{{ inventory_hostname }}"
-    state: directory
-  when: 'adept_context == "setup" and inventory_hostname != "kommandir"'
-  delegate_to: kommandir
+  when: 'inventory_hostname == "kommandir"'
 
 - name: Key variables are displayed
   debug:
