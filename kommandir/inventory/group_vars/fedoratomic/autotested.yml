@@ -8,7 +8,7 @@ docker_autotest_templates:
 
 docker_autotest:
     test_image:
-        host: "localhost"
+        host: ""
         user: ""
         name: "fedora_test_image"
         tag: "latest"
