@@ -109,6 +109,11 @@ For example, if a variable is specific to a...
     Same as `cloud_provisioning_command`_, but defines the command
     for removing the host.
 
+``docker_autotest_timeout``
+    Integer, huge number default.
+    Only used by ``autotested`` role (if enabled) on *kommandir*.
+    Specifies number of minutes to set as the overall timeout for Autotest on each *peon*.
+
 ``empty``
     Defines the set of values which are to be considered "not set" or "blank".  This
     is used as a convenience value for quickly testing whether or not a variable is
@@ -158,6 +163,12 @@ For example, if a variable is specific to a...
     contents from the directory referenced by `kommandir_workspace`_.  This is the
     primary method to specialize a jobs activities.  This is where
     you will find the job's ``kommandir_vars.yml`` file.
+
+``job_subthings``
+    List of strings, defaults to empty.
+    Only used by ``autotested`` role (if enabled) on *kommandir*.
+    List of Docker Autotest sub/sub-subtest names to include in the run.  When empty,
+    all sub/sub-subtests are considered for running.
 
 .. _kommandir_groups:
 

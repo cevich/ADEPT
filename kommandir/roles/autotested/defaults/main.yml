@@ -17,6 +17,10 @@ docker_autotest_timeout: 120
 subtests_template_path: "subtests.ini.j2"
 control_template_path: "control.ini.j2"
 
+# When non-empty, and the default templates are used (above),
+# this causes an exclusive list of sub-tests to run (in order).
+job_subthings: []
+
 # List of template module arg dictionaries, empty for none
 # e.g. - dest: "config_custom/tests.ini"
 #        src: "tests.ini.j2"
