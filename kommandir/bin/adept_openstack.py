@@ -575,9 +575,8 @@ class TimeoutCreate(TimeoutAction):
         image_details = self.os_rest.service_request('image',
                                                      '/v2/images?name=%s&status=active'
                                                      % image, 'images')
-        self.os_rest.raise_if(len(image_details) != 1,
-                              RuntimeError,
-                              "Found more than one image named %s" % image)
+        if len(image_details) > 1:
+            logging.warning("Found more than one image named %s", image)
         image_details = image_details[0]
         logging.debug("Image %s is id %s", image, image_details['id'])
 

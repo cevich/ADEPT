@@ -66,6 +66,11 @@
         vg: '{{ item.vg | default(omit) }}'
       register: result
       with_items: '{{ lvol_ops }}'
+      delay: 5
+      # In Ansible 2.3 the 'wipe' occastionally races with
+      # device-mapper creating & activating the logical volume.
+      until: result | success
+      retries: 3
 
     - name: Result is displayed
       debug:

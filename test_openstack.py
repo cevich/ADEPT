@@ -431,6 +431,15 @@ class TestDiscoverCreate(TestDiscoverCreateDestroyBase):
         self.create_args = ('foobar', ['list', 'of', 'ssh', 'keys'],
                             'image_name', 'flavor_name')
 
+    def test_dupe_img(self):
+        """Verify new creation works when multiple image names returned"""
+        with self.patched:
+            self.uut.create(*self.create_args)
+        # Tried checking log messages and stderr, but behavior is inconsistent
+        self.certify_stdout('foobar', '4.5.6.7')
+        # Verify all requests were consumed; requests == replies
+        self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
+
     def test_missing(self):
         """Verify new creation works with available floating ip"""
         with self.patched:
