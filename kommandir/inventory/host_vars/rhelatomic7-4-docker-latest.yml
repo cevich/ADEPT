@@ -4,13 +4,13 @@ ansible_shell_type: sh
 
 peon_groups:
     - openstack
-    - fedoratomic
+    - rhelatomic
+    - subscribed
     - updated
-    - docker
+    - docker-latest
     - autotested
-    - liverestore
 
-peon_image: 'Fedora-Atomic-26'
+peon_image: 'rhel-atomic-cloud-7.4-released-latest'
 
 peon_flavor: 'm1.medium'
 

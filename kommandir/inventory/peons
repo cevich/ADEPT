@@ -5,17 +5,26 @@
 
 [peons]
 
+rhel7-4-docker
+rhel7-4-docker-latest
+
 rhel7-3-docker
 rhel7-3-docker-latest
 
-rhel7-2-upgraded-docker
-rhel7-2-upgraded-docker-latest
+rhel7-2-docker
+rhel7-2-docker-latest
+
+rhelatomic7-4-docker
+rhelatomic7-4-docker-latest
 
 rhelatomic7-3-docker
 rhelatomic7-3-docker-latest
 
-rhelatomic7-2-upgraded-docker
-rhelatomic7-2-upgraded-docker-latest
+rhelatomic7-2-docker
+rhelatomic7-2-docker-latest
 
-fedora-25-docker-latest
-fedoratomic-25-docker-latest
+fedora26-docker-latest
+fedoratomic26-docker-latest
+
+fedora25-docker-latest
+fedoratomic25-docker-latest

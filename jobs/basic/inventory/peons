@@ -3,8 +3,8 @@
 
 [peons]
 
-rhel7-3-docker
-rhelatomic7-3-docker-latest
+rhel7-4-docker
+rhelatomic7-4-docker-latest
 
-fedora-25-docker-latest
-fedoratomic-25-docker-latest
+fedora26-docker-latest
+fedoratomic26-docker-latest

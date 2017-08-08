@@ -3,8 +3,9 @@
 
 [peons]
 
-fedora-25-docker-liverestore
-fedoratomic-25-docker-latest-liverestore
+rhel-latest-docker-liverestore
+rhelatomic-latest-docker-latest-liverestore
 
-rhel7-3-docker-liverestore
-rhelatomic7-3-docker-latest-liverestore
+fedora-latest-docker-liverestore
+fedoratomic-latest-docker-latest-liverestore
+
