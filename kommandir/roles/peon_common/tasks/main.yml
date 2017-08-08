@@ -13,14 +13,6 @@
     is_enterprise: False
   when: empty is undefined
 
-- name: Peons group themselves from their own peon_groups list
-  add_host:
-    name: '{{ inventory_hostname }}'
-    groups: '{{ peon_groups }}'
-  when: peon_groups | default() not in empty
-  # This is really noisy
-  no_log: '{{ no_log_synchronize }}'
-
 # Peon may not be accessable during cleanup
 - block:
 

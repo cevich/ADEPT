@@ -2,20 +2,15 @@
 
 # N/B: This file can be overwritten by a copy from job_path.
 
+# Required for peons to be grouped
 - hosts: kommandir
-  # Can't assume all hosts are reachable
-  gather_facts: False
   vars_files:
       - kommandir_vars.yml
-  pre_tasks:
-    - name: Gather kommandir facs exclusive of other inventory hosts
-      setup:
-        gather_subset: 'facter'
   roles:
-    # Needed to group/add all peons
     - common
 
 - hosts: peons
+  # Can't assume all hosts are reachable
   gather_facts: False
   vars_files:
       - kommandir_vars.yml
@@ -29,13 +24,7 @@
       when: 'cleanup | default(True) and inventory_hostname != "kommandir"'
 
 - hosts: kommandir
-  # Can't assume all hosts are reachable
-  gather_facts: False
   vars_files:
       - kommandir_vars.yml
-  pre_tasks:
-    - name: Gather kommandir facs exclusive of other inventory hosts
-      setup:
-        gather_subset: 'facter'
   roles:
     - workspace_cleanup

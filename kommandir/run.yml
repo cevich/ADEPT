@@ -2,6 +2,13 @@
 
 # N/B: This file can be overwritten by a copy from job_path.
 
+# Required for peons to be grouped
+- hosts: kommandir
+  vars_files:
+      - kommandir_vars.yml
+  roles:
+    - common
+
 - hosts: peons:autotested
   vars_files:
       - kommandir_vars.yml
