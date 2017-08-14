@@ -1,0 +1,50 @@
+---
+
+- assert:
+    that:
+        - 'empty is defined'
+        - 'is_atomic'
+        - 'ostree_remote | default() not in empty'
+        - 'ostree_remote.name | default() not in empty'
+        - 'ostree_remote.url | default() not in empty'
+        - 'ostree_remote.spec | default() not in empty'
+
+- name: Key variables are displayed
+  debug:
+    var: "{{ item }}"
+  when: adept_debug
+  with_items: ["is_atomic","ostree_remote"]
+
+- name: remote already exists
+  command: ostree remote list
+  register: result
+
+- name: ostree command is executed
+  command: >
+    /usr/bin/ostree remote
+                    add
+                    {{ ostree_remote.extra | default('') }}
+                    {{ ostree_remote.name }}
+                    {{ ostree_remote.url }}
+  # TODO: Add whitespace matching before/after ostree_remote.name?
+  when: not (result.stdout | search(ostree_remote.name))
+
+- name: current deployment origin refspec is known
+  shell: >
+    ostree admin status |
+    grep -A 2 '^\*' |
+    grep 'origin refspec: ' |
+    cut -d: -f2 |
+    tr -d [:blank:]
+  register: result
+
+- name: rebase to alternate remote if refspec name is different
+  command: rpm-ostree rebase '{{ ostree_remote.name }}:{{ ostree_remote.spec }}'
+  register: atomic_rebase
+  changed_when: atomic_rebase.stdout | search('to start a reboot')
+  when: result.stdout != ostree_remote.name
+
+- name: set flag when changes require reboot
+  set_fact:
+    needs_reboot: True
+  when: result | changed

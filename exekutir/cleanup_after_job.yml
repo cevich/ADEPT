@@ -1,0 +1,25 @@
+---
+
+- include: setup_after_job.yml
+
+- hosts: all
+  gather_facts: False
+  tasks:
+    - meta: clear_host_errors
+
+- hosts: kommandir:!nocloud
+  vars_files:
+      - exekutir_vars.yml
+  roles:
+    - common
+    - kommandir_destroyed  # When it's old or stonith=True
+  post_tasks:
+    - name: Ansible inventory is reloaded
+      meta: refresh_inventory
+
+- hosts: exekutir
+  vars_files:
+      - exekutir_vars.yml
+  roles:
+    - common
+    - workspace_cleanup

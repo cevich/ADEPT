@@ -1,0 +1,30 @@
+---
+
+- assert:
+    that:
+        - 'autotest_docker_path is defined'
+        - 'autotest_dest_dir is defined'
+
+- block:
+
+    - name: Execute Docker autotest
+      shell: "$AUTOTEST_PATH/client/autotest-local {{ autotest_docker_path }}/control &> /dev/null"
+      environment:
+        AUTOTEST_PATH: "{{ autotest_dest_dir }}"
+      args:
+        chdir: "{{ autotest_docker_path }}"
+      register: autotest_execution
+      async: "{{ (docker_autotest_timeout | default(240)) * 61 }}"
+      poll: 60
+      # Any Autotest failures will eventually be reflected as missing results
+      ignore_errors: True
+
+  always:
+
+    # All tasks ignore_errors
+    - include: produce_results.yml
+
+    # All tasks ignore_errors
+    - include: collect_results.yml
+
+  when: docker_autotest.execute

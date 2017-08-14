@@ -1,0 +1,26 @@
+---
+
+################################################################
+# N/B: This may be running on an old (2.1)  version of ansible #
+################################################################
+
+# These are all default values for this host, any may be overridden
+# on the ansible command-line
+
+# You probably don't want to change any of these
+ansible_connection: "local"
+ansible_become: false
+ansible_host: "localhost"
+ansible_ssh_host: "{{ ansible_host }}"
+compatible_ansible_minimum: "2.1"
+
+# Directory where kommandir's workspace will be sync'd to/from
+kommandir_workspace: '{{ workspace }}/kommandir_workspace'
+
+# Path where job's kommandir.xn, inventory, and kommandir_vars are found.
+# N/B: Intended to be overriden from command-line or in exekutir_vars.yml
+job_path: "{{ lookup('env','ADEPT_PATH') }}/jobs/quickstart"
+
+# Short name of the job, used to identify/mark resources and files
+# N/B: Intended to be overriden from command-line or in exekutir_vars.yml
+job_name: "{{ job_path | basename }}"

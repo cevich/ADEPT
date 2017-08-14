@@ -1,0 +1,21 @@
+---
+
+- assert:
+    that:
+        - '"subscribed" in group_names'
+
+- block:
+
+    - name: System is  unsubscribed
+      shell: subscription-manager unregister | true
+      register: result
+      ignore_errors: True
+
+  always:
+
+    - meta: clear_host_errors
+
+- name: Result is displayed when adept_debug
+  debug:
+    var: "result"
+  when: adept_debug

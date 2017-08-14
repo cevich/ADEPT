@@ -1,8 +1,0 @@
----
-
-ostree_remote:
-    name:
-    spec:
-    url:
-    extra:
-rpms_updated: False

@@ -1,0 +1,70 @@
+---
+
+- name: Important common facts are defined
+  set_fact:
+    empty:
+        - Null
+        - ""
+        - []
+        - {}
+    hostvarsfile: "{{ inventory_dir }}/host_vars/{{ inventory_hostname }}.yml"
+    result:
+    ansible_private_key_file: '{{ hostvars.kommandir.workspace }}/ssh/kommandir_key'
+
+# NO clue why this doesn't get picked up from inventory/group_vars/all.yml
+- name: The no_log_synchronize variable is defined
+  set_fact:
+    no_log_synchronize: True
+  when: no_log_synchronize is undefined
+
+- assert:
+    # These are set automatically by adept.py
+    that:
+        - "workspace | default() not in empty"
+        - "adept_path | default() not in empty"
+        - "adept_context | default() not in empty"
+        - "uuid | default() not in empty"
+        - "job_name | default() not in empty"
+        - "groups.peons is defined"
+        - 'no_log_synchronize | default() not in empty'
+
+- name: Results sub-directory for exists for inventory_hostname
+  file:
+  args:
+    path: "{{ hostvars.kommandir.workspace }}/results/{{ inventory_hostname }}"
+    state: directory
+  when: 'adept_context == "setup" and inventory_hostname != "kommandir"'
+  delegate_to: kommandir
+
+- block:  # when: inventory_hostname == "kommandir"
+
+    - name: The kommandir is always a member of the nocloud group
+      add_host:
+        name: "kommandir"
+        groups: "nocloud"
+
+    - name: The kommandir groups all peons from their peon_groups list
+      add_host:
+        name: '{{ item.inventory_hostname }}'
+        groups: '{{ item.peon_groups }}'
+      when: 'item.peon_groups | default() not in empty'
+      with_items: "{{ groups['peons'] | map('extract', hostvars) | list }}"
+      # This one is really noisy
+      no_log: '{{ no_log_synchronize }}'
+
+    - name: Kommandir's hostvars are logged into results dir
+      blockinfile:
+        block: |
+          ---
+          {{ hostvars.kommandir | to_nice_yaml }}
+        create: True
+        marker: "##### ANSIBLE MANAGED FILE ({{ role_path }})"
+        path: "{{ hostvars.kommandir.workspace }}/results/kommandir_facts.yml"
+
+  when: 'inventory_hostname == "kommandir"'
+
+- name: Key variables are displayed
+  debug:
+    var: "{{ item }}"
+  when: adept_debug
+  with_items: ["uuid","job_name","adept_context","workspace","inventory_hostname","group_names","groups","adept_optional","adept_path","hostvarsfile","cleanup"]

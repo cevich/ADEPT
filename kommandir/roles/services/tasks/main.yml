@@ -1,0 +1,65 @@
+---
+
+- assert:
+    that:
+        - 'empty is defined'
+
+- name: Key variables are displayed
+  debug:
+    var: "{{ item }}"
+  when: adept_debug
+  with_items: ["enabled_services","disabled_services","started_services","stopped_services","restarted_services","reloaded_services"]
+
+- name: systemd is reloaded
+  command: "systemctl daemon-reload"
+
+- name: valid service unit names are known
+  shell: >
+    systemctl list-unit-files --type=service --plain --no-pager --no-legend --all |
+        awk --field-separator '.' -e '{print $1}'
+  register: result
+
+- name: result set to result's stdout lines
+  set_fact:
+    result: '{{ result.stdout_lines | default([]) }}'
+
+- name: Service lists buffered by state and action
+  set_fact:
+    result:
+        # Order is important, use lists of dicts
+        state:
+           - enabled: True
+             services: '{{ enabled_services | default([]) | intersect(result) }}'
+           - enabled: False
+             services: '{{ disabled_services | default([]) | intersect(result) }}'
+        action:
+           - state: stopped
+             services: '{{ stopped_services | default([]) | intersect(result) }}'
+           - state: started
+             services: '{{ started_services | default([]) | intersect(result) }}'
+           - state: reloaded
+             services: '{{ reloaded_services | default([]) | intersect(result) }}'
+           - state: restarted
+             services: '{{ restarted_services | default([]) | intersect(result) }}'
+
+- debug:
+    var: "result"
+  when: adept_debug
+
+- name: Enabled/disabled services are made such
+  service:
+    name: '{{ item.1 }}'
+    enabled: '{{ item.0.enabled }}'
+  with_subelements:
+    - "{{ result.state }}"
+    - "services"
+    - skip_missing: True
+
+- name: Stopped/started/reloaded/restarted are made such
+  service:
+    name: '{{ item.1 }}'
+    state: '{{ item.0.state }}'
+  with_subelements:
+    - "{{ result.action }}"
+    - "services"
+    - skip_missing: True

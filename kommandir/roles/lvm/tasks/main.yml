@@ -1,0 +1,80 @@
+---
+
+- assert:
+    that:
+        - 'empty is defined'
+        - 'is_atomic is defined'
+        - 'lvg_ops | default() not in empty or lvol_ops | default() not in empty'
+
+- name: Key variables are displayed
+  debug:
+    var: '{{ item }}'
+  when: adept_debug
+  with_items: ['lvg_ops','lvol_ops', 'is_atomic']
+
+- name: Space needed for RPMs, but RPMs needed to create space
+  block:
+
+    - name: Key variables are displayed
+      debug:
+        var: '{{ item }}'
+      when: adept_debug
+      with_items: ['repo_rpms', 'disable_repos', 'enable_repos', 'install_rpms', 'ansible_distribution']
+
+    - include: '{{ playbook_dir }}/roles/installed/tasks/main.yml'
+
+  vars:
+      install_rpms: ['lvm2', 'lvm2-libs']
+      repo_rpms: "{{ hostvars[inventory_hostname].repo_rpms | default([])}}"
+      disable_repos: "{{ hostvars[inventory_hostname].disable_repos | default([]) }}"
+      enable_repos: "{{ hostvars[inventory_hostname].enable_repos | default([]) }}"
+      ansible_distribution: "{{ hostvars[inventory_hostname].ansible_distribution }}"
+      all_updated: False
+
+  when: not is_atomic|bool
+
+- block:
+
+    - name: lvg module commands are executed
+      lvg:
+        force: '{{ item.force | default(omit) }}'
+        pesize: '{{ item.pesize | default(omit) }}'
+        pvs: '{{ item.pvs | default(omit) }}'
+        state: '{{ item.state | default(omit) }}'
+        vg: '{{ item.vg | default(omit) }}'
+        vg_options: '{{ item.vg_options | default(omit) }}'
+      register: result
+      with_items: '{{ lvg_ops }}'
+
+    - name: Result is displayed
+      debug:
+        var: result
+      when: adept_debug
+
+  when: lvg_ops | default() not in empty
+
+- block:
+
+    - name: lvol module commands are executed
+      lvol:
+        force: '{{ item.force | default(omit) }}'
+        lv: '{{ item.lv | default(omit) }}'
+        opts: '{{ item.opts | default(omit) }}'
+        size: '{{ item.size | default(omit) }}'
+        snapshot: '{{ item.snapshot | default(omit) }}'
+        state: '{{ item.state | default(omit) }}'
+        vg: '{{ item.vg | default(omit) }}'
+      register: result
+      with_items: '{{ lvol_ops }}'
+      delay: 5
+      # In Ansible 2.3 the 'wipe' occastionally races with
+      # device-mapper creating & activating the logical volume.
+      until: result | success
+      retries: 3
+
+    - name: Result is displayed
+      debug:
+        var: result
+      when: adept_debug
+
+  when: lvol_ops | default() not in empty

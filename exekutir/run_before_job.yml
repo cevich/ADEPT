@@ -1,0 +1,12 @@
+---
+
+# Always create/locate kommandir (it may have gone away)
+- include: setup_before_job.yml
+
+- hosts: kommandir
+  vars_files:  # Still running from exekutir
+      - exekutir_vars.yml
+  tasks:
+    # Block job.xn w/o complete & successful setup
+    - assert:
+        that: 'lookup("file","{{ workspace }}/exekutir_setup_after_job.exit") == "0"'

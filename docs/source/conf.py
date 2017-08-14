@@ -30,6 +30,7 @@ needs_sphinx = '1.1'
 # ones.
 extensions = [
     'sphinx.ext.intersphinx',
+    'sphinx.ext.todo'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -69,7 +70,7 @@ release = '1.0'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = ['*.inc.rst']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -262,4 +263,4 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'python': ('http://docs.python.org/', None),
-                       'dat': ('http://docker-autotest.readthedocs.org/en/latest', None)}
+                       'dat': ('http://docker-autotest.readthedocs.io/en/latest', None)}

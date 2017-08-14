@@ -1,0 +1,27 @@
+---
+
+################################################################
+# N/B: This may be running on an old (2.1)  version of ansible #
+################################################################
+
+- assert:
+    that:
+        - 'inventory_hostname == "kommandir"'
+        - "'nocloud' not in group_names"
+        - 'purge_home_days | default(0) | int > 0'
+
+- name: Cron job to clean out old home directory files
+  cron:
+    special_time: daily
+    job: /bin/find /home -atime +{{ purge_home_days|int() }} -exec rm -f {} +
+
+- name: SSHd is configured to accept OS_* and TERM environment vars
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    block: "AcceptEnv OS_AUTH_URL OS_TENANT_ID OS_TENANT_NAME OS_PROJECT_NAME OS_USERNAME OS_PASSWORD OS_REGION_NAME OS_CLOUD_NAME TERM"
+
+- name: sshd service is restarted
+  service:
+    name: sshd
+    enabled: true
+    state: restarted

@@ -1,0 +1,81 @@
+---
+
+################################################################
+# N/B: This may be running on an old (2.1)  version of ansible #
+################################################################
+
+- assert:
+    that:
+        - "inventory_hostname == 'kommandir'"
+        - "cloud_provisioning_command is defined"
+
+# Allows customized checking of jinja templates / variables in cloud_provisioning_command
+- name: Optional, kommandir's list of cloud_asserts are all true
+  assert:
+    that: '{{ cloud_asserts }}'
+  when: cloud_asserts is defined
+
+- name: Kommandir's cloud_provisioning_command is executed on exekutir
+  shell: "{{ cloud_provisioning_command.command | mandatory }}"
+  # Optional dictionary of env vars to set w/in shell's process.
+  environment: "{{ cloud_environment | default({}) }}"
+  args:
+    # Command is being run on exekutir, not kommandir.
+    chdir: "{{ cloud_provisioning_command.chdir | default(hostvars.exekutir.workspace) }}"
+    executable: "{{ cloud_provisioning_command.executable | default(omit) }}"
+    # Should be relative to workspace, on exekutir!
+    creates: "{{ cloud_provisioning_command.creates | default(omit) }}"
+    # Same here.
+    removes: "{{ cloud_provisioning_command.removes | default(omit) }}"
+  when: cloud_provisioning_command is defined
+  delegate_to: exekutir
+  register: result
+  # Allow output to be logged
+  ignore_errors: True
+
+- name: Command's result is recorded in Exekutir's workspace
+  copy:
+    dest: '{{ hostvars.exekutir.workspace }}/results/kommandir_discovery_result.yml'
+    # Workaround ansible 2.1 bug
+    content: '{{ result | to_json | from_json | to_nice_yaml }}'
+  delegate_to: exekutir
+
+- name: Command's stderr is displayed
+  debug:
+    msg: '{{ result.stderr }}'
+
+- assert:
+    that: result | success
+
+- name: Command's stdout is parsed into YAML
+  set_fact:
+    # Old ansible takes anything as yaml, going through JSON guarantees parsing.
+    result: '{{ result.stdout | from_yaml | to_json | from_json }}'
+
+- name: result is displayed
+  debug:
+    var: "result"
+  when: adept_debug
+
+- name: Exekutir's host_vars/kommandir.yml file is marked as ansible managed
+  lineinfile:
+    dest: "{{ hostvarsfile }}"
+    insertbefore: BOF  # Last defined key wins
+    line: "##### ANSIBLE MANAGED FILE ({{ role_path }})"
+    create: True  # Guarantee from this point firward, it always exists
+  delegate_to: exekutir
+
+- name: Exekutir's host_vars/kommandir.yml file is updated with discovered values
+  lineinfile:
+    # This is running on exekutir, not kommandir.
+    dest: "{{ hostvarsfile }}"
+    regexp: '^{{ item.key }}:.*'
+    line: '{{ item.key }}: {{ item.value }}'
+    insertafter: EOF
+    create: True
+    state: present
+  delegate_to: exekutir
+  with_dict: "{{ result }}"
+
+- name: Exekutir's host_vars/kommandir.yml file is reloaded
+  include_vars: "{{ hostvarsfile }}"

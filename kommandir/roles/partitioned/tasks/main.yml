@@ -1,0 +1,46 @@
+---
+
+- assert:
+    that:
+        - 'empty is defined'
+        - 'disk_device | default() not in empty'
+        - 'parted_cmds | default() not in empty'
+        # No parted on Atomic
+        - 'is_atomic != True'
+
+- name: State of /root/<disk_device>_partitioned file is known
+  stat:
+    path: "/root/{{ disk_device }}_partitioned"
+  register: result
+
+- name: File does exist
+  set_fact:
+    result: True
+  when: result.stat is defined and
+        result.stat.exists is defined and
+        result.stat.exists == True
+
+- name: File does not exist
+  set_fact:
+    result: False
+  when: result != True
+
+- name: Key variables are displayed
+  debug:
+    var: "{{ item }}"
+  with_items: ["disk_device","parted_cmds"]
+  when: adept_debug
+
+- block:
+
+    - name: parted command is executed
+      shell: "/usr/sbin/parted --align optimal --script {{ disk_device }} {{ parted_cmds }}"
+
+    - name: Final partition table is stored
+      shell: "/usr/sbin/sfdisk --dump {{ disk_device }} > /root/{{ disk_device | basename }}_partitioned"
+
+    - name: system needs reboot when partition table changed
+      set_fact:
+        needs_reboot: True
+
+  when: result != True  # file didn't exist

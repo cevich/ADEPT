@@ -1,0 +1,35 @@
+---
+
+- assert:
+    that:
+        - 'empty is defined'
+        - 'swap_device | default() not in empty'
+
+- debug:
+    var: "swap_device"
+  when: adept_debug
+
+- name: Run mkswap against swap_device
+  command: mkswap "{{ swap_device }}"
+  register: result
+  # Don't fail if device is mounted - assume swap already setup
+  failed_when: result | failed and
+               (not result.stdout | search('is mounted') or
+                not result.stderr | search('is mounted'))
+
+- debug:
+    var: "result"
+  when: adept_debug
+
+- name: Swap setup persists across reboots
+  mount:
+    fstype: swap
+    name: "none"
+    src: "{{ swap_device }}"
+    passno: 0
+    state: present
+  when: result | success
+
+- name: All swap is enabled
+  command: swapon -a
+  when: result | success

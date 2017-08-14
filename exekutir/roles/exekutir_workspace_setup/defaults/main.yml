@@ -1,0 +1,35 @@
+---
+
+# File relative to kommandir_workspace which should
+# be resolved into the results dir, as a jinja-template.
+# It should describe the purpose/function of the job and
+# the source for the job files.
+job_docs_template_src: README
+job_docs_template_dest: README
+
+# This list of keys to be filtered out of kommandir_vars.yml if present
+kommandir_vars_exclude_keys:
+  - 'extra_kommandir_setup'
+  - 'extra_exekutir_setup'
+  - 'job_path'
+  - 'kommandir_groups'
+  - 'stonith'
+  - 'kommandir_name_prefix'
+  - 'global_lockdir'
+  - 'cloud_environment'
+  - 'cloud_asserts'
+  - 'cloud_provisioning_command'
+  - 'cloud_destruction_command'
+
+# This list of keys will be overriden in kommandir_vars.yml basedon
+# on the current exekutir values if defined (except global_lockdir
+# which is always overriden)
+kommandir_vars_copy_keys:
+  - "public_peons"
+  - "cleanup_globs"
+  - "uuid"
+  - "job_name"
+  - "adept_debug"
+  - "cleanup"
+  - "no_log_synchronize"
+  - "adept_debug"

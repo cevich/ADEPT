@@ -1,0 +1,7 @@
+---
+
+# list of parameter dictionaries for lvg module
+lvg_ops:
+
+# list of parameter dictionaries for lvol module
+lvol_ops:

@@ -1,0 +1,50 @@
+---
+
+- assert:
+    that:
+        - 'empty is defined'
+        - "'fedora' in group_names"
+        - "'rawhide' in group_names"
+        - "use_dnf == True"
+        - "needs_reboot | default() not in empty "
+
+- name: Key variables are displayed
+  debug:
+    var: "{{ item }}"
+  when: adept_debug
+  with_items: ["group_names","use_dnf"]
+
+- name: The core dnf plugins, and rawhide repo are installed
+  include: '{{ playbook_dir }}/roles/installed/tasks/main.yml'
+  vars:
+    install_rpms:
+        - dnf-plugins-core
+    repo_rpms:
+        - fedora-repos-rawhide
+    enable_repos:
+    # Don't actually _use_ rawhide yet
+    disable_repos: ["rawhide"]
+    state: 'latest'
+    all_updated: False
+    use_dnf: True
+
+- name: fedora, updates, updates-testing repos are disabled
+  command: dnf --assumeyes config-manager --set-disabled fedora updates updates-testing
+
+- name: rawhide repo is enabled
+  command: dnf config-manager --set-enabled rawhide
+
+- name: dnf cache is squeeky-clean for rawhide update
+  command: dnf --assumeyes clean -q dbcache plugins metadata
+
+- name: system will re-label SELinux contexts on reboot
+  file:
+    path: /.autorelabel
+    state: touch
+
+- name: system is switched to rawhide and all packages synchronized to the latest
+  command: dnf --assumeyes --releasever=rawhide --setopt=deltarpm=false distro-sync --nogpgcheck
+
+- name: System needs rebooting
+  set_fact:
+    needs_reboot: True

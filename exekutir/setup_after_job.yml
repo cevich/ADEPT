@@ -1,0 +1,14 @@
+---
+
+# Some Exekutir variable values are referenced by kommandir
+- hosts: all
+  vars_files:
+      - exekutir_vars.yml
+  roles:
+    - common
+
+- hosts: kommandir:!nocloud
+  vars_files:
+      - exekutir_vars.yml
+  roles:
+    - kommandir_to_exekutir_sync

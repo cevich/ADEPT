@@ -1,0 +1,21 @@
+---
+
+# N/B: This file can be overwritten by a copy from job_path.
+
+# Required for peons to be grouped
+- hosts: kommandir
+  vars_files:
+      - kommandir_vars.yml
+  roles:
+    - common
+
+- hosts: peons:autotested
+  vars_files:
+      - kommandir_vars.yml
+  roles:
+    - common
+    - peon_common
+    - role: touchstone
+      touchstone_filepath: "/var/lib/autotested_touchstone"
+    - role: autotested
+      when: stone_touched

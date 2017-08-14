@@ -1,0 +1,26 @@
+---
+
+################################################################
+# N/B: This may be running on an old (2.1)  version of ansible #
+################################################################
+
+- assert:
+    that:
+        - 'inventory_hostname == "kommandir"'
+        - 'kommandir_workspace is defined'
+        - 'hostvars.exekutir.kommandir_workspace is defined'
+        - '"nocloud" not in group_names'
+        - 'workspace_rsync_excludes | default() not in empty'
+
+- name: exekutir's copy of kommandir_workspace synchronized from kommandir's
+  synchronize:
+    checksum: True  # Don't trust local clock
+    group: False  # Would require permissions on exekutir
+    owner: False  # Same
+    mode: pull
+    rsync_opts: "{{ workspace_rsync_excludes }}"
+    src: "{{ kommandir_workspace }}/"
+    dest: "{{ hostvars.exekutir.kommandir_workspace }}"
+  # Kommandir may have died or gone/away
+  ignore_errors: '{{ adept_context == "cleanup" }}'
+  no_log: '{{ no_log_synchronize }}'

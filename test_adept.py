@@ -615,7 +615,6 @@ class TestParameters(TestCaseBase):
         # Stub in str(field number) as values for each field
         source = ['/path/to/script']
         source.extend([str(num) for num in xrange(len(supd.fields))])
-        source = tuple(source)
 
         # extend scope for verification
         mocks = {}
@@ -641,17 +640,9 @@ class TestParameters(TestCaseBase):
         for _mock in mocks.values():
             self.assertTrue(_mock.call_count)
             for name, args, dargs in _mock.mock_calls:
-                self.assertEqual(name, '')  # TODO: Investigate why no name.
+                self.assertEqual(name, '')
                 self.assertEqual(dargs, {})
                 del args
-                # TODO: Investigate why this doesn't work
-                # First two args are the same for all these methods
-                # field, _string = args[1:3]
-                # expected_method = self.uut.ParametersData.xforms[field]
-                # actual_method = _mock.func_name
-                # msg = "verifying Parameters.%s(%s, %s)" % (actual_method,
-                #                                           field, _string)
-                # self.assertEqual(expected_method, actual_method, msg=msg)
 
     def test_mangle_verify(self):
         """
@@ -1025,11 +1016,15 @@ class TestPlaybook(TestActionBaseBase):
 
     def test_init_bad(self):
         "Verify differences in init method from Command class"""
+        env = {'ADEPT_PATH':'/foobar',
+               'ADEPT_OPTIONAL': '--verbose --sudo'}
         # This was already tested above, and otherwise gets in the way here
         self.patchers.append(patch('%s.Command.make_env' % self.UUT,
-                                   lambda mock_self: {}))
+                                   lambda mock_self: env))
         self.patchers.append(patch('%s.shlex.split' % self.UUT,
                                    lambda x, _: x.split()))
+        self.patchers.append(patch('%s.os.path.isfile' % self.UUT,
+                                   lambda x: isinstance(x, MagicMock)))
         self.start_patchers()
         self.mocks['Parameters'].optional = ''
         for dargs in self.subtests(({'index': 42,},
@@ -1084,9 +1079,6 @@ class TestPlaybook(TestActionBaseBase):
         # Create required (self.uut.open) to mock where it would be looked up
         # before a builtin
         with PatchedParameters(self.uut):
-            # FIXME: This needs to result in parameters.mangle_verify
-            #        altering the path to make sure it's being used
-            #        correctly
             self.patch_os_path(self.UUT)
             values = ('/path/to/script',
                       'test_context', 'test_workspace', 'test_yaml', '      ')
@@ -1171,7 +1163,6 @@ class TestVariable(TestCaseBase):
         """Verify positive documented behavior of init()"""
         for param, value in {'value': 'foo', 'from_env': 'bar',
                              'from_file': "/some/file/to/read"}.items():
-            # TODO: patch open() and read() to test from_fil
             test_var = self.uut.Variable(123, name='foo', **{param: value})
             self.assertEqual(test_var.global_vars, self.uut.Command.global_vars)
             self.assertEqual(self.uut.Command.global_vars, {})
@@ -1186,9 +1177,9 @@ class TestVariable(TestCaseBase):
             for safe in self.uut.SAFE_ENV_VARS:
                 test_var = self.uut.Variable(123, name="foo", from_env=safe)
                 self.assertEqual(test_var(), 0)  # side effects!!!!
-                if test_var.global_vars['foo'] != self.env[safe]:
+                if test_var.global_vars.get('foo') != self.env[safe]:
                     self.trace()
-                self.assertEqual(test_var.global_vars['foo'], self.env[safe])
+                self.assertEqual(test_var.global_vars.get('foo'), self.env[safe])
 
             self.uut.ActionBase.global_vars = {}
             for value in ('foo', 'bar', 'baz'):
@@ -1198,20 +1189,21 @@ class TestVariable(TestCaseBase):
             self.assertEqual(self.uut.ActionBase.global_vars,
                              {'BAZ': 'baz', 'FOO': 'foo', 'BAR': 'bar'})
 
-class TestAIsBase(TestCaseBase):
-    """action_items(yaml_document, parameters_source=None)"""
+    def test_default(self):
+        """Verify action behaves as documented, using default value"""
+        # Prevent __call__ from printing out a bunch of crap
+        mock_call = lambda mockself: mockself.action()
+        mock_env = {'bar': 'baz'}
+        with patch.object(self.uut.ActionBase, '__call__', mock_call), patch.dict(self.uut.os.environ, mock_env, clear=True):
 
-    # Placeholders for inputs
-    yaml_document = None
-    parameters_source = None
+            self.uut.ActionBase.global_vars = {}
+            test_var = self.uut.Variable(123, name="foo", from_env="foo", default='bar')
+            self.assertEqual(test_var(), 0)  # side effects!!!!
+            self.assertEqual(test_var.global_vars.get('foo'), 'bar')
 
-    def setUp(self):
-        self.yaml_document = []
-        self.parameters_source = ['/path/to/adept.py']
-        super(TestAIsBase, self).setUp()
-
-    # TODO: Write me
-
+            test_var = self.uut.Variable(123, name="bar", from_env="bar", default='')
+            self.assertEqual(test_var(), 0)  # side effects!!!!
+            self.assertEqual(test_var.global_vars.get('bar'), 'baz')
 
 
 if __name__ == '__main__':

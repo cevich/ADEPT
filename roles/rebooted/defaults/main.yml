@@ -1,8 +1,0 @@
----
-needs_reboot: false
-
-# Time to wait for ssh port to close
-shutdown_timeout: 30
-
-# Maximum time to wait for system to become available again (in seconds)
-bootup_timeout: 300

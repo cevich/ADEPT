@@ -1,0 +1,30 @@
+---
+
+# N/B: This file can be overwritten by a copy from job_path.
+
+# Required for peons to be grouped
+- hosts: kommandir
+  vars_files:
+      - kommandir_vars.yml
+  roles:
+    - common
+
+- hosts: peons
+  # Can't assume all hosts are reachable
+  gather_facts: False
+  vars_files:
+      - kommandir_vars.yml
+  roles:
+    - common
+    - peon_common
+    - role: unsubscribed
+      when: cleanup and
+            "subscribed" in group_names
+    - role: peon_destroyed
+      when: 'cleanup | default(True) and inventory_hostname != "kommandir"'
+
+- hosts: kommandir
+  vars_files:
+      - kommandir_vars.yml
+  roles:
+    - workspace_cleanup

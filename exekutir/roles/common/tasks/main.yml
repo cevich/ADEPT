@@ -1,0 +1,107 @@
+---
+
+################################################################
+# N/B: This may be running on an old (2.1)  version of ansible #
+################################################################
+
+# N/B: exekutir == localhost == primary/top-level adept.py caller
+#      kommandir ?= exekutir ?= other host
+
+- assert:
+    that:
+        # Required variables for all hosts
+        - "inventory_hostname in ['exekutir','kommandir']"
+        # These are set automaticly by adept.py
+        - "workspace is defined"
+        - "adept_path is defined"
+        - "adept_context is defined"
+
+# Only for exekutir
+- assert:
+    that:
+        # These come from host_vars or exekutir_vars.yml
+        - "uuid is defined"
+        - "job_path is defined"
+        - "job_name is defined"
+        - "kommandir_workspace is defined"
+  when: 'inventory_hostname == "exekutir"'
+
+- name: Import common facts are defined
+  set_fact:
+    empty:
+        - Null
+        - ""
+        - []
+        - {}
+    # Set by exekutir.xn
+    ansible_private_key_file: '{{ lookup("env", "ANSIBLE_PRIVATE_KEY_FILE") }}'
+
+- name: The workspace/rsync exclude pattern list is defined
+  set_fact:
+    workspace_rsync_excludes:
+        - "--exclude=.ssh"
+        - "--exclude=.ansible"
+        - "--exclude=.git"
+        - "--exclude=.??*.lock"
+        - "--exclude=.*cache"
+        - "--exclude=.virtualenv"
+        - "--exclude=README.j2"
+
+# NO clue why this doesn't get picked up from inventory/group_vars/all.yml
+- name: The no_log_synchronize variable is defined
+  set_fact:
+    no_log_synchronize: True
+  when: no_log_synchronize is undefined
+
+- name: The adept_debug variable defaults to False and is a boolean
+  set_fact:
+    adept_debug: "{{ (adept_debug | default(False)) | bool() }}"
+
+- name: Key variables are displayed
+  debug:
+    var: "{{ item }}"
+  when: adept_debug
+  with_items: ["adept_debug", "no_log_synchronize", "exekutir_groups", "kommandir_groups"]
+
+- name: The exekutir is joined to exekutir_groups or default_exekutir_groups
+  add_host:
+    name: "exekutir"
+    groups: '{{ exekutir_groups | default(default_exekutir_groups) }}'
+
+- name: The kommandir is joined to exekutir's kommandir_groups or default_kommandir_groups
+  add_host:
+    name: "kommandir"
+    groups: '{{ kommandir_groups | default(default_kommandir_groups) }}'
+
+- name: The hostvarsfile value is set based on inventory_dir and inventory_hostname
+  set_fact:
+    hostvarsfile: "{{ inventory_dir }}/host_vars/{{ inventory_hostname }}.yml"
+
+- block:
+    - name: kommandir_name is set with a prefix
+      set_fact:
+        kommandir_name: "{{ kommandir_name_prefix }}-{{ default_kommandir_name }}"
+      when: kommandir_name_prefix not in empty
+
+    - name: kommandir_name is set without a prefix
+      set_fact:
+        kommandir_name: "{{ default_kommandir_name }}"
+      when: kommandir_name_prefix in empty
+
+    - name: Kommandir's kommandir_workspace is set to /home/uuid for cloud kommandir
+      set_fact:
+        kommandir_workspace: "/home/{{ uuid }}"
+      when: '"nocloud" not in group_names'
+
+    - name: Kommandir's kommandir_workspace points under exekutir workspace
+      set_fact:
+        kommandir_workspace: '{{ hostvars.exekutir.kommandir_workspace }}'
+      when: '"nocloud" in group_names'
+
+  when: inventory_hostname == "kommandir"
+
+- name: Key variables are displayed
+  debug:
+    var: "{{ item }}"
+  when: adept_debug
+  with_items: ["workspace","hostvarsfile","kommandir_workspace","inventory_hostname","group_names","groups","adept_optional","adept_path","no_log_synchronize","uuid","job_path","job_name","adept_context","adept_debug","cleanup","hostvarsfile","global_lockdir"]

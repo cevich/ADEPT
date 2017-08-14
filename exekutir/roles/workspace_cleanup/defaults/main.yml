@@ -1,0 +1,9 @@
+---
+
+# List of globs, relative to workspace to remove, if non-empty.
+cleanup_globs: []
+
+# List of absolute paths to always filter out of list formed from cleanup_globs
+cleanup_filter:
+    - "{{ workspace }}"
+    - '{{ workspace ~ "/results" }}'

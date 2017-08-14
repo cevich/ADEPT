@@ -1,0 +1,47 @@
+---
+
+- hosts: exekutir
+  vars_files:
+      - exekutir_vars.yml
+  pre_tasks:
+    - name: Gather exekutir facs exclusive of other inventory hosts
+      setup:
+  roles:
+    - common
+    - role: ansible_versioned
+      when: "adept_context == 'setup'"
+    - role: compatible_ansible
+      when: "adept_context == 'setup'"
+    - role: exekutir_workspace_setup
+      when: "adept_context == 'setup'"
+
+# Remote kommandir
+- hosts: kommandir:!nocloud
+  # Inventory is incomplete
+  gather_facts: False
+  vars_files:  # Still running from exekutir
+      - exekutir_vars.yml
+  roles:
+    - common
+    - kommandir_discovered
+    - kommandir_up
+    - role: touchstone
+      touch_touchstone: False
+    - role: installed
+      when: not hostvars.kommandir.stone_touched
+    - role: kommandir_setup
+      when: not hostvars.kommandir.stone_touched
+    - role: touchstone
+      touch_touchstone: True
+      when: not hostvars.kommandir.stone_touched
+
+# All kommandir's
+- hosts: kommandir
+  vars_files:  # Still running from exekutir
+      - exekutir_vars.yml
+  roles:
+    - common
+    - kommandir_workspace_update
+    # Make sure local copy matches remote
+    - role: kommandir_to_exekutir_sync
+      when: '"nocloud" not in group_names'
