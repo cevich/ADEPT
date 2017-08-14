@@ -7,6 +7,7 @@
         - "adept_context == 'setup'"
         - "cloud_provisioning_command is defined"
         - "cloud_asserts is defined"
+        - "peon_was_created | default(False) == False"
 
 - name: Key variables are displayed
   debug:
@@ -77,6 +78,13 @@
     state: present
   delegate_to: kommandir
   with_dict: "{{ result }}"
+
+- name: peon's host_vars file is updated to set peon_was_created flag True
+  lineinfile:
+    dest: "{{ hostvarsfile }}"
+    regexp: "^peon_was_created:.*"
+    line: "peon_was_created: True"
+  delegate_to: kommandir
 
 - name: peon's host_vars file is reloaded to make new values active
   include_vars: '{{ hostvarsfile }}'

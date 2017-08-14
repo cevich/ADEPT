@@ -5,6 +5,25 @@
         - 'empty is defined'
         - 'disk_device | default() not in empty'
         - 'parted_cmds | default() not in empty'
+        # No parted on Atomic
+        - 'is_atomic != True'
+
+- name: State of /root/<disk_device>_partitioned file is known
+  stat:
+    path: "/root/{{ disk_device }}_partitioned"
+  register: result
+
+- name: File does exist
+  set_fact:
+    result: True
+  when: result.stat is defined and
+        result.stat.exists is defined and
+        result.stat.exists == True
+
+- name: File does not exist
+  set_fact:
+    result: False
+  when: result != True
 
 - name: Key variables are displayed
   debug:
@@ -12,53 +31,16 @@
   with_items: ["disk_device","parted_cmds"]
   when: adept_debug
 
-- name: Current partition table is stored
-  # Fails if no disk label exists, don't display this, catch in 'fail' below
-  shell: "/usr/sbin/sfdisk --dump {{ disk_device }} || /bin/true"
-  register: sfdisk_before
-  ignore_errors: true
-  changed_when: False
-
-- debug:
-    var: sfdisk_before
-  when: adept_debug
-
-- name: Missing/corrupt partition table is okay
-  assert:
-    msg: "The word 'Success' must appear in failed sfdisk --dump output"
-    that:
-        sfdisk_before.stdout | search('Success') or
-        sfdisk_before.stderr | search('Success')
-  when: sfdisk_before | failed
-
 - block:
 
     - name: parted command is executed
-      shell: "/usr/sbin/parted --script {{ disk_device }} {{ parted_cmds }}"
-      register: parted
+      shell: "/usr/sbin/parted --align optimal --script {{ disk_device }} {{ parted_cmds }}"
 
-  rescue:
-    - debug:
-        var: parted
-      when: adept_debug
-
-    - name: post-fail partition table is stored
-      command: "/usr/sbin/sfdisk --dump {{ disk_device }}"
-      register: sfdisk_rescue
-      changed_when: False
-
-    - name: Original partition table is recovered if different from original
-      shell: "/usr/bin/echo {{ sfdisk_before.stdout | quote }} | /usr/sbin/sfdisk {{ disk_device }}"
-      when: sfdisk_before | success and
-            sfdisk_before.stdout != sfdisk_rescue.stdout
-
-  always:
     - name: Final partition table is stored
-      command: "/usr/sbin/sfdisk --dump {{ disk_device }}"
-      register: sfdisk_after
-      changed_when: False
+      shell: "/usr/sbin/sfdisk --dump {{ disk_device }} > /root/{{ disk_device | basename }}_partitioned"
 
-- name: system needs reboot when partition table changed
-  set_fact:
-    needs_reboot: True
-  when: sfdisk_before.stdout != sfdisk_after.stdout
+    - name: system needs reboot when partition table changed
+      set_fact:
+        needs_reboot: True
+
+  when: result != True  # file didn't exist

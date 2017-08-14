@@ -19,7 +19,7 @@
   roles:
     - common
     - role: peon_created
-      when: ansible_host | default() not in empty and
+      when: not peon_was_created | default(False) and
             "recycled" not in group_names
     - role: peon_up
       reboot_context: "creation"

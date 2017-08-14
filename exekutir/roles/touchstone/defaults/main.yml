@@ -4,4 +4,4 @@
 touch_touchstone: False
 
 # Full/absolute path to filename that exists when role completes
-touchstone_filepath: "/var/lib/adept_touchstone"
+touchstone_filepath: "/root/adept_touchstone"
