@@ -1247,7 +1247,8 @@ if __name__ == '__main__':  # pylint: disable=C0103
     os.chdir(workspace)
     # Control location of caching
     os.environ['HOME'] = workspace
-    for _name in os.environ.keys():
+    # Not a standard dictionary, can be modified in-flight, must iterate on keys
+    for _name in os.environ.keys():  # pylint: disable=C0201
         if _name.startswith('XDG'):
             del os.environ[_name]
 
