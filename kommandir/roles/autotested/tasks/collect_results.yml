@@ -18,7 +18,7 @@
   synchronize:
     mode: pull
     src: "{{ autotest_dest_dir }}/client/results/default/"
-    dest: "{{ workspace }}/results/{{ inventory_hostname }}"
+    dest: "{{ workspace }}/results/{{ inventory_hostname }}/docker_autotest"
   ignore_errors: true
   #no_log: '{{ no_log_synchronize }}'
 

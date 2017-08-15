@@ -11,6 +11,7 @@
           - 'this_role | default() not in empty'
           - 'job_name | default() not in empty'
           - 'hostvars.kommandir.ansible_date_time.date | default() not in empty'
+          - 'results_junit_dirpath | default() not in empty'
 
   - name: Key variables are displayed
     debug:
@@ -19,9 +20,15 @@
 
   when: adept_debug
 
+- name: Path to peon's docker_autotest results.junit exists
+  file:
+    path: "{{ results_junit_dirpath }}"
+    state: directory
+  delegate_to: kommandir
+
 - name: Peon's results.junit file is cooked with failure of upcoming role
   template:
     # peon_up includes this file, need full-path to template
     src: "{{ playbook_dir }}/roles/failed_peon_junit/templates/failed_peon.junit.j2"
-    dest: "{{ hostvars.kommandir.workspace }}/results/{{ inventory_hostname }}/results.junit"
+    dest: "{{ results_junit_dirpath }}/results.junit"
   delegate_to: kommandir
