@@ -644,20 +644,25 @@ class Playbook(Command):
     limit = None
     varsfile = None
     inventory = None
+    config = None
+    tags = None
+    skip_tags = None
 
     def __str__(self, additional=None):
         if additional:
             mine = additional
         else:
             mine = {}
-        for name in ('varsfile', 'limit'):
+        for name in ('varsfile', 'limit', 'tags'):
             thing = getattr(self, name)
             if thing:
                 mine[name] = thing
         return super(Playbook, self).__str__(mine)
 
+    # This thing is just complicated, no easy way around it
+    # pylint: disable=R0913,R0912
     def init(self, filepath, varsfile=None, limit=None, inventory=None,
-             config=None, **dargs):
+             config=None, tags=None, skip_tags=None, **dargs):
         self.popen_dargs = {'bufsize': 1,   # line buffered for speed
                             'close_fds': False,
                             'shell': False,
@@ -684,6 +689,8 @@ class Playbook(Command):
 
         for name, value in {'varsfile': varsfile, 'inventory': inventory,
                             'limit': limit,
+                            'tags': tags,
+                            'skip_tags': skip_tags,
                             'config': config,
                             'adept_context': self.parameters.context,
                             'workspace': self.parameters.workspace,
@@ -707,8 +714,12 @@ class Playbook(Command):
                 args.extend(['--inventory', value])
                 self.inventory = value
             elif name is 'config':
+                self.config = value
                 new_env['ANSIBLE_CONFIG'] = value
-            elif name is 'varsfile' and os.path.isfile(value):
+            elif "tags" in name:
+                setattr(self, name, value)
+                args.extend(['--%s' % name.replace('_', '-'), value])
+            elif name is 'varsfile':
                 args.extend(['--extra-vars', '@%s' % value])
                 self.varsfile = value
             elif name is 'limit':

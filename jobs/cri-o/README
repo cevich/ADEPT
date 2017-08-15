@@ -1,0 +1,14 @@
+This job "{{ job_name }}" (from adept/jobs/{{ job_name }}),
+exercises CRI-O using it's upstream test playbook.
+It's fairly heavy-weight resource usage means concurrent
+executions should be monitored and job cleanup strictly
+enforced.
+
+The "main.yml" playbook from the CRI-O repository executes
+during the 'run' ADEPT context, followed by 'results.yml'.
+However, the final exit code will be that from 'main.yml'.
+
+All output/results collected under {{ workspace }}/artifacts/HOSTNAME
+after the 'run' context is complete.
+
+(src: {{ job_path }}/{{ job_docs_template_src }})

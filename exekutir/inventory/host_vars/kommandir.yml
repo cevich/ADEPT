@@ -20,6 +20,7 @@ install_rpms:
     - iproute
     - hostname
     - sed
+    - awk
     - git
     - findutils
     - PyYAML
@@ -41,3 +42,6 @@ git_cache_args:
       recursive: False
       cachepath: "python-bugzilla"
       version: "v1.2.2"
+    - repo: "https://github.com/kubernetes-incubator/cri-o.git"
+      recursive: False
+      cachepath: 'cri-o'

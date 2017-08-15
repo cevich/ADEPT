@@ -1,0 +1,7 @@
+While running {{ job_name }}, the peon {{ inventory_hostname }} failed
+in/after applying the {{ this_role }} role at {{ hostvars.kommandir.ansible_date_time.date }}.
+
+This peon was defined by inventory/host_vars/{{ inventory_hostname }}.yml,
+and associated group variables under inventory/group_vars/ in the job_path.
+
+Additional information can be found in the file kommandir_workspace/kommandir_ansible.log

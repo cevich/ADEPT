@@ -1,0 +1,36 @@
+---
+
+git_cache_args:
+    - repo: "https://github.com/kubernetes-incubator/cri-o.git"
+      recursive: False
+      cachepath: '_upstream_cri-o'
+      clone: True
+      update: True
+
+extra_kommandir_setup:
+    command: |
+        bash -c 'set -e;
+                 rm -rf "{{ kommandir_workspace}}/cache/cri-o";
+                 cd "{{ kommandir_workspace}}/cache/_upstream_cri-o";
+                 git fetch origin --unshallow || true;  # just in case
+                 cd "{{ kommandir_workspace}}/cache";
+                 git clone --local --dissociate _upstream_cri-o cri-o;
+
+                 # For testing a PR, pull it in here
+                 #cd "{{ kommandir_workspace}}/cache/cri-o";
+                 #git remote set-url origin https://github.com/kubernetes-incubator/cri-o.git;
+                 #git pull --no-commit origin +pull/957/head;
+
+                 cd {{ workspace }}/cache/cri-o/contrib/test;
+                 cp requirements.txt "{{ kommandir_workspace }}";
+
+                 [ -h "{{ kommandir_workspace}}/artifacts" ] && exit 0;
+                 for DIRPATH in "{{ workspace }}" "{{ kommandir_workspace }}";
+                 do
+                     cd "$DIRPATH";
+                     ln -nsf "results" "artifacts";
+                 done;'
+
+results_template_filepath: "{{ kommandir_workspace }}/adept_result.txt.j2"
+results_filepath: "adept_result.txt"
+peon_userdata: "{{ kommandir_workspace }}/roles/peon_created/files/cri-o_userdata.yml"

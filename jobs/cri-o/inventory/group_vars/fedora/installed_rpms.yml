@@ -1,0 +1,15 @@
+---
+
+install_rpms:
+    - git
+    - python2-virtualenv
+    - gcc
+    - openssl-devel
+    - redhat-rpm-config
+    - libffi-devel
+    - python-devel
+    - libselinux-python
+    - rsync
+    - yum-utils
+    - python3-pycurl
+    - python2-simplejson

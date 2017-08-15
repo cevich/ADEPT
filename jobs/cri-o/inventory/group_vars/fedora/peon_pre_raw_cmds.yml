@@ -1,0 +1,4 @@
+---
+
+peon_pre_raw_cmds:
+    - "dnf install -y python-simplejson python2-dnf libselinux-python"

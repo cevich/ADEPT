@@ -21,7 +21,10 @@
 - name: Repository rpms are installed
   shell: "$(type -P dnf || type -P yum) install -y {{ item }}"
   when: item not in empty
+  register: result
   with_items: "{{ repo_rpms | default([]) }}"
+  failed_when: result | failed and
+               not result.stderr | search("Nothing to do")
   # Avoid running into task timeouts.
   async: "{{ 60 * install_timeout }}"
   poll: 5

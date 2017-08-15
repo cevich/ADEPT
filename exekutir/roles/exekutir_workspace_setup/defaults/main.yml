@@ -9,7 +9,6 @@ job_docs_template_dest: README
 
 # This list of keys to be filtered out of kommandir_vars.yml if present
 kommandir_vars_exclude_keys:
-  - 'extra_kommandir_setup'
   - 'extra_exekutir_setup'
   - 'job_path'
   - 'kommandir_groups'

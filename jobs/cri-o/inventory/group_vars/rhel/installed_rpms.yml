@@ -1,0 +1,17 @@
+---
+
+repo_rpms:
+    - http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+install_rpms:
+    - git
+    - python-virtualenv
+    - gcc
+    - openssl-devel
+    - redhat-rpm-config
+    - libffi-devel
+    - python-devel
+    - libselinux-python
+    - rsync
+    - yum-utils
+    - python-pycurl

@@ -37,8 +37,8 @@
 
 # All kommandir's
 - hosts: kommandir
-  vars_files:  # Still running from exekutir
-      - exekutir_vars.yml
+  vars_files:
+      - "{{ hostvars.exekutir.kommandir_workspace }}/kommandir_vars.yml"
   roles:
     - common
     - kommandir_workspace_update

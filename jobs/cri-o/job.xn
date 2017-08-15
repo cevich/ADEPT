@@ -1,0 +1,64 @@
+---
+# vim-syntax: yaml
+
+- command:
+    contexts:
+        - setup
+    filepath: /bin/bash
+    arguments: |
+        -c '[ -d "$WORKSPACE" ] || exit 1
+            cd $WORKSPACE;
+            echo "Setting up peons as the cri-o playbook SubjectHosts";
+            cat inventory/peons | sed -r -e "s/^\[peons\]/[\SubjectHosts\]/"> inventory/SubjectHosts.ini
+            echo "Setting up kommandir as the cri-o playbook ControlHost";
+            echo -e "[ControlHost]\nkommandir\n" > inventory/ControlHost.ini
+        '
+
+- command:
+    contexts:
+        - setup
+        - cleanup
+    filepath: /bin/bash
+    arguments: |
+        -c '[ -d "$WORKSPACE" ] || exit 1
+            cd $WORKSPACE;
+
+            echo;
+            echo "Making nested call to adept.py for default_job.xn";
+            echo;
+            $ADEPT_PATH/adept.py \
+                "$ADEPT_CONTEXT" \
+                "." \
+                "default_job.xn" \
+                $ADEPT_OPTIONAL;
+            RET=$?;
+            [ "$RET" == "0" ] || echo "Nested adept.py call exit: $RET - not continuing.";
+            exit $RET;
+        '
+
+- playbook:
+    contexts:
+        - run
+    filepath: "${WORKSPACE}/cache/cri-o/contrib/test/main.yml"
+    inventory: "${WORKSPACE}/inventory"
+    # Always collect results separately
+    skip_tags: "results"
+    # Ignore exit status for now, collect results first
+    exitfile: "${WORKSPACE}/cri-o-playbook.exit"
+
+- playbook:
+    contexts:
+        - run
+    filepath: "${WORKSPACE}/cache/cri-o/contrib/test/main.yml"
+    tags:  "results"
+    inventory: "${WORKSPACE}/inventory"
+
+- command:
+    contexts:
+        - run
+    filepath: /bin/bash
+    arguments: |
+        -c '[ -d "$WORKSPACE" ] || exit 1;
+            echo "Now exiting with main.yml playbook exit code";
+            exit $(cat "${WORKSPACE}/cri-o-playbook.exit");
+        '

@@ -2,7 +2,7 @@
 
 # N/B: This file can be overwritten by a copy from job_path.
 
-- hosts: peons
+- hosts: peons:!recycled
   vars_files:
       - kommandir_vars.yml
   roles:

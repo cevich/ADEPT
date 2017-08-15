@@ -1003,15 +1003,18 @@ class TestPlaybook(TestActionBaseBase):
             test_pb = self.uut.Playbook(index=123,
                                         filepath='whatever',
                                         varsfile='/foo/bar/baz',
+                                        tags='foo,bar,baz',
                                         limit=True)
             paraminit.assert_called_once_with(test_pb,
                                               filepath='whatever',
                                               varsfile='/foo/bar/baz',
+                                              tags='foo,bar,baz',
                                               limit=True)
             self.assertIsInstance(test_pb.global_vars, dict)
             self.assertEqual(test_pb.index, 123)
             self.assertEqual(test_pb.filepath, 'whatever')
             self.assertEqual(test_pb.limit, True)
+            self.assertEqual(test_pb.tags, 'foo,bar,baz')
             self.assertEqual(test_pb.varsfile, '/foo/bar/baz')
 
     def test_init_bad(self):

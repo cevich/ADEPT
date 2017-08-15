@@ -1,0 +1,5 @@
+---
+
+# Needs to happen before rebooting
+peon_pre_raw_cmds:
+    - 'grubby --update-kernel=ALL --args="rootflags=pquota"'

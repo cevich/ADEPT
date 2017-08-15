@@ -86,6 +86,12 @@
     from_env: "TERM"
     default: "dumb"
 
+# Needed by venv-cmd.sh
+- variable:
+    name: "ARTIFACTS"
+    from_env: "ARTIFACTS"
+    default: "$WORKSPACE"
+
 # Display what we got (excluding sensitive values, below)
 - command:
     filepath: "/bin/bash"

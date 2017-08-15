@@ -38,7 +38,7 @@ cloud_asserts:
 
 cloud_provisioning_command:
     command: >
-        bin/openstack_exclusive_create.py \
+        bin/openstack_discover_create.py \
             {{ "--verbose" if adept_debug == True else "" }} \
             {{ "--lockdir=" ~ hostvars.kommandir.global_lockdir | trim if hostvars.kommandir.global_lockdir|default() not in empty else ""}} \
             --image {{ peon_image | trim }} \

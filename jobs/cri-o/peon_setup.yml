@@ -1,0 +1,13 @@
+---
+
+- include: default_peon_setup.yml
+
+- hosts: peons
+  vars_files:
+      - kommandir_vars.yml
+  tasks:
+    - name: Update adept_result.txt to reflect current situation
+      copy:
+        dest: '{{ workspace }}/results/{{ inventory_hostname }}/{{ results_filepath }}'
+        content: "Setup concluded successfully.\n"
+      delegate_to: kommandir
