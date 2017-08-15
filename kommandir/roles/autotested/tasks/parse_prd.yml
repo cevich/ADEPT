@@ -1,0 +1,29 @@
+---
+
+- assert:
+    that:
+      - 'empty is defined'
+      - 'pull_request_description not in empty'
+
+- name: Filter pull_request_description of unacceptable characters/formatting
+  set_fact:
+    docker_autotest_mmargs: >
+          {{ pull_request_description |
+             regex_replace('\s', ' ') |
+             regex_replace('[^ a-zA-Z0-9_\-/\[\]=]', '') }}
+  when: docker_autotest_mmargs|default() in empty
+
+- name: Display value of filtered docker_autotest_mmargs
+  debug:
+    var: "docker_autotest_mmargs"
+
+- name: Parse --args value out of filtered docker_autotest_mmargs
+  set_fact:
+    docker_autotest_mmargs: >
+          {{ pull_request_description |
+             regex_replace('.*\[--args=(.+)\].*', '\1' ) }}
+  when: docker_autotest_mmargs|default() in empty
+
+- name: Display --args value of docker_autotest_mmargs
+  debug:
+    var: "docker_autotest_mmargs"

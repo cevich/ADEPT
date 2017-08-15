@@ -220,6 +220,14 @@ For example, if a variable is specific to a...
     Otherwise, when ``False``, unrestricted access is optional, except by
     the *kommandir*.
 
+``pull_request_description``
+    String, defaults to undefined
+    *Exekutir's* value overrides *kommandi'r*.
+    When set to a string, this is assumed to be the description text contained
+    in the originating pull-request.  Jobs may make use of this however they like.
+    Specifically, the ``autotested`` role will attempt to convert this into
+    a parameter to autotest's ``--args`` option.
+
 .. _stonith:
 
 ``stonith``

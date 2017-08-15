@@ -21,7 +21,7 @@ kommandir_vars_exclude_keys:
   - 'cloud_provisioning_command'
   - 'cloud_destruction_command'
 
-# This list of keys will be overriden in kommandir_vars.yml basedon
+# This list of keys will be overriden in kommandir_vars.yml based on
 # on the current exekutir values if defined (except global_lockdir
 # which is always overriden)
 kommandir_vars_copy_keys:
@@ -29,7 +29,6 @@ kommandir_vars_copy_keys:
   - "cleanup_globs"
   - "uuid"
   - "job_name"
-  - "adept_debug"
-  - "cleanup"
   - "no_log_synchronize"
   - "adept_debug"
+  - "pull_request_description"

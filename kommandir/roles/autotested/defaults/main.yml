@@ -60,3 +60,6 @@ docker_autotest:
 
     # Set true to copy in python-bugzilla from cache directory
     enable_bugzilla: true
+
+# If non-empty, pass this string as the parameter to the ``--args`` option
+docker_autotest_mmargs:
