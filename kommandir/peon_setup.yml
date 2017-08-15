@@ -52,7 +52,7 @@
     - role: partitioned
       when: not hostvars[inventory_hostname].stone_touched and
             disk_device | default() not in empty and
-            sfdisk_cmds | default() not in empty
+            parted_cmds | default() not in empty
 
     - role: rebooted
       reboot_context: "beginning"
