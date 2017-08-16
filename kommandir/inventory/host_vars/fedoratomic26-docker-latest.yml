@@ -14,3 +14,7 @@ peon_image: 'Fedora-Atomic-26'
 peon_flavor: 'm1.medium'
 
 peon_userdata: '{{ workspace }}/roles/peon_created/files/nodocker_userdata.yml'
+
+# Needed for Docker Autotest docker_cli/systemd_in_container subtest
+extra_peon_setup_cmnds:
+  - "setsebool -P container_manage_cgroup 1"
