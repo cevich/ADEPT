@@ -30,7 +30,7 @@
       enable_repos: "{{ hostvars[inventory_hostname].enable_repos | default([]) }}"
       ansible_distribution: "{{ hostvars[inventory_hostname].ansible_distribution }}"
       all_updated: False
-
+      install_timeout: "{{ hostvars[inventory_hostname].install_timeout | default(60) }}"
   when: not is_atomic|bool
 
 - block:

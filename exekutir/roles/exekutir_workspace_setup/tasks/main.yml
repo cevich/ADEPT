@@ -118,44 +118,49 @@
     mode: "0444"
     state: "file"
 
+# Variables file parsing (below) validates they contain YAML dictionaries
+# and prevents future parsing-problems by re-writing the parsed YAML
+
 - name: Kommandir's kommandir_vars.yml exists as a YAML dictionary
   lineinfile:
     dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
     line: 'uuid: will_be_replaced'
     create: True
 
-- name: Kommandir's kommandir_vars.yml excludes certain restricted values
-  lineinfile:
-    path: "{{ kommandir_workspace }}/kommandir_vars.yml"
-    regexp: '^{{ item }}:.*'
-    state: absent
-  with_items: "{{ kommandir_vars_exclude_keys }}"
-
-- name: Exekutir's exekutir_vars.yml is buffered
+- name: Empty dictionary buffer is created
   set_fact:
-    result: '{{ lookup("file", workspace ~ "/exekutir_vars.yml")
-                | from_yaml | to_json | from_json }}'
+    result: {}
 
-- name: Kommandir's kommandir_vars.yml file hard-codes some values from exekutir_vars.yml
-  lineinfile:
-    dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
-    regexp: '^{{ item }}:.*'
-    line: '{{ item }}: {{ result[item] | default(hostvars.exekutir[item]) }}'
-  when: item in result or item in hostvars.exekutir
-  with_items: "{{ kommandir_vars_copy_keys }}"
+- name: kommandir_vars.yml is buffered to exclude kommandir_vars_exclude_keys
+  set_fact:
+    result: "{{ result | combine( {item.key: item.value} ) }}"
+  when: item.key not in kommandir_vars_exclude_keys
+  with_dict: '{{ lookup("file", kommandir_workspace ~ "/kommandir_vars.yml") | from_yaml | to_json | from_json }}'
 
-- name: Remote kommandir's kommandir_vars.yml file hard-codes the global_lockdir location
-  lineinfile:
-    dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
-    regexp: '^global_lockdir.*'
-    line: 'global_lockdir: "/var/lock/adept"'
+- name: kommandir_vars.yml file hard-codes kommandir_vars_copy_keys values from exekutir_vars.yml
+  set_fact:
+    result: "{{ result | combine( {item.key: item.value} ) }}"
+  when: item.key in kommandir_vars_copy_keys
+  with_dict: '{{ lookup("file", workspace ~ "/exekutir_vars.yml") | from_yaml | to_json | from_json }}'
+
+- name: kommandir_vars.yml file hard-codes the global_lockdir location
+  set_fact:
+    result: "{{ result | combine( {'global_lockdir': '/var/lock/adept'} ) }}"
   when: '"nocloud" not in kommandir_groups'
 
-- name: Kommandir's kommandir_vars.yml file is marked as ansible managed
-  lineinfile:
-    dest: "{{ kommandir_workspace }}/kommandir_vars.yml"
-    insertbefore: BOF  # Last defined key wins
-    line: "##### ANSIBLE MANAGED FILE ({{ role_path }})"
+- name: On-disk kommandir_vars.yml file is wiped out prior to replacement
+  file:
+    path: "{{ kommandir_workspace }}/kommandir_vars.yml"
+    state: absent
+
+- name: kommandir_vars.yml file is written out from buffer
+  blockinfile:
+    path: "{{ kommandir_workspace }}/kommandir_vars.yml"
+    create: True
+    follow: True
+    marker: "##### {mark} ANSIBLE MANAGED FILE ({{ role_path }})"
+    block: |
+      {{ result | to_nice_yaml(indent=4) }}
 
 - name: If Exekutir's workspace has a cache directory, assume it's pre-populated for use
   file:
