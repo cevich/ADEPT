@@ -138,6 +138,12 @@ For example, if a variable is specific to a...
     Same as `extra_exekutir_setup`_.  It is executed on the *kommandir*, after
     every time the ``kommandir_workspace_update`` role is applied.
 
+``extra_peon_setup_cmnds``
+    List, defaults to ``Null``
+    Only use on *kommandir*.
+    Whatever command-strings are in this list for a *peon*, will be executed after all
+    setup is completed from the default ``kommandir/peon_setup.yml`` playbook.
+
 .. _hostvarsfile:
 
 ``hostvarsfile``
