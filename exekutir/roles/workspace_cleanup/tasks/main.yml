@@ -16,6 +16,7 @@
       - 'workspace is defined'
       - 'cleanup_globs is defined'
       - 'cleanup_filter is defined'
+      - 'adept_debug is defined'
 
 - name: Key variables are displayed
   debug:
@@ -44,13 +45,13 @@
   - name: Items that would have been removed are listed
     debug:
       var: "result"
-    when: adept_debug or 'nocloud' in hostvars.kommandir.group_names
+    when: adept_debug
 
   - name: Unnecessary items removed from workspace
     file:
       path: "{{ item }}"
       state: absent
-    when: not adept_debug and 'nocloud' not in hostvars.kommandir.group_names
+    when: not adept_debug
     with_items: '{{ result }}'
 
   when: cleanup_globs | default() not in empty
