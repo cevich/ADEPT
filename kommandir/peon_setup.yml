@@ -58,14 +58,6 @@
       reboot_context: "beginning"
       when: needs_reboot == True
 
-
-- hosts: peons
-  # Outside of debug-mode, run all peons as fast as possible
-  strategy: "{{ 'linear' if adept_debug | default(False) else 'free' }}"
-  vars_files:
-      - kommandir_vars.yml
-  roles: # N/B: failed_peon_junit role applied via role dependencies
-
     - role: lvm
       when: not hostvars[inventory_hostname].stone_touched and
             (lvg_ops | default() not in empty or
@@ -74,6 +66,14 @@
     - role: swap_enabled
       when: not hostvars[inventory_hostname].stone_touched and
             swap_device | default() not in empty
+
+
+- hosts: peons
+  # Outside of debug-mode, run all peons as fast as possible
+  strategy: "{{ 'linear' if adept_debug | default(False) else 'free' }}"
+  vars_files:
+      - kommandir_vars.yml
+  roles: # N/B: failed_peon_junit role applied via role dependencies
 
     - role: installed
       when: not is_atomic and
