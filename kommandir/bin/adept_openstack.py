@@ -209,10 +209,9 @@ class OpenstackREST(Singleton):
         self.service_sessions = service_sessions
 
     def __init__(self, service_sessions=None):
-        del service_sessions  # consumed by __new__
-        logging.debug('New %s created, wiping any previous REST API history.',
-                      self.__class__.__name__)
-        self.previous_responses = []
+        del service_sessions
+        if self.previous_responses is None:
+            self.previous_responses = []
 
     def raise_if(self, true_condition, xception, msg):
         """
@@ -735,10 +734,17 @@ class TimeoutAttachVolume(TimeoutAction):
         """
         Return volume_id if attachment complete or None if not
         """
+        try:
+            volume_details = self.os_rest.volume(volume_id)
+            status = volume_details['status']
+        except (ValueError, IndexError, KeyError):
+            return None  # Volume doesn't exist or data is bad
         attachments = self.os_rest.attachments(uuid=server_id)
         attached_to_server = volume_id in attachments
-        logging.info("     %s: attached to %s: %s)",
-                     volume_id, server_id, attached_to_server)
+        logging.info("     %s(%s): attached: %s)",
+                     volume_id, status, attached_to_server)
+        if not self.attach_requested and status.lower() != 'available':
+            return None
         if not attached_to_server and not self.attach_requested:
             volumeattachment = dict(volumeId=volume_id)
             self.os_rest.compute_request('/servers/%s/os-volume_attachments' % server_id,
@@ -756,64 +762,50 @@ class TimeoutDeleteVolume(TimeoutAction):
     """Helper class to detach and delete a volume"""
 
     detach_requests = None
-    vanish_fmt = 'Volume %s vanished while deleting, raised %s'
 
     def __init__(self, volume_id):
         self.os_rest = OpenstackREST()
         self.detach_requests = set()
-        self._sentinel = self
+        self.sentinel = object()  # Needed to detect colliding removal requests
         super(TimeoutDeleteVolume, self).__init__(volume_id)
-
-    def detach_all(self, volume_id, server_ids):
-        """
-        Submit detach requests for all id's in server_ids for volume_id
-        """
-        for server_id in set(server_ids) - self.detach_requests:
-            try:
-                self.os_rest.compute_request('/servers/%s/os-volume_attachments/%s'
-                                             % (server_id, volume_id),
-                                             unwrap=None, method='delete')
-            # Server may have "gone away" before request could be submitted
-            except Exception, xcept:
-                logging.warning("detach server %s from volume %s raised %s",
-                                server_id, volume_id, xcept)
-            self.detach_requests |= set([server_id])
 
     def _safe_query(self, volume_id):
         try:  # Prevent TOCTOU: id in list, then vanishes before query
             return self.os_rest.volume(volume_id)
-        except Exception, xcept:
+        except Exception:
             volume_ids = self.os_rest.volume_list()
             if volume_id not in volume_ids:
-                # Gone now, whew! this is okay
-                logging.debug(self.vanish_fmt, volume_id, xcept)
-                # Stub volume_details to satisfy original caller and identify race
-                return dict(id=volume_id, attachments=[], sentinel=self._sentinel)
+                # Gone now, whew! This is okay, removal was the goal.
+                # Satisfy all callers with expected dict() + sentinel
+                return dict(id=volume_id, attachments=[], sentinel=self.sentinel)
             else:
-                raise
+                raise  # Removal request collision w/o removal, can't handle this.
 
     def am_done(self, volume_id):
         """
         Return former volume details (or equivalent) if deleted, or None if not
         """
         volume_details = self._safe_query(volume_id)
-        if volume_details.get('sentinel', None) == self._sentinel:
+        if volume_details.get('sentinel', None) == self.sentinel:
+            del volume_details['sentinel']
             return volume_details  # removal was the goal
         attachments = self.os_rest.child_search('id',
                                                 alt_list=volume_details['attachments'])
-        if attachments:  # delete request will fail!
-            logging.warning("    Detaching unexpected VMs: %s", attachments)
-            self.detach_all(volume_id, attachments)
-            return None  # try again
+        # Server always deleted first, before volume, so...
+        if attachments:  # can't handle, was it multi-attach?
+            logging.warning("    Found VMs still attached,"
+                            "IGNORING volume '%s' and attached VMs '%s'",
+                            volume_details.get('name', volume_id),
+                            attachments)
+            return volume_details  # bail out!
         else:
             logging.info("     Deleting volume %s: status %s",
                          volume_id, volume_details['status'])
             try:  # Prevent TOCTOU: id vanishes before query
                 self.os_rest.volume_request('/volumes/%s' % volume_id,
                                             unwrap=None, method='delete')
-            except Exception, xcept:
-                logging.debug(self.vanish_fmt, volume_id, xcept)
-                return volume_details
+            except Exception:
+                return volume_details  # Removal was the goal
             return None  # try again
 
 
@@ -861,6 +853,27 @@ def discover(name=None, uuid=None, router_name=None, private=False, **dargs):
     else:
         raise IndexError("No server %s found", thing)
 
+def _destroy_volumes(volume_ids, server_id):
+    os_rest = OpenstackREST()
+    # It's possible volume wasn't attached yet
+    try:
+        volumes = os_rest.volume_list()
+        logging.info("Searching for orphan volumes.")
+        for volume in volumes:
+            if volume in volume_ids:
+                continue
+            try:
+                details = os_rest.volume(volume)
+                if details["name"] == server_id:
+                    volume_ids.append(volume)
+            except (ValueError, IndexError):
+                continue
+    except (ValueError, IndexError):
+        pass  # Volume named with server_id doesn't exist
+    if volume_ids:
+        logging.info("Deleting leftover volumes:")
+        for volume_id in volume_ids:
+            TimeoutDeleteVolume(volume_id)()
 
 def destroy(name=None, uuid=None, **dargs):
     """
@@ -893,13 +906,11 @@ def destroy(name=None, uuid=None, **dargs):
     except IndexError:  # Attachments and server not found
         pass
 
-    if server_id:
-        TimeoutDelete(server_id)()
+    if not server_id:
+        return
 
-    for volume_id in volume_ids:
-        logging.info("Deleting leftover volumes: %s", volume_id)
-        TimeoutDeleteVolume(volume_id)()
-
+    TimeoutDelete(server_id)()
+    _destroy_volumes(volume_ids, server_id)
 
 # Arguments come from argparse, listing them all for clarity of intent
 def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
@@ -943,7 +954,6 @@ def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
         if not private:
             logging.info("Attempting to assign floating ip on network %s", router_name)
             TimeoutAssignFloatingIP(server_id, router_name)()
-
         discover(name=name, uuid=server_id, router_name=router_name, private=private)
 
     # Must not leak servers or volumes, original exception will be re-raised
