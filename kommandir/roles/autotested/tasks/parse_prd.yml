@@ -28,7 +28,8 @@
     set_fact:
       docker_autotest_mmargs: '{{ result }}'
 
-  when: docker_autotest_mmargs|default() in empty
+  when: docker_autotest_mmargs|default() in empty and
+        pull_request_description | search('(\[--args=(.+)\]){1}')
 
 - name: Display value of parsed buffer
   debug:
