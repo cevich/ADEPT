@@ -1,7 +1,7 @@
 ---
 
 peon_groups:
-    - openstack
+    - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
     - rhel
     - subscribed
     - updated
@@ -9,9 +9,3 @@ peon_groups:
     - autotested
 
 peon_image: 'rhel-7.3-server-x86_64-latest'
-
-peon_size: '20'
-
-peon_flavor: 'm1.medium'
-
-peon_userdata: '{{ workspace }}/roles/peon_created/files/nodocker_userdata.yml'

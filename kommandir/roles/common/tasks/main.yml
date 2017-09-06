@@ -20,6 +20,7 @@
 - assert:
     # These are set automatically by adept.py
     that:
+        - "empty is defined"
         - "workspace | default() not in empty"
         - "adept_path | default() not in empty"
         - "adept_context | default() not in empty"
@@ -27,6 +28,7 @@
         - "job_name | default() not in empty"
         - "groups.peons is defined"
         - 'no_log_synchronize | default() not in empty'
+        - "default_peon_cloud_group | default() not in empty"
 
 - name: Results sub-directory for exists for inventory_hostname
   file:
@@ -42,6 +44,11 @@
       add_host:
         name: "kommandir"
         groups: "nocloud"
+
+    - name: The peon_cloud_group variable is set from defaults
+      set_fact:
+        peon_cloud_group: '{{ default_peon_cloud_group }}'
+      when: peon_cloud_group is undefined
 
     - name: The kommandir groups all peons from their peon_groups list
       add_host:

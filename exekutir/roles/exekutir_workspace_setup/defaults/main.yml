@@ -20,6 +20,16 @@ kommandir_vars_exclude_keys:
   - 'cloud_asserts'
   - 'cloud_provisioning_command'
   - 'cloud_destruction_command'
+  - 'install_rpms'
+  - 'repo_rpms'
+  - 'enable_repos'
+  - 'disable_repos'
+  - 'all_updated'
+  - 'state'
+  - 'install_timeout'
+  - 'disable_all_rh_repos'
+  - 'enable_rh_repos'
+  - 'yum_repos'
 
 # This list of keys will be overriden in kommandir_vars.yml based on
 # on the current exekutir values if defined (except global_lockdir
@@ -32,3 +42,4 @@ kommandir_vars_copy_keys:
   - "no_log_synchronize"
   - "adept_debug"
   - "pull_request_description"
+  - "peon_cloud_group"

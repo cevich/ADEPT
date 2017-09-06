@@ -1,0 +1,4 @@
+---
+
+# If peon_cloud_group is not set, use this as the default
+default_peon_cloud_group: "openstack"

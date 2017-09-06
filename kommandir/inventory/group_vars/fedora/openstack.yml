@@ -1,0 +1,6 @@
+---
+
+# Only applicable to adept_openstack.py provisioner
+peon_size: '{{ "20" if "openstack" in group_names else omit }}'
+peon_flavor: '{{ "m1.medium" if "openstack" in group_names else omit }}'
+peon_userdata: '{{ hostvars.kommandir.workspace ~ "/roles/peon_created/files/nodocker_userdata.yml" if "openstack" in group_names else omit }}'

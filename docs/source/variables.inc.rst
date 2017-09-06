@@ -7,6 +7,8 @@ of the common variables used throughout ADEPT's plays and tasks.
 
 .. _`lookup order is defined by Ansible's documentation`: http://docs.ansible.com/ansible/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable
 
+.. _high_level_variables:
+
 High-level Variables
 ---------------------
 
@@ -60,7 +62,7 @@ For example, if a variable is specific to a...
     removing files during `the *cleanup* transition <tcct>`_.
 
 ``cleanup``
-    Boolean, defaults to ``True``
+    Boolean, defaults to ``True``.
     *Exekutir's* value copied to *kommandir's*.
     Enables/Disables removal of all *peons* by the *kommandir*,
     during `the *cleanup* transition <tcct>`_.
@@ -70,7 +72,7 @@ For example, if a variable is specific to a...
 
 ``cleanup_globs``
     List, defaults to ``[]``.
-    Not shared between *exekutir* and *kommandirs*
+    Not shared between *exekutir* and *kommandirs*.
     A list of strings, each interpreted as a shell-glob, relative to ``workspace``.
     Intended to mark certain sensitive files/directories for removal during
     `the *cleanup* transition <tcct>`_.  See `adept_debug`_.
@@ -139,7 +141,7 @@ For example, if a variable is specific to a...
     every time the ``kommandir_workspace_update`` role is applied.
 
 ``extra_peon_setup_cmnds``
-    List, defaults to ``Null``
+    List, defaults to ``Null``.
     Only use on *kommandir*.
     Whatever command-strings are in this list for a *peon*, will be executed after all
     setup is completed from the default ``kommandir/peon_setup.yml`` playbook.
@@ -208,7 +210,7 @@ For example, if a variable is specific to a...
     the value is always reset back to ``False``.
 
 ``no_log_synchronize``
-    Boolean, defaults to ``True``
+    Boolean, defaults to ``True``.
     *Exekutir's* value overrides *kommandi'r*.
     When ``False`` and ``adept_debug`` (above) is ``True`` or ``--verbose`` was used,
     the Ansible ``synchronize`` module will output the full contents of its operation.
@@ -216,10 +218,29 @@ For example, if a variable is specific to a...
     Even when debugging, it's recommended to keep this ``True`` unless the details are
     really needed.
 
+.. _peon_groups:
+
+``peon_groups``
+    List, no-default, **mandatory**.
+    Only defined for *peons* but only used by *kommandir*.
+    Defines the names of all groups a peon should be made a member of.
+    This determines **many** other variable values for *peons*, all of which
+    are defined by YAML files under ``kommandir/inventory/group_vars/``.
+
+.. _peon_cloud_group:
+
+``peon_cloud_group``
+    String, defaults to ``{{default_peon_cloud_group}}`` - "openstack".
+    Only defined for *peons* but only used by *kommandir*.
+    All of the bundled default peon definitions (under ``kommandir/inventory/host_vars``)
+    list a single group indirectly by this value.  Therefor changing the value
+    of this one variable will affect (by group membership) the values brought in
+    for cloud_environment_, cloud_provisioning_command_, cloud_destruction_command_, etc.
+
 .. _public_peons:
 
 ``public_peons``
-    Boolean, defaults to ``False``
+    Boolean, defaults to ``False``.
     Only used by *peons*.
     When ``True``, the `cloud_provisioning_command`_ should
     make every effort to allow unrestricted network access to created *peons*.
@@ -227,7 +248,7 @@ For example, if a variable is specific to a...
     the *kommandir*.
 
 ``pull_request_description``
-    String, defaults to undefined
+    String, defaults to undefined.
     *Exekutir's* value overrides *kommandi'r*.
     When set to a string, this is assumed to be the description text contained
     in the originating pull-request.  Jobs may make use of this however they like.
@@ -237,7 +258,7 @@ For example, if a variable is specific to a...
 .. _stonith:
 
 ``stonith``
-    Boolean, defaults to ``False``
+    Boolean, defaults to ``False``.
     Only used  by *kommandir* during the ``exekutir/roles/kommandir_destroyed`` role.
     When ``True`` during the *cleanup* context, it forces removal of the *kommandir*.
     This is used primarily during CI jobs for ADEPT itself,

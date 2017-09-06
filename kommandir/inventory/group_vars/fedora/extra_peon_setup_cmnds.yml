@@ -1,0 +1,8 @@
+---
+
+# Needed for Docker Autotest docker_cli/systemd_in_container subtest
+extra_peon_setup_cmnds:
+  - >
+    {{ "setsebool -P container_manage_cgroup 1"
+       if ansible_distribution_major_version >= 26
+       else "/bin/true" }}

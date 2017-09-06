@@ -1,16 +1,10 @@
 ---
 
 peon_groups:
-    - openstack
+    - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
     - fedora
     - updated
     - docker
     - autotested
 
 peon_image: 'Fedora-Cloud-25'
-
-peon_size: '20'
-
-peon_flavor: 'm1.medium'
-
-peon_userdata: '{{ workspace }}/roles/peon_created/files/nodocker_userdata.yml'

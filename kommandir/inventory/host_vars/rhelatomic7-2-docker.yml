@@ -1,9 +1,7 @@
 ---
 
-ansible_shell_type: sh
-
 peon_groups:
-    - openstack
+    - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
     - rhelatomic
     - subscribed
     - updated
@@ -11,7 +9,3 @@ peon_groups:
     - autotested
 
 peon_image: 'rhel-atomic-cloud-7.3-released-latest'
-
-peon_flavor: 'm1.medium'
-
-peon_userdata: '{{ workspace }}/roles/peon_created/files/nodocker_userdata.yml'

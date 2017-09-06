@@ -73,6 +73,8 @@ The *setup* context transition
 
     * Shell-module arguments in `extra_kommandir_setup`_ are executed.
 
+.. _jobxn_on_kommandir:
+
 #. Run ``job.xn`` on *kommandir* (local or remote).
    (``exekutir.xn``)
 
@@ -80,6 +82,9 @@ The *setup* context transition
 
     * The default executes the ``setup.yml`` playbook, which creates and
       configures any *peons* that are members of the "*peons*" Ansible group
+
+    * By default, *peons* are members of the "openstack" group, this can
+      be changed by overriding peon_cloud_group_ from the `high-level variables`_
 
     * For a remote *kommandir*, the `uuid`_ user is used for execution.
 
