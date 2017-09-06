@@ -89,13 +89,19 @@ but require some manual manipulations of files in the workspace.
 It's safer to apply the ``cleanup`` context, then start over again
 with ``setup`` against a fresh workspace, with a fresh `uuid`_
 
-
 OpenStack Cloud
 ------------------
 
-This requires that you either set the ``$OS_*`` environment variables
-correctly, or dropped a ``clouds.yml`` file in the correct workspace(s).
+This is the default for all bundled *peons* as per the peon_cloud_group_ variable
+value.  The openstack group variables demand that you either set the ``$OS_*``
+environment variables correctly, or dropped a ``clouds.yml`` file in
+the relevant workspace_.
 
+#. **Important**, verify that all the default peon images are accessable
+   to your tenant by examining the group variable file:
+   ``kommandir/inventory/group_vars/openstack/peon_images.yml``.  If any
+   are incorrect, fix them before proceeding.  Otherwise, those *peons*
+   will most certainly fail to be created.
 
 #. Setup your OpenStack credentials via the standard ``os-client-config``
    file ``clouds.yml``, in the workspace, as show below.  The
@@ -148,3 +154,17 @@ correctly, or dropped a ``clouds.yml`` file in the correct workspace(s).
    to release cloud resources.
 
     .. include:: adept_cleanup.inc.rst
+
+
+Other Clouds
+----------------
+
+A multitude of topologies are possible by changing the values of a few host and group variables.
+From the *exekutir's* perspective, the *kommandir* will be created according to whichever
+group is set via kommandir_groups_.  For example, "openstack" will cause the group variables
+from ``exekutir/inventory/group_vars/openstack.yml`` to be brought in.
+
+From the *kommandir's* perspective, all default *peons* are created by membership dictated
+by the peon_cloud_group_.  This value is used to help populate the peon_groups_ variable.
+The default value of "openstack" will cause all default *peons* to created according to variables
+defined in the group variables files ``kommandir/inventory/group_vars/openstack/*.yml``.
