@@ -8,5 +8,3 @@ peon_groups:
     - docker-latest
     - overlay2
     - autotested
-
-peon_image: 'rhel-7.4-server-x86_64-latest'

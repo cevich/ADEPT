@@ -7,5 +7,3 @@ peon_groups:
     - docker
     # overlay2 - already the default
     - autotested
-
-peon_image: 'Fedora-Atomic-26'

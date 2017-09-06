@@ -6,5 +6,3 @@ peon_groups:
     - updated
     - docker
     - autotested
-
-peon_image: 'Fedora-Atomic-25'
