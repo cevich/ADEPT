@@ -2,10 +2,11 @@
 
 peon_groups:
     - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
-    - fedora
+    - rhel
+    - subscribed
     - updated
-    - docker
-    # overlay2 - already the default
+    - docker-latest
+    - overlay2
     - autotested
 
-peon_image: 'Fedora-Cloud-26'
+peon_image: 'rhel-7.4-server-x86_64-latest'

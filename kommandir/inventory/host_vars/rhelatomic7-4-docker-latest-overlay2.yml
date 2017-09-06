@@ -1,0 +1,12 @@
+---
+
+peon_groups:
+    - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
+    - rhelatomic
+    - subscribed
+    - updated
+    - docker-latest
+    - overlay2
+    - autotested
+
+peon_image: 'rhel-atomic-cloud-7.4-released-latest'

@@ -106,8 +106,12 @@
     - role: liverestore_enabled
       when: '"liverestore" in group_names'
 
+    # These two are mutually exclusive
     - role: docker-storage-setup
-      when: sysconfig_dss_lines | default([]) != []
+      when: sysconfig_dss_lines | default([]) != [] and
+            "overlay2" not in group_names
+    - role: overlay2_enabled
+      when: '"overlay2" in group_names'
 
 
 - hosts: peons

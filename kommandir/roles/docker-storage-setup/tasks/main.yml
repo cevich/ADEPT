@@ -1,5 +1,9 @@
 ---
 
+- assert:
+    that:
+      - 'sysconfig_dss_lines | default([]) != []'
+
 - name: Add lines to sysconfig/d-s-s
   lineinfile:
     create: true

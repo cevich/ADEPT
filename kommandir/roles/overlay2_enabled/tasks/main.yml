@@ -1,0 +1,26 @@
+---
+
+- assert:
+    that:
+      - '"overlay2" in group_names'
+
+- name: Start with peon's already defined sysconfig_dss_lines
+  set_fact:
+    overlay2_sysconfig_dss_lines: '{{ sysconfig_dss_lines }}'
+  when: sysconfig_dss_lines is defined
+
+- name: The overlay2_sysconfig_dss_lines variable sets STORAGE_DRIVER
+  set_fact:
+    overlay2_sysconfig_dss_lines: '{{ overlay2_sysconfig_dss_lines + ["STORAGE_DRIVER=overlay2"] }}'
+
+- name: Key variables are displayed
+  debug:
+    var: "{{ item }}"
+  when: adept_debug
+  with_items: ["group_names", "sysconfig_dss_lines", "overlay2_sysconfig_dss_lines"]
+
+- name: The docker-storage-setup role is re-used for overlay2 setup
+  include_role:
+    name: docker-storage-setup
+  vars:
+    sysconfig_dss_lines: '{{ overlay2_sysconfig_dss_lines }}'

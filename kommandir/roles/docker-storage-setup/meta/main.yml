@@ -3,3 +3,4 @@
 dependencies:
     - role: failed_peon_junit
       this_role: "docker-storage-setup"
+      when: '"overlay2" not in group_names'
