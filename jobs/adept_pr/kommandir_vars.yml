@@ -1,0 +1,7 @@
+---
+
+docker_autotest_timeout: 30
+
+job_subthings:
+    - docker_cli/dockerhelp
+    - docker_cli/version
