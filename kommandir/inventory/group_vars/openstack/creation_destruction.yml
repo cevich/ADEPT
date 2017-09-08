@@ -40,14 +40,14 @@ cloud_provisioning_command:
     command: >
         bin/openstack_exclusive_create.py \
             {{ "--verbose" if adept_debug == True else "" }} \
-            {{ "--lockdir=" ~ hostvars.kommandir.global_lockdir if hostvars.kommandir.global_lockdir|default() not in empty else ""}} \
-            --image {{ peon_image }} \
-            --flavor {{ peon_flavor }} \
+            {{ "--lockdir=" ~ hostvars.kommandir.global_lockdir | trim if hostvars.kommandir.global_lockdir|default() not in empty else ""}} \
+            --image {{ peon_image | trim }} \
+            --flavor {{ peon_flavor | trim }} \
             {{ "--private" if public_peons is undefined or public_peons != True else "" }} \
-            {{ "--size " ~ peon_size if peon_size is defined else "" }} \
-            {{ "--userdata " ~ peon_userdata if peon_userdata is defined else "" }} \
-            {{ inventory_hostname }}-{{ uuid }} \
-            {{ ansible_private_key_file }}.pub \
+            {{ "--size " ~ peon_size | trim if peon_size is defined else "" }} \
+            {{ "--userdata " ~ peon_userdata | trim if peon_userdata is defined else "" }} \
+            {{ inventory_hostname }}-{{ uuid | trim }} \
+            {{ ansible_private_key_file | trim }}.pub \
             {{ hostvars.kommandir.workspace }}/ssh/exekutir_key.pub
     chdir: "{{ hostvars.kommandir.workspace }}"
 

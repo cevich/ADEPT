@@ -1,0 +1,7 @@
+This job ({{ job_name }}) is intended to exercise
+a very small subset of tests on a small number peons
+to verify basic ADEPT functionality.  It should execute
+relatively fast, not consume many resources, and
+nearly always pass without any failures.
+
+(src: {{ job_path }}/{{ job_docs_template_src }})

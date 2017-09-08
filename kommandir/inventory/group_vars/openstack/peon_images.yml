@@ -2,18 +2,18 @@
 
 # Avoid needing to specify image names in every peon's host_vars
 peon_image: >
-  {# RHEL Images #}
+  {#- RHEL Images -#}\
   {%-   if inventory_hostname|search("rhel7-2") -%}rhel-7.2-server-x86_64-released
   {%- elif inventory_hostname|search("rhel7-3") -%}rhel-7.3-server-x86_64-latest
   {%- elif inventory_hostname|search("rhel7-4") -%}rhel-7.4-server-x86_64-latest
-  {# RHEL Atomic Host Images #}
+  {#- RHEL Atomic Host Images -#}\
   {%- elif inventory_hostname|search("rhelatomic7-2") -%}rhel-atomic-cloud-7.2-released-latest
   {%- elif inventory_hostname|search("rhelatomic7-3") -%}rhel-atomic-cloud-7.3-released-latest
   {%- elif inventory_hostname|search("rhelatomic7-4") -%}rhel-atomic-cloud-7.4-released-latest
-  {# Fedora Images #}
+  {#- Fedora Images -#}\
   {%- elif inventory_hostname|search("fedora25") -%}Fedora-Cloud-25
   {%- elif inventory_hostname|search("fedora26") -%}Fedora-Cloud-26
-  {# Fedora Atomic Host Images #}
+  {#- Fedora Atomic Host Images -#}\
   {%- elif inventory_hostname|search("fedoratomic25") -%}Fedora-Atomic-25
   {%- elif inventory_hostname|search("fedoratomic26") -%}Fedora-Atomic-26
-  {%- endif -%}
+  {%- else -%}{{ 'Error: Peon not found while looking up image-name' | comment }}{%- endif -%}

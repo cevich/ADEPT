@@ -7,5 +7,3 @@ peon_groups:
     - updated
     - docker
     - autotested
-
-peon_image: 'rhel-atomic-cloud-7.3-released-latest'

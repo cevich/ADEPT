@@ -7,5 +7,3 @@ peon_groups:
     - updated
     - docker-latest
     - autotested
-
-peon_image: 'rhel-7.4-server-x86_64-latest'

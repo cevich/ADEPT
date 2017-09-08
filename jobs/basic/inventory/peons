@@ -4,7 +4,10 @@
 [peons]
 
 rhel7-4-docker
+rhel7-4-docker-latest-overlay2
+
 rhelatomic7-4-docker-latest
+rhelatomic7-4-docker-latest-overlay2
 
 fedora26-docker-latest
 fedoratomic26-docker-latest
