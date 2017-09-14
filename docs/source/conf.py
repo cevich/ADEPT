@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Autotest Docker Enabled Product Testing (ADEPT) documentation build configuration file, created by
+# ADEPT documentation build configuration file, created by
 # sphinx-quickstart on Wed May 20 12:50:14 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -46,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Autotest Docker Enabled Product Testing (ADEPT)'
+project = u'ADEPT'
 copyright = u'2015, Chris Evich'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -179,7 +179,7 @@ html_use_opensearch = ''
 html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'AutotestDockerEnabledProductTestingADEPTdoc'
+htmlhelp_basename = 'ADEPT'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -199,7 +199,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'AutotestDockerEnabledProductTestingADEPT.tex', u'Autotest Docker Enabled Product Testing (ADEPT) Documentation',
+  ('index', 'ADEPT.tex', u'ADEPT Documentation',
    u'Chris Evich', 'manual'),
 ]
 
@@ -229,7 +229,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'adept', u'Autotest Docker Enabled Product Testing (ADEPT) Documentation',
+    ('index', 'adept', u'ADEPT Documentation',
      [u'Chris Evich'], 1)
 ]
 
@@ -243,8 +243,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'AutotestDockerEnabledProductTestingADEPT', u'Autotest Docker Enabled Product Testing',
-   u'Chris Evich', 'AutotestDockerEnabledProductTesting', 'ADEPT',
+  ('index', 'ADEPT', u'ADEPT Documentation',
+   u'Chris Evich', 'ADEPT', 'ADEPT',
    'Documentation'),
 ]
 
