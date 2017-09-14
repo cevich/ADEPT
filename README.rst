@@ -1,6 +1,6 @@
-=====================================================
-Autotest-Docker Enabled Product Testing (A.D.E.P.T.)
-=====================================================
+=======================================================
+ADEPT, the Deterministic Executor for Parallel Testing
+=======================================================
 
 ADEPT includes a small python program and a collection of Ansible playbooks, and
 related configurations.  Together, they help orchestrate parallel
@@ -93,7 +93,7 @@ Latest Documentation
 ======================
 
 For the latest, most up to date documentation please visit
-http://autotest-docker-enabled-product-testing.readthedocs.io/en/simplify/
+http://ADEPT.readthedocs.io/en/latest
 
 The latest `Docker Autotest`_ documentation is located at:
 http://docker-autotest.readthedocs.io
