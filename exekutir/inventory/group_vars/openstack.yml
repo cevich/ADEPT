@@ -13,7 +13,7 @@ cloud_environment:
     OS_USERNAME: '{{ lookup("env", "OS_USERNAME") | default("",True) }}'
     OS_PASSWORD: '{{ lookup("env", "OS_PASSWORD") | default("",True) }}'
     OS_REGION_NAME: '{{ lookup("env", "OS_REGION_NAME") | default("",True) }}'
-    OS_CLOUD_NAME: '{{ lookup("env", "OS_CLOUD_NAME") | default("",True) }}'
+    OS_CLOUD: '{{ lookup("env", "OS_CLOUD") | default("",True) }}'
 
 cloud_asserts:
     - 'empty is defined'

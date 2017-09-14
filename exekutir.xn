@@ -100,6 +100,7 @@
 - variable: {"name":"OS_USERNAME","from_env":"OS_USERNAME","default":""}
 - variable: {"name":"OS_REGION_NAME","from_env":"OS_REGION_NAME","default":""}
 - variable: {"name":"OS_CLOUD_NAME","from_env":"OS_CLOUD_NAME","default":""}
+- variable: {"name":"OS_CLOUD","from_env":"OS_CLOUD","default":""}
 - variable: {"name":"OS_AUTH_URL","from_env":"OS_AUTH_URL","default":""}
 - variable: {"name":"OS_PASSWORD","from_env":"OS_PASSWORD","default":""}
 
