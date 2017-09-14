@@ -649,7 +649,7 @@ class TimeoutCreate(TimeoutAction):
 class TimeoutAssignFloatingIP(TimeoutAction):
     """Helper class to ensure floating IP assigned to server within timeout window"""
 
-    timeout = 30
+    timeout = 120  # Allow provisioning MANY VMs at the same time
 
     def __init__(self, server_id, router_name=None):
         self.os_rest = OpenstackREST()
