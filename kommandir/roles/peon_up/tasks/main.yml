@@ -16,7 +16,7 @@
   with_items: ["ansible_host","ansible_port","ansible_user","wait_for_timeout", 'reboot_context']
 
 - name: Role was included by rebooted role, bypassing dependencies
-  include: "{{ playbook_dir }}/roles/failed_peon_junit/tasks/main.yml"
+  include: "{{ playbook_dir }}/roles/failed_peon_result/tasks/main.yml"
   vars:
     this_role: "rebooted.peon_up.{{ reboot_context }}"
   when: reboot_context | default() not in empty
