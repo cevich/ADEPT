@@ -1,0 +1,7 @@
+---
+
+# This role may come in by 'include_role' so complete path to template is needed
+results_template_filepath: "{{ playbook_dir }}/roles/failed_peon_result/templates/failed_peon.junit.j2"
+
+# Filepath, relative to results/hostname/ where template should be rendered
+results_filepath: "docker_autotest/results.xml"

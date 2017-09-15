@@ -1,0 +1,39 @@
+---
+
+# This role renders results_template_filename indicating that the
+# role {{ this_role }} has failed.  It's intended use is by role-dependency
+# inclusion.  In this way, if any role fails on a peon, the results for that
+# peon indicate which one was problematic - saving time searching through logs.
+
+- block:
+
+  - assert:
+      that:
+          - 'empty is defined'
+          - 'inventory_hostname != "kommandir"'
+          # Not literally, rather the role that included failed_peon_result
+          - 'this_role | default() not in empty'
+          - 'job_name | default() not in empty'
+          - 'hostvars.kommandir.ansible_date_time.date | default() not in empty'
+          - 'results_filepath | default() not in empty'
+          - 'results_template_filepath | default() not in empty'
+
+  - name: Key variables are displayed
+    debug:
+      var: "{{ item }}"
+    with_items: ["job_name","this_role","inventory_hostname","results_filepath","results_template_filepath"]
+
+  when: adept_debug
+
+- name: Output results_filepath directory exists
+  file:
+    path: '{{ (hostvars.kommandir.workspace ~ "/results/" ~ "/" ~ results_filepath) | dirname }}'
+    state: directory
+  delegate_to: kommandir
+
+- name: Peon's results file is cooked with failure of this_role
+  template:
+    # peon_up includes this file, need full-path to template
+    src: "{{ results_template_filepath }}"
+    dest: "{{ hostvars.kommandir.workspace }}/results/{{ inventory_hostname }}/{{ results_filepath }}"
+  delegate_to: kommandir
