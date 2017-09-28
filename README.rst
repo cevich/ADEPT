@@ -93,7 +93,7 @@ Latest Documentation
 ======================
 
 For the latest, most up to date documentation please visit
-http://ADEPT.readthedocs.io/en/latest
+http://A-D-E-P-T.readthedocs.io/en/latest
 
 The latest `Docker Autotest`_ documentation is located at:
 http://docker-autotest.readthedocs.io
