@@ -72,6 +72,11 @@
 
 - include: configure_control.yml
 
+- name: Copy 'known_failures.txt' file to config_custom directory
+  copy:
+    dest: "{{ autotest_docker_path }}/config_custom/"
+    src: "known_failures.txt"
+
 - name: Results directory is empty
   file:
   args:
