@@ -119,6 +119,13 @@
   strategy: "{{ 'linear' if adept_debug | default(False) else 'free' }}"
   vars_files:
       - kommandir_vars.yml
+  pre_tasks:
+    - name: Peon executes commands from extra_peon_setup_cmnds
+      shell: "{{ item }}"
+      register: result
+      with_items: '{{ extra_peon_setup_cmnds }}'
+      when: extra_peon_setup_cmnds | default() not in empty
+
   roles:
     - selinux_enforcing
 
@@ -144,27 +151,3 @@
       # See recovery section in the subsequent play
       touchstone_filepath: "/var/lib/autotested_touchstone"
       touch_touchstone: True
-
-- hosts: peons
-  vars_files:
-      - kommandir_vars.yml
-  tasks:
-    - block:
-
-        - name: Peon executes commands from extra_peon_setup_cmnds
-          shell: "{{ item }}"
-          register: result
-          with_items: '{{ extra_peon_setup_cmnds }}'
-
-      rescue:
-
-          - name: Autotested touchstone is removed on failure
-            file:
-                # See touchstone role in previous play
-                path: "/var/lib/autotested_touchstone"
-                state: absent
-
-          - fail:
-              msg: "{{ result }}"
-
-      when: extra_peon_setup_cmnds | default() not in empty
