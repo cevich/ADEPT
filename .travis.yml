@@ -20,11 +20,10 @@ env:
     global:
         - TYPOS="komandir executir ecoh roel fixup! squash! FIXME id_rsa '<<<<<<<' '=======' '>>>>>>>'"
         - PATH="$PATH:$VIRTUAL_ENV/bin"
-        - ANSIBLE_VERSION=2.3
 
 install:
     # These seem to match up roughly with behavior on RHEL 7
-    - pip install ansible==$ANSIBLE_VERSION Sphinx==1.2.2 unittest2==1.1.0 pylint==1.4.5 virtualenv==15.1.0
+    - pip install Sphinx==1.2.2 unittest2==1.1.0 pylint==1.4.5 virtualenv==15.1.0
 
 script:
     # Helps debugging
@@ -32,7 +31,7 @@ script:
     # Test building docs
     - cd docs && SPHINXOPTS="-W" make html
     - cd ..
-    - unit2 -vfc
-    - ./test_exekutir_xn.sh
+    - ./venv-cmd.sh unit2 -vfc
+    - ./venv-cmd.sh ./test_exekutir_xn.sh
     # Check for some typos / git commit problems (except in this file)
     - for i in $TYPOS; do echo; echo "$i"; git log -p $TRAVIS_COMMIT_RANGE $(ls -1 | grep -v .travis.yml) | grep -a -2 "$i"; test "$?" == "1" || exit 1; done

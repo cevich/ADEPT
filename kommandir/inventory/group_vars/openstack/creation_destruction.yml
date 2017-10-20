@@ -8,7 +8,7 @@ cloud_environment:
     USER_CONFIG_DIR: "{{ hostvars.kommandir.workspace }}"
     SITE_CONFIG_DIR: "{{ hostvars.kommandir.workspace }}"
     OS_CLIENT_CONFIG_FILE: "{{ hostvars.kommandir.workspace }}/clouds.yml"
-    OS_CLOUD: "default"
+    OS_CLOUD: '{{ lookup("env", "OS_CLOUD") | default("default",True) }}'
     HOME: "{{ hostvars.kommandir.workspace }}"
     WORKSPACE: "{{ hostvars.kommandir.workspace }}"
     OS_AUTH_URL: '{{ lookup("env", "OS_AUTH_URL") | default("",True) }}'
@@ -18,7 +18,6 @@ cloud_environment:
     OS_USERNAME: '{{ lookup("env", "OS_USERNAME") | default("",True) }}'
     OS_PASSWORD: '{{ lookup("env", "OS_PASSWORD") | default("",True) }}'
     OS_REGION_NAME: '{{ lookup("env", "OS_REGION_NAME") | default("",True) }}'
-    OS_CLOUD: '{{ lookup("env", "OS_CLOUD") | default("",True) }}'
 
 cloud_asserts:
     - 'empty is defined'
