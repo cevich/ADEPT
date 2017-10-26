@@ -37,7 +37,7 @@ REQUIREMENTS="$WORKSPACE/requirements.txt"
 # Confine this w/in the workspace
 export PIPCACHE="$WORKSPACE/.cache/pip"
 mkdir -p "$PIPCACHE"
-# Don't recycle cache, it may become polluted between runs
+# Don't recycle cache or bootstrap venv unless it succeeds
 trap 'rm -rf "$PIPCACHE" "$WORKSPACE/.venvbootstrap"' EXIT
 
 [ -n "$ARTIFACTS" ] || export ARTIFACTS="$WORKSPACE/results"
@@ -90,6 +90,7 @@ echo
         ./.venvbootstrap/bin/virtualenv --no-site-packages --python=python2.7 "./$VENV_DIRNAME"
         # Exit untrusted virtualenv
         deactivate
+        rm -rf ./.venvbootstrap  # No longer needed
     fi
     # Enter trusted virtualenv
     source ./.venv/bin/activate
@@ -101,6 +102,9 @@ echo
     [ -r "./.venv/.complete" ] || echo "Setup by: $@" > "./.venv/.complete"
   ) &>> "$LOGFILEPATH"
 ) 42>>"$LOGFILEPATH"
+
+# Success, clear cache-destruction on exit
+trap EXIT
 
 # Enter trusted virtualenv in this shell
 source "$WORKSPACE/$VENV_DIRNAME/bin/activate"
