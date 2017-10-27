@@ -990,7 +990,7 @@ def parse_args(argv, operation='help'):
 
         parser.add_argument('--router', '-r', default=None, dest='router_name',
                             help=('If creating a VM, assign a floating IP routed'
-                                  ' through gateway assigned to (existing) ROUTER,'
+                                  ' through gateway assigned to (existing) ROUTER_NAME,'
                                   ' instead of first-found (Optional).'))
 
         parser.add_argument('--private', '-p', default=False,
@@ -999,16 +999,18 @@ def parse_args(argv, operation='help'):
 
         parser.add_argument('--size', '-s', default=None, type=int,
                             help=('If creating a VM, also create and attach'
-                                  ' a volume with the same name, of SIZE'
-                                  ' gigabytes (Optional).'))
+                                  ' a volume of SIZE'
+                                  ' gigabytes as /dev/vdb (Optional).'))
 
         parser.add_argument('--userdata', '-u', default=None, dest='userdata_filepath',
                             help=('Path to filename containing cloud-config userdata'
-                                  ' YAML to use instead of default (Optional).'))
+                                  ' YAML. The token "{auth_key_lines}" will be replaced'
+                                  ' with a JSON list of the ssh public keys (Optional).'))
 
         parser.add_argument('--lockdir', '-l', default=None, type=str,
                             help=('Absolute path to directory where global lock file'
-                                  ' should be created/used.'))
+                                  ' should be created/used.  Required for parallel'
+                                  ' executions.'))
 
     # All operations get these
     parser.add_argument('--verbose', '-v', default=False,
