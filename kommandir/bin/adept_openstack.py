@@ -1281,7 +1281,7 @@ if __name__ == '__main__':  # pylint: disable=C0103
         logger.setLevel(logging.DEBUG)
     else:
         # Lower to INFO level and higher for general details
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.WARNING)
     del logger  # keep global namespace clean
 
     os_client_config = activate_and_setup(globals(),
