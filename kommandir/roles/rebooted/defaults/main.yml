@@ -18,6 +18,6 @@ wait_for_timeout: 13
 test_command_template: '{{ playbook_dir }}/roles/peon_up/templates/test_command.sh.j2'
 
 # When there are multiple reboots in a play, this sets the message which
-# helps destinguish which one failed, when the failed_peon_junit
+# helps destinguish which one failed, when the failed_peon_result
 # role-dependency is applied.
 reboot_context:
