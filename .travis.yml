@@ -18,7 +18,7 @@ git:
 
 env:
     global:
-        - TYPOS="komandir executir ecoh roel fixup! squash! FIXME id_rsa '<<<<<<<' '=======' '>>>>>>>'"
+        - TYPOS="komandir executir ecoh roel fixup! squash! FIXME id_rsa <<<<<<< ======= >>>>>>>"
         - PATH="$PATH:$VIRTUAL_ENV/bin"
 
 install:
@@ -35,4 +35,4 @@ script:
     - ./venv-cmd.sh unit2 -vfc
     - ./venv-cmd.sh ./test_exekutir_xn.sh
     # Check for some typos / git commit problems (except in this file)
-    - for i in $TYPOS; do echo; echo "$i"; git log -p $TRAVIS_COMMIT_RANGE $(ls -1 | grep -v .travis.yml) | grep -a -2 "$i"; test "$?" == "1" || exit 1; done
+    - for i in $TYPOS; do echo; echo "$i"; git log -p $TRAVIS_COMMIT_RANGE | grep -a -2 "$i"; test "$?" != "0" || exit 1; done
