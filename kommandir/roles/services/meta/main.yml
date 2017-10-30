@@ -1,5 +1,5 @@
 ---
 
 dependencies:
-    - role: failed_peon_result
+    - role: failed_peon_junit
       this_role: "services"
