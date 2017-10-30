@@ -6,5 +6,5 @@ wait_for_timeout: 13
 
 test_command_template: '{{ playbook_dir }}/roles/peon_up/templates/test_command.sh.j2'
 
-# When empty, do not include application of failed_peon_result role
+# When empty, do not include application of failed_peon_junit role
 reboot_context:

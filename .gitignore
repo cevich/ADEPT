@@ -6,7 +6,3 @@
 *.retry
 docs/build
 legacy_group_vars
-.cache
-.venvbootstrap
-.venv
-results

@@ -14,14 +14,14 @@
   gather_facts: False
   vars_files:
       - kommandir_vars.yml
-  force_handlers: True   # Actual destruction happens via handlers
   roles:
     - common
     - peon_common
+    - role: unsubscribed
+      when: cleanup and
+            "subscribed" in group_names
     - role: peon_destroyed
       when: 'cleanup | default(True) and inventory_hostname != "kommandir"'
-    - role: unsubscribed
-      when: cleanup and "subscribed" in group_names
 
 - hosts: kommandir
   vars_files:
