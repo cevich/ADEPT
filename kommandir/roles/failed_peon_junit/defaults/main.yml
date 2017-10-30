@@ -1,0 +1,4 @@
+---
+
+# Location (on kommandir) where peons results.junit would be overwritten by testing
+results_junit_dirpath: "{{ hostvars.kommandir.workspace }}/results/{{ inventory_hostname }}/docker_autotest"

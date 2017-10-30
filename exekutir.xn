@@ -161,13 +161,16 @@
             echo "-----";
             KOMMANDIR_HOST=$(grep -s -x -m 1 -e "^ansible_host: .*$" inventory/host_vars/kommandir.yml | cut -d: -f2 | tr --delete --complement "[:digit:].");
             echo "ansible_host: $KOMMANDIR_HOST"
-            ADEPT_CMD="./adept.py $ADEPT_CONTEXT . job.xn $ADEPT_OPTIONAL"
             if [ -z "$KOMMANDIR_HOST" ] || [ "$KOMMANDIR_HOST" == "localhost" ] || [ "$KOMMANDIR_HOST" == "127.0.0.1" ];
             then
                 echo "Local Kommandir calling adept.py for job.xn";
                 # Absolute path is needed here
                 cd "$WORKSPACE/kommandir_workspace"
-                $ADEPT_CMD;
+                ./adept.py \
+                    "$ADEPT_CONTEXT" \
+                    "." \
+                    "job.xn" \
+                    $ADEPT_OPTIONAL;
                 RET=$?;
             else
                 UUID=$(grep -s -x -m 1 -e "^uuid: .*$" exekutir_vars.yml | cut -d: -f2 | tr -d [:blank:]);
@@ -178,11 +181,11 @@
                     -o "PasswordAuthentication=no" \
                     -o "StrictHostKeyChecking=no" \
                     -o "UserKnownHostsFile=/dev/null" \
-                    -o "SendEnv=OS_AUTH_URL OS_TENANT_ID OS_TENANT_NAME OS_PROJECT_NAME OS_USERNAME OS_PASSWORD OS_REGION_NAME OS_CLOUD_NAME OS_CLOUD TERM" \
+                    -o "SendEnv=OS_AUTH_URL OS_TENANT_ID OS_TENANT_NAME OS_PROJECT_NAME OS_USERNAME OS_PASSWORD OS_REGION_NAME OS_CLOUD_NAME TERM" \
                     -o "User=$UUID" \
                     -i "$WORKSPACE/ssh/exekutir_key" \
                     "$KOMMANDIR_HOST" \
-                    "./venv-cmd.sh $ADEPT_CMD";
+                    "./adept.py $ADEPT_CONTEXT . job.xn $ADEPT_OPTIONAL";
                 RET=$?
             fi;
 
