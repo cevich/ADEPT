@@ -1,0 +1,37 @@
+---
+
+- name: Status of previously unreachable hosts is reset
+  listen: "peon destruction"
+  meta: clear_host_errors
+  delegate_to: kommandir
+
+- name: cloud_destruction_command is executed
+  listen: "peon destruction"
+  shell: "{{ cloud_destruction_command.command | mandatory }}"
+  environment: "{{ cloud_environment }}"
+  args:
+    chdir: "{{ cloud_destruction_command.chdir | default(workspace) }}"
+    executable: "{{ cloud_destruction_command.executable | default(omit) }}"
+    creates: "{{ cloud_destruction_command.creates | default(omit) }}"
+    removes: "{{ cloud_destruction_command.removes | default(omit) }}"
+  # There are many reasons why this could fail, host will still be removed
+  ignore_errors: True
+  register: result
+  when: cloud_destruction_command not in empty
+  delegate_to: kommandir
+
+- name: Command's result is recorded in peon's results dir
+  listen: "peon destruction"
+  copy:
+    dest: '{{ hostvars.kommandir.workspace }}/results/{{inventory_hostname}}/destruction_result.yml'
+    # Workaround ansible 2.1 bug
+    content: '{{ result | to_json | from_json | to_nice_yaml }}'
+  ignore_errors: True
+  delegate_to: kommandir
+
+- name: Display result if cloud_destruction_command failed
+  listen: "peon destruction"
+  debug:
+    var: "result"
+  when: cloud_destruction_command not in empty and
+        result | failed
