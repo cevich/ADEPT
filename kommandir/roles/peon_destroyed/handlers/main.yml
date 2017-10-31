@@ -1,10 +1,5 @@
 ---
 
-- name: Status of previously unreachable hosts is reset
-  listen: "peon destruction"
-  meta: clear_host_errors
-  delegate_to: kommandir
-
 - name: cloud_destruction_command is executed
   listen: "peon destruction"
   shell: "{{ cloud_destruction_command.command | mandatory }}"
