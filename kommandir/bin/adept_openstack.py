@@ -1117,7 +1117,7 @@ def api_debug_dump():
             pass
     _basename = os.path.basename(sys.argv[0])
     prefix = _basename.split('.', 1)[0]
-    filepath = os.path.join(workspace, '.virtualenv',
+    filepath = os.path.join(workspace, '.venv',
                             '%s_api_responses.json' % prefix)
     # Don't fail main operations b/c missing module
     import json as simplejson
@@ -1287,7 +1287,7 @@ if __name__ == '__main__':  # pylint: disable=C0103
     del logger  # keep global namespace clean
 
     os_client_config = activate_and_setup(globals(),
-                                          os.path.join(workspace, '.virtualenv'),
+                                          os.path.join(workspace, '.venv'),
                                           PIP_REQUIREMENTS,
                                           PIP_ONLY_BINARY,
                                           PIP_NO_BINARY)
