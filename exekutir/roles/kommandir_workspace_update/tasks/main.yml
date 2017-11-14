@@ -114,6 +114,9 @@
     # HEAD is the default if not specified
     version: "{{ item.version | default(omit) }}"
     recursive: "{{ item.recursive | default(False) }}"
+    clone: "{{ item.clone | default(omit) }}"
+    refspec: "{{ item.refspec | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
   when: result | changed and
         git_cache_args is defined and git_cache_args not in [None,"",[],{}]
   with_items: '{{ git_cache_args }}'
