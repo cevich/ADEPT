@@ -167,7 +167,8 @@
                 echo "Local Kommandir calling adept.py for job.xn";
                 # Absolute path is needed here
                 cd "$WORKSPACE/kommandir_workspace"
-                $ADEPT_CMD;
+                export WORKSPACE=$PWD
+                ./venv-cmd.sh $ADEPT_CMD;
                 RET=$?;
             else
                 UUID=$(grep -s -x -m 1 -e "^uuid: .*$" exekutir_vars.yml | cut -d: -f2 | tr -d [:blank:]);
