@@ -43,23 +43,6 @@
 
   when: "'nocloud' not in group_names"
 
-- name: Kommandir's extra_kommandir_setup command is executed
-  shell: "{{ extra_kommandir_setup.command }}"
-  args:
-    chdir: "{{ extra_kommandir_setup.chdir | default(omit) }}"
-    creates: "{{ extra_kommandir_setup.creates | default(omit) }}"
-    executable: "{{ extra_kommandir_setup.executable | default(omit) }}"
-    removes: "{{ extra_kommandir_setup.removes | default(omit) }}"
-    warn: False
-  register: result
-  when: extra_kommandir_setup is defined and
-        extra_kommandir_setup.command is defined
-
-- name: Display Kommandir's extra_kommandir_setup command results
-  debug:
-    var: result
-  when: adept_debug
-
 - name: Remote Kommandir's workspace is destructivly synchronized from exekutir's copy
   synchronize:
     copy_links: true  # Relative links wouldn't work afterwards
@@ -131,6 +114,9 @@
     # HEAD is the default if not specified
     version: "{{ item.version | default(omit) }}"
     recursive: "{{ item.recursive | default(False) }}"
+    clone: "{{ item.clone | default(omit) }}"
+    refspec: "{{ item.refspec | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
   when: result | changed and
         git_cache_args is defined and git_cache_args not in [None,"",[],{}]
   with_items: '{{ git_cache_args }}'
@@ -138,4 +124,21 @@
 - name: Remote Kommandir's workspace files have correct ownership
   command: "chown -R {{ uuid }}.{{ uuid }} {{ kommandir_workspace }}"
   when: "'nocloud' not in group_names"
+
+- name: Kommandir's extra_kommandir_setup command is executed
+  shell: "{{ extra_kommandir_setup.command }}"
+  args:
+    chdir: "{{ extra_kommandir_setup.chdir | default(omit) }}"
+    creates: "{{ extra_kommandir_setup.creates | default(omit) }}"
+    executable: "{{ extra_kommandir_setup.executable | default(omit) }}"
+    removes: "{{ extra_kommandir_setup.removes | default(omit) }}"
+    warn: False
+  register: result
+  when: extra_kommandir_setup is defined and
+        extra_kommandir_setup.command is defined
+
+- name: Display Kommandir's extra_kommandir_setup command results
+  debug:
+    var: result
+  when: adept_debug
 
