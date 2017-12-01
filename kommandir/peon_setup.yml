@@ -88,11 +88,6 @@
       reboot_context: "middle"
       when: needs_reboot == True
 
-    # End of low-level one-time-only setup
-    - role: touchstone
-      touch_touchstone: True
-
-
 - hosts: docker:docker-latest:&peons
   # Outside of debug-mode, run all peons as fast as possible
   strategy: "{{ 'linear' if adept_debug else 'free' }}"
@@ -128,6 +123,10 @@
 
   roles:
     - selinux_enforcing
+
+    # End of low-level one-time-only setup
+    - role: touchstone
+      touch_touchstone: True
 
     # Starting/Restarting docker may run d-s-s
     - services
