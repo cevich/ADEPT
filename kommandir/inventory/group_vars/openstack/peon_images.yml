@@ -4,8 +4,12 @@
 peon_image: >
   {#- RHEL Images -#}\
   {%-   if inventory_hostname|search("rhel7-2") -%}rhel-7.2-server-x86_64-released
-  {%- elif inventory_hostname|search("rhel7-3") -%}rhel-7.3-server-x86_64-latest
-  {%- elif inventory_hostname|search("rhel7-4") -%}rhel-7.4-server-x86_64-latest
+  {%- elif inventory_hostname|search("rhel7-3") -%}rhel-7.3-server-x86_64-released
+  {%- elif inventory_hostname|search("rhel7-4") -%}rhel-7.4-server-x86_64-released
+  {#- RHEL Fully-updated Images -#}\
+  {%- elif inventory_hostname|search("rhel7-2-latest") -%}rhel-7.2-server-x86_64-latest
+  {%- elif inventory_hostname|search("rhel7-3-latest") -%}rhel-7.3-server-x86_64-latest
+  {%- elif inventory_hostname|search("rhel7-4-latest") -%}rhel-7.4-server-x86_64-latest
   {#- RHEL Atomic Host Images -#}\
   {%- elif inventory_hostname|search("rhelatomic7-2") -%}rhel-atomic-cloud-7.2-released-latest
   {%- elif inventory_hostname|search("rhelatomic7-3") -%}rhel-atomic-cloud-7.3-released-latest
