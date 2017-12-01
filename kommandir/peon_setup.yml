@@ -29,6 +29,7 @@
             enable_rh_repos | default() not in empty or
             yum_repos | default() not in empty
 
+
 # Assume recycled peons have already completed low-level
 # setup/configuration
 - hosts: peons:!recycled
@@ -56,7 +57,8 @@
 
     - role: rebooted
       reboot_context: "beginning"
-      when: needs_reboot == True
+      when: needs_reboot == True and
+            not hostvars[inventory_hostname].stone_touched
 
     - role: lvm
       when: not hostvars[inventory_hostname].stone_touched and
@@ -88,6 +90,7 @@
       reboot_context: "middle"
       when: needs_reboot == True
 
+
 - hosts: docker:docker-latest:&peons
   # Outside of debug-mode, run all peons as fast as possible
   strategy: "{{ 'linear' if adept_debug else 'free' }}"
@@ -96,17 +99,21 @@
   roles: # N/B: failed_peon_junit role applied via role dependencies
 
     - role: sysconfig_docker
-      when: "ansible_distribution != 'Fedora'"
+      when: ansible_distribution != 'Fedora' and
+            not hostvars[inventory_hostname].stone_touched
 
     - role: liverestore_enabled
-      when: '"liverestore" in group_names'
+      when: '"liverestore" in group_names and
+            not hostvars[inventory_hostname].stone_touched'
 
     # These two are mutually exclusive
     - role: docker-storage-setup
       when: sysconfig_dss_lines | default([]) != [] and
-            "overlay2" not in group_names
+            "overlay2" not in group_names and
+            not hostvars[inventory_hostname].stone_touched
     - role: overlay2_enabled
-      when: '"overlay2" in group_names'
+      when: '"overlay2" in group_names and
+            not hostvars[inventory_hostname].stone_touched'
 
 
 - hosts: peons
@@ -122,7 +129,12 @@
       when: extra_peon_setup_cmnds | default() not in empty
 
   roles:
-    - selinux_enforcing
+    - role: selinux_enforcing
+      when: not hostvars[inventory_hostname].stone_touched
+
+    # End of low-level one-time-only setup
+    - role: touchstone
+      touch_touchstone: True
 
     # End of low-level one-time-only setup
     - role: touchstone

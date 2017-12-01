@@ -10,6 +10,7 @@
     backup: False
     dest: "/etc/sysconfig/docker-storage-setup"
     line: "{{ item }}"
+  register: _dss
   with_items: '{{ sysconfig_dss_lines }}'
 
 - name: Add lines to sysconfig/d-s-s latest
@@ -18,6 +19,7 @@
     backup: False
     dest: "/etc/sysconfig/docker-latest-storage-setup"
     line: "{{ item }}"
+  register: _dss_latest
   with_items: '{{ sysconfig_dss_lines }}'
 
 # Necessary so docker / docker-latest service properly runs d-s-s
@@ -28,3 +30,4 @@
   with_items:
     - "/var/lib/docker"
     - "/var/lib/docker-latest"
+  when: _dss | changed or _dss_latest | changed
