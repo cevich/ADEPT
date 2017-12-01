@@ -20,4 +20,6 @@ peon_image: >
   {#- Fedora Atomic Host Images -#}\
   {%- elif inventory_hostname|search("fedoratomic25") -%}Fedora-Atomic-25
   {%- elif inventory_hostname|search("fedoratomic26") -%}Fedora-Atomic-26
+  {#- CentOS 7 Images -#}\
+  {%- elif inventory_hostname|search("centos7") -%}CentOS-Cloud-7
   {%- else -%}{{ 'Error: Peon not found while looking up image-name' | comment }}{%- endif -%}
