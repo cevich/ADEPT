@@ -63,10 +63,6 @@
     async: "{{ 60 * install_timeout }}"
     poll: 5
 
-  - name: Host needs rebooting when packages were updated with yum
-    set_fact:
-      needs_reboot: True
-
   - name: Packages are updated from desired repo set using dnf
     dnf:
       name: '*'
@@ -82,5 +78,6 @@
   - name: Host needs rebooting when packages were updated with dnf
     set_fact:
       needs_reboot: True
+    when: result | changed
 
   when: all_updated | default(True)
