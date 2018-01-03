@@ -25,3 +25,18 @@
     - 'DOCKERDBINARY'
     - 'DOCKER_CONTAINERD_BINARY'
     - 'DOCKER_CONTAINERD_SHIM_BINARY'
+
+- name: OpenStack MTU workaround is enabled for docker and docker-latest
+  lineinfile:
+    dest: "/etc/sysconfig/{{ item }}"
+    backrefs: True
+    # Grab quoting characters, then match only if mtu option NOT present
+    regexp: >
+        ^OPTIONS=(['"])(((?!--mtu=1400).)*)(['"])$
+    line: >
+        OPTIONS=\1\2 --mtu=1400\4
+    create: True  # don't fail play if file doesn't exist (broken in some ansible versions)
+  when: openstack_mtu_workaround | default(False) | bool
+  with_items:
+    - "docker"
+    - "docker-latest"
