@@ -173,7 +173,7 @@
                 RET=$?;
             else
                 UUID=$(grep -s -x -m 1 -e "^uuid: .*$" exekutir_vars.yml | cut -d: -f2 | tr -d [:blank:]);
-                echo "Remote Kommandir ($KOMMANDIR_HOST) calling adept.py for job.xn";
+                echo "Remote Kommandir ($KOMMANDIR_HOST) calling adept.py for job.xn as user $UUID";
                 /usr/bin/ssh \
                     -o "KbdInteractiveAuthentication=no" \
                     -o "PreferredAuthentications=publickey" \
