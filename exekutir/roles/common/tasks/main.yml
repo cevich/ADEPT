@@ -44,8 +44,8 @@
         - "--exclude=.git"
         - "--exclude=.??*.lock"
         - "--exclude=.*cache"
-        - "--exclude=.virtualenv"
-        - "--exclude=README.j2"
+        - "--exclude=.venv"
+        - "--exclude=README"
 
 # NO clue why this doesn't get picked up from inventory/group_vars/all.yml
 - name: The no_log_synchronize variable is defined
