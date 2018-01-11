@@ -16,19 +16,24 @@ repo_rpms:
 enable_repos: []
 disable_repos: []
 install_rpms:
-    - rsync
-    - iproute
-    - hostname
-    - sed
-    - git
-    - findutils
     - PyYAML
-    - python-virtualenv
-    - gcc
-    - redhat-rpm-config
-    - openssl-devel
-    - libffi-devel
     - ansible
+    - findutils
+    - gcc
+    - git
+    - hostname
+    - iproute
+    - libffi-devel
+    - libselinux-python
+    - openssl-devel
+    - python-devel
+    - python-pycurl
+    - python-simplejson
+    - python-virtualenv
+    - redhat-rpm-config
+    - rsync
+    - sed
+    - util-linux
 
 git_cache_args:
     - repo: "https://github.com/autotest/autotest.git"
