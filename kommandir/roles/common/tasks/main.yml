@@ -9,7 +9,8 @@
         - {}
     hostvarsfile: "{{ inventory_dir }}/host_vars/{{ inventory_hostname }}.yml"
     result:
-    ansible_private_key_file: '{{ hostvars.kommandir.workspace }}/ssh/kommandir_key'
+    # set by job.xn
+    ansible_private_key_file: '{{ lookup("env", "ANSIBLE_PRIVATE_KEY_FILE") }}'
 
 # NO clue why this doesn't get picked up from inventory/group_vars/all.yml
 - name: The no_log_synchronize variable is defined
