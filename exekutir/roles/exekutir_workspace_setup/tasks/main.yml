@@ -41,6 +41,24 @@
     rsync_opts: "{{ workspace_rsync_excludes }}"
   no_log: '{{ no_log_synchronize }}'
 
+- name: kommandir's workspace contains a results directory
+  file:
+    path: '{{ kommandir_workspace | basename }}/results'
+    state: directory
+
+- name: Contents of exekutir's results directory moved to kommandir's
+  synchronize:
+    archive: True
+    src: '{{ workspace }}/results'
+    dest: "{{ kommandir_workspace }}"
+  when: (workspace ~ "/results") | is_dir
+
+- name: exekutir's results directory is absent prior to linking
+  file:
+    path: '{{ workspace }}/results'
+    state: absent
+  when: (workspace ~ "/results") | is_dir
+
 - name: Exekutir's results directory points at Kommandir's
   file:
     # Use a relative link, in case base directory changes
