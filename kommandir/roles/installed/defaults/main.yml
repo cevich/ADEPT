@@ -2,34 +2,15 @@
 
 # Mandatory, List of Names / URLs of packages to install / update
 install_rpms:
-    - PyYAML
-    - ansible
-    - findutils
-    - gcc
-    - git
-    - hostname
-    - iproute
-    - libffi-devel
-    - libselinux-python
-    - openssl-devel
-    - python-devel
-    - python-pycurl
-    - python-simplejson
-    - python-virtualenv
-    - redhat-rpm-config
-    - rsync
-    - sed
-    - util-linux
 
 # Optional, names / URLs of repository-rpms to install
 repo_rpms:
-    - epel-release
 
 # Optional, when installing/updating install_rpms (below), enable these repos.
-enable_repos: []
+enable_repos:
 
 # Optionanl, when installing/updating install_rpms (below), disable these repos.
-disable_repos: []
+disable_repos:
 
 # Optional, True if all installed packages should also be updated
 all_updated: "{{ 'updated' in group_names }}"
@@ -39,4 +20,3 @@ state: 'latest'
 
 # Optional, timeout in minutes allowed for package install to complete
 install_timeout: 60
-
