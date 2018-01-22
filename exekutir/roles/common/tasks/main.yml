@@ -41,7 +41,6 @@
     workspace_rsync_excludes:
         - "--exclude=.ssh"
         - "--exclude=.ansible"
-        - "--exclude=.git"
         - "--exclude=.??*.lock"
         - "--exclude=.*cache"
         - "--exclude=.venv"
