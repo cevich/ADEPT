@@ -11,26 +11,3 @@ ansible_connection: "local"
 ansible_become: false
 
 is_atomic: False
-repo_rpms:
-    - epel-release
-enable_repos: []
-disable_repos: []
-install_rpms:
-    - PyYAML
-    - ansible
-    - findutils
-    - gcc
-    - git
-    - hostname
-    - iproute
-    - libffi-devel
-    - libselinux-python
-    - openssl-devel
-    - python-devel
-    - python-pycurl
-    - python-simplejson
-    - python-virtualenv
-    - redhat-rpm-config
-    - rsync
-    - sed
-    - util-linux
