@@ -1,6 +1,11 @@
 ---
 # vim-syntax: yaml
 
+- variable:
+    name: "ANSIBLE_PRIVATE_KEY_FILE"
+    from_env: "ANSIBLE_PRIVATE_KEY_FILE"
+    default: ""  # One is generated (below) if none set
+
 # Initial workspace configuration
 - command:
     contexts:
@@ -103,6 +108,12 @@
 - variable: {"name":"OS_CLOUD","from_env":"OS_CLOUD","default":""}
 - variable: {"name":"OS_AUTH_URL","from_env":"OS_AUTH_URL","default":""}
 - variable: {"name":"OS_PASSWORD","from_env":"OS_PASSWORD","default":""}
+
+# Support pass-through of Ansible related env. vars
+- variable:
+    name: "ANSIBLE_VAULT_PASSWORD_FILE"
+    from_env: "ANSIBLE_VAULT_PASSWORD_FILE"
+    default: ""
 
 # For all contexts, exit non-zero immediatly on failure.
 # Transition summary:
