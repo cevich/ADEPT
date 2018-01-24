@@ -50,16 +50,11 @@ MYHOSTNAME = gethostname().split('.', 1)[0]
 XTN = 'xn'
 
 # Only pass a certain select set of environment variables through
-# to child processes, for security purposes.  Additional variables
-# can be set by some action items.
+# to child processes automaticly, for security purposes.  Additional
+# variables can be passed using the 'variable' action in the transition
+# file.
 SAFE_ENV_VARS = ('HOME', 'EDITOR', 'TERM', 'PATH', 'PYTHONPATH',
-                 'VIRTUAL_ENV', 'ANSIBLE_CONFIG', 'ANSIBLE_LIBRARY',
-                 'ANSIBLE_INVENTORY', 'SSH_AUTH_SOCK',
-                 'SSH_CONNECTION', 'SSH_TTY', 'TZ', 'USER',
-                 'SHELL', 'ANSIBLE_HOST_KEY_CHECKING',
-                 'ANSIBLE_ROLES_PATH', 'ANSIBLE_PRIVATE_KEY_FILE',
-                 'ANSIBLE_VAULT_PASSWORD_FILE', 'ANSIBLE_FORCE_COLOR',
-                 'DISPLAY_SKIPPED_HOSTS', 'ANSIBLE_HOST_KEY_CHECKING')
+                 'VIRTUAL_ENV', 'TZ', 'USER', 'SHELL')
 # ref: https://github.com/ansible/ansible/blob/devel/lib/ansible/constants.py
 
 def highlight_normal(color_code=32):  # Green
