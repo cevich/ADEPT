@@ -8,6 +8,7 @@ Dependencies:
     - python-unittest2
     - python-mock
     - pylint
+    - python2-pylint
     - python-jenkins
     - test_adept
 """
@@ -334,6 +335,24 @@ class TestDiscoverCreateDestroyBase(TestCaseBase):
     # When non-None, filename prefix + self._testMethodNameto to setup FakeSession()
     resp_filename_prefix = None
 
+    def reset_session(self):
+        """Helper for setUp and tests needing to iterate over multiple sessions"""
+        self.stdout.truncate(0)
+        self.stderr.truncate(0)
+        self.fake_time_value = 123456
+        self.filename = '%s%s.json' % (self.resp_filename_prefix, self._testMethodName)
+        self.fake_session = FakeSession(self.filename)
+        # Un-singleton the singleton
+        self.uut.OpenstackREST.__clobber__()
+        self.uut.OpenstackREST.service_sessions = None
+        # Initialize singleton with fake sessions
+        self.uut.OpenstackREST(FakeServiceSessions(self.fake_session))
+        # Disable random floating-ip selection
+        self.uut.OpenstackREST.float_ip_selector = staticmethod(lambda iplist: iplist[0])
+        # Allow examining requests/responses in detail
+        os_rest_sr = self.uut.OpenstackREST().service_request
+        self.patched_sr = patch.object(self.uut.OpenstackREST, 'service_request', wraps=os_rest_sr)
+
     def setUp(self):
         super(TestDiscoverCreateDestroyBase, self).setUp()
         open_stdout = mock_open()
@@ -348,14 +367,7 @@ class TestDiscoverCreateDestroyBase(TestCaseBase):
         self.create_patch('%s.time.time' % self.UUT, self.fake_time)
         self.create_patch('%s.time.sleep' % self.UUT, self.fake_time)
         if self.resp_filename_prefix:
-            self.filename = '%s%s.json' % (self.resp_filename_prefix, self._testMethodName)
-            self.fake_session = FakeSession(self.filename)
-            # Un-singleton the singleton
-            self.uut.OpenstackREST._self = None
-            # Initialize singleton with fake sessions
-            self.uut.OpenstackREST(FakeServiceSessions(self.fake_session))
-            # Disable random floating-ip selection
-            self.uut.OpenstackREST.float_ip_selector = staticmethod(lambda iplist: iplist[0])
+            self.reset_session()
 
     def fake_time(self, sleep=1):
         """Return fake_time_value after incrementing it by 1"""
@@ -363,12 +375,50 @@ class TestDiscoverCreateDestroyBase(TestCaseBase):
         self.fake_time_value += max(int(sleep), 1)
         return self.fake_time_value
 
+    def search_service_requests(self, mock_service_request, query=None, json_obj_query=None):
+        """Helper to find and allow examining service_request calls in detail"""
+
+        def get_arg(call, index, keyword, default=None):  # pylint: disable=C0111
+            try:
+                return call[0][index]
+            except IndexError:
+                try:
+                    return call[1][keyword]
+                except KeyError:
+                    return default
+
+        if query is None:
+            query = {}
+        if json_obj_query is None:
+            json_obj_query = {}
+
+        for call in mock_service_request.call_args_list:
+            call_args = dict(service=get_arg(call, 0, 'service'),
+                             uri=get_arg(call, 1, 'uri'),
+                             unwrap=get_arg(call, 2, 'unwrap', None),
+                             method=get_arg(call, 3, 'method', 'get'),
+                             post_json=get_arg(call, 4, 'post_json', None))
+            json_obj = {}
+            if call_args['post_json']:
+                json_obj = call_args['post_json'].get(call_args['unwrap'], {})
+
+            conditions = []
+            sentinel = object()
+            for key, value in query.items():
+                conditions.append(call_args.get(key, sentinel) == value)
+            for key, value in json_obj_query.items():
+                conditions.append(json_obj.get(key, sentinel) == value)
+            if all(conditions):
+                return call_args, json_obj
+        self.assertTrue(mock_service_request.call_args_list,
+                        msg="Service request call not found matching criteria")
+
     def certify_stdout(self, name, ip_address):
         """Helper for checking stdout contents contains what playbooks expect"""
         write_calls = self.uut.sys.stdout.write.call_args_list
         written = None
         for write_call in write_calls:
-            if len(write_call) and len(write_call[0]) and name in write_call[0][0]:
+            if write_call and write_call[0] and name in write_call[0][0]:
                 written = write_call[0][0]
                 break
         self.assertIsNotNone(written)
@@ -402,8 +452,6 @@ class TestTimeoutAction(TestDiscoverCreateDestroyBase):
                 """docstring"""
                 if one == 1 and two == 2 and three == 3:
                     return one + two + three
-                else:
-                    return None
 
         inst = TimeoutActionTest(42)
         self.assertRaises(RuntimeError, inst)
@@ -477,6 +525,26 @@ class TestDiscoverCreate(TestDiscoverCreateDestroyBase):
                                    'More than one server',
                                    self.uut.discover, 'foobar')
         self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
+
+    def test_preserve(self):
+        """Verify creation of VM sets preserve in the expected ways"""
+        for test in (None, True, False, 0, -1, 2):
+            with self.subTest(preserve=test), self.patched, self.patched_sr as mock_service_request:
+                self.uut.create(*self.create_args, preserve=test)
+                self.certify_stdout('foobar', '4.5.6.7')
+                self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
+                query = dict(service='compute', uri='/servers', unwrap='server',
+                             method='post')
+                json_obj_query = dict(name='foobar', imageRef='the_image_id')
+                call_args, json_obj = self.search_service_requests(mock_service_request,
+                                                                   query, json_obj_query)
+                del call_args # Not used
+                metadata = json_obj.get('metadata', {})
+                if test is None:
+                    self.assertEqual(metadata.get('preserve'), 0)
+                else:
+                    self.assertEqual(metadata.get('preserve'), int(test))
+            self.reset_session()
 
 
 class TestDestroy(TestDiscoverCreateDestroyBase):

@@ -551,7 +551,9 @@ class TimeoutCreate(TimeoutAction):
         6: 'CRASHED',
         7: 'SUSPENDED'}
 
-    def __init__(self, name, auth_key_lines, image, flavor, userdata_filepath=None):
+    # TODO: maybe just pass in a dictionary full of parameters?
+    # pylint: disable=E1121
+    def __init__(self, name, auth_key_lines, image, flavor, userdata_filepath=None, preserve=0):
         """
         Callable instance to create VM or timeout by raising RuntimeError exception
 
@@ -609,7 +611,8 @@ class TimeoutCreate(TimeoutAction):
             name=name,
             flavorRef=flavor_details['id'],
             imageRef=image_details['id'],
-            user_data=b64encode(userdata)
+            user_data=b64encode(userdata),
+            metadata=dict(preserve=int(preserve))
         )
 
         # Immediatly bail out if somehow another server exists with name
@@ -929,7 +932,10 @@ def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
                               optional ``{auth_key_lines}`` token (JSON).
     :param dargs: Additional parsed arguments, possibly not relevant.
     """
-    del dargs  # not used
+    preserve = dargs.get('preserve', 0)
+    if not preserve:
+        preserve = 0
+    del dargs  # not otherwise used
     pubkeys = []
     for pub_key_file in pub_key_files:
         logging.info("Loading public key file: %s", pub_key_file)
@@ -942,7 +948,9 @@ def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
     # Needed in case of exception
     server_id = None
     try:
-        server_id = TimeoutCreate(name, pubkeys, image, flavor, userdata_filepath)()
+        # TODO: maybe just pass in a dictionary full of parameters?
+        # pylint: disable=E1121
+        server_id = TimeoutCreate(name, pubkeys, image, flavor, userdata_filepath, preserve)()
         logging.info("Creation successful, VM %s id %s", name, server_id)
 
         if size:
@@ -995,6 +1003,10 @@ def parse_args(argv, operation='help'):
         parser.add_argument('--private', '-p', default=False,
                             action='store_true',
                             help='If creating a VM, do not assign a floating IP (Optional).')
+
+        parser.add_argument('--preserve', default=0, type=int,
+                            help='Set the metadata key preserve=VALUE when specified.'
+                                 ' Otherwise it\'s 0 by default.')
 
         parser.add_argument('--size', '-s', default=None, type=int,
                             help=('If creating a VM, also create and attach'
