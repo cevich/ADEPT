@@ -27,6 +27,8 @@
     - kommandir_up
     - role: touchstone
       touch_touchstone: False
+    - role: yumrepos
+      when: not hostvars.kommandir.stone_touched
     - role: installed
       when: not hostvars.kommandir.stone_touched
     - role: kommandir_setup
