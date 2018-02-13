@@ -4,43 +4,47 @@
     that:
         - 'empty is defined'
         - 'disk_device | default() not in empty'
-        - 'parted_cmds | default() not in empty'
-        # No parted on Atomic
+        - 'parted_opts | default() not in empty'
+        # No parted on Atomic, bail out
         - 'is_atomic != True'
 
 - name: State of /root/<disk_device>_partitioned file is known
   stat:
-    path: "/root/{{ disk_device }}_partitioned"
+    path: "/root/{{ disk_device | basename }}_partitioned"
   register: result
-
-- name: File does exist
-  set_fact:
-    result: True
-  when: result.stat is defined and
-        result.stat.exists is defined and
-        result.stat.exists == True
-
-- name: File does not exist
-  set_fact:
-    result: False
-  when: result != True
 
 - name: Key variables are displayed
   debug:
     var: "{{ item }}"
-  with_items: ["disk_device","parted_cmds"]
+  with_items: ["result", "disk_device","parted_opts"]
   when: adept_debug
 
 - block:
 
-    - name: parted command is executed
-      shell: "/usr/sbin/parted --align optimal --script {{ disk_device }} {{ parted_cmds }}"
-
-    - name: Final partition table is stored
-      shell: "/usr/sbin/sfdisk --dump {{ disk_device }} > /root/{{ disk_device | basename }}_partitioned"
+    - name: Partition table is updated
+      parted:
+        align: '{{ parted_opts.align | default(omit) }}'
+        device: '{{ disk_device }}'
+        flags: '{{ parted_opts.flags | default(omit) }}'
+        label: '{{ parted_opts.label | default(omit) }}'
+        name: '{{ parted_opts.name | default(omit) }}'
+        number: '{{ parted_opts.number | default(omit) }}'
+        part_end: '{{ parted_opts.part_end | default(omit) }}'
+        part_start: '{{ parted_opts.part_start | default(omit) }}'
+        part_type: '{{ parted_opts.part_type | default(omit) }}'
+        state: '{{ parted_opts.state | default(omit) }}'
+        unit: '{{ parted_opts.unit | default(omit) }}'
 
     - name: system needs reboot when partition table changed
       set_fact:
         needs_reboot: True
 
-  when: result != True  # file didn't exist
+  always:
+
+    - name: Drop /root/<disk_device>_partitioned file to avoid re-partitioning on accident
+      file:
+        path: "/root/{{ disk_device | basename }}_partitioned"
+        state: touch
+
+  when: result.stat is undefined or
+        not result.stat.exists | bool

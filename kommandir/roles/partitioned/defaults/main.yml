@@ -1,0 +1,7 @@
+---
+
+# Dictionary of options to pass to the parted Ansible module
+parted_opts:
+
+# Complete path to the disk-device that will be managed
+disk_device:
