@@ -1308,6 +1308,8 @@ if __name__ == '__main__':  # pylint: disable=C0103
     original_environ = os.environ.copy()
     osc = os_client_config.OpenStackConfig()
     clouds = osc.get_cloud_names()
+    if not clouds:
+        clouds = ['default']
     os_cloud_name = original_environ.get('OS_CLOUD', osc.get_cloud_names()[0])
     if os_cloud_name:
         logging.info("Using cloud '%s' from %s", os_cloud_name, osc.config_filename)
