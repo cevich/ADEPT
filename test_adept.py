@@ -286,7 +286,7 @@ class TestPylint(TestCaseBase):
               # --msg-template doesn't work
               #' --msg-template="{msg_id}:{line:3d},{column}: {obj}: {msg}"'
               ' --rcfile="/dev/null"'
-              ' --max-args=6'
+              ' --max-args=8'
               ' --min-public-methods=2'
               ' --no-docstring-rgx="(__.*__)|(_.*)|(__init__)|(__new__)"'
               '')

@@ -25,6 +25,7 @@ import random
 from importlib import import_module
 from imp import find_module
 import time
+import datetime
 import argparse
 import subprocess
 from base64 import b64encode
@@ -36,16 +37,18 @@ from flock import Flock
 ONLY_CREATE_NAME = 'openstack_exclusive_create.py'
 DISCOVER_CREATE_NAME = 'openstack_discover_create.py'
 DESTROY_NAME = 'openstack_destroy.py'
-ALLOWED_NAMES = (DISCOVER_CREATE_NAME, DESTROY_NAME, ONLY_CREATE_NAME)
+REAP_NAME = 'openstack_reap.py'
+ALLOWED_NAMES = (DISCOVER_CREATE_NAME, DESTROY_NAME, ONLY_CREATE_NAME, REAP_NAME)
 
 DESCRIPTION = ('Low dependency script called by ADEPT playbooks'
                ' to manage OpenStack VMs.')
 
 EPILOG = ('Required:  The WORKSPACE environment variable must exist and point to a'
           ' writeable directory.  The script must be invoked by link (or symlink)'
-          ' named "%s" or "%s". Alternatively, if named "%s", VM creation will'
-          ' fail, should another with the same name already exist.'
-          % ALLOWED_NAMES)
+          ' named "%s", "%s", "%s", or "%s".'
+          ' If named "%s", VM creation will'
+          ' fail if another with the same name already exist.'
+          % tuple(list(ALLOWED_NAMES) + [ONLY_CREATE_NAME]))
 
 # Needed for unitesting so argparse doesn't call system.exit()
 ENABLE_HELP = True
@@ -118,6 +121,8 @@ PIP_CHECKPATH = 'lib/python2.7/site-packages/os_client_config'
 HELP_EXIT_CODE = 127
 
 DEFAULT_TIMEOUT = 300
+
+DEFAULT_PRESERVE = 3
 
 # Must use format dictionary w/ keys: name, ip_addr, and uuid
 OUTPUT_FORMAT = """---
@@ -287,8 +292,7 @@ class OpenstackREST(Singleton):
                           % (unwrap, self.response_json))
             self.response_json = self.response_json[unwrap]
             return self.response_json
-        else:  # return it as-is
-            return self.response_json
+        return self.response_json
 
     def compute_request(self, uri, unwrap=None, method='get', post_json=None):
         """
@@ -329,10 +333,9 @@ class OpenstackREST(Singleton):
                           'Could not find key %s with value %s in %s'
                           % (key, value, search_list))
             return found[0]
-        else:
-            found = [child[key] for child in search_list
-                     if key in child]
-            return found
+        found = [child[key] for child in search_list
+                 if key in child]
+        return found
 
     def server_list(self, key='name'):
         """
@@ -390,6 +393,41 @@ class OpenstackREST(Singleton):
         iface = self.child_search('OS-EXT-IPS:type', net_type,
                                   server_details['addresses'][net_name])
         return iface['addr']
+
+    def server_expires_at(self, uuid):
+        """Cache details about server, return UTC datetime when it should be reaped"""
+        try:
+            server_details = self.server(name=None, uuid=uuid)
+        except (ValueError, IndexError, KeyError):
+            logging.debug("Retrieving details about server %s failed. Returning"
+                          " infinite lifetime.", uuid)
+            return None  # server disappeared, this is okay in a reaper-context
+        metadata = server_details.get('metadata', dict(preserve=DEFAULT_PRESERVE))
+
+        try:
+            preserve_hours = int(metadata.get('preserve'))
+        except (TypeError, ValueError):
+            preserve_hours = DEFAULT_PRESERVE
+
+        if preserve_hours < 0:
+            return -1  # checking disabled for this server
+
+        iso18601fmt = "%Y-%m-%dT%H:%M:%S.%f"  # e.g. 2017-08-18T20:04:26.000000
+        launched_at = server_details.get('OS-SRV-USG:launched_at')
+        try:
+            launch_stamp = datetime.datetime.strptime(launched_at,
+                                                      iso18601fmt).replace(microsecond=0)  # don't care
+        except (TypeError, ValueError):
+            logging.error("Error parsing server %s launched_at stamp %s",
+                          uuid, launched_at)
+            return None
+
+        try:
+            lifetime = datetime.timedelta(hours=preserve_hours + 1)  # one hour always "free"
+        except OverflowError:
+            return None
+
+        return launch_stamp + lifetime
 
     def server_delete(self, uuid):
         """
@@ -533,9 +571,8 @@ class TimeoutDelete(TimeoutAction):
         if server_id in server_ids:
             logging.info("    Deleting %s", server_id)
             return None
-        else:
-            logging.info("Confirmed VM %s does not exist", server_id)
-            return server_ids
+        logging.info("Confirmed VM %s does not exist", server_id)
+        return server_ids
 
 
 class TimeoutCreate(TimeoutAction):
@@ -553,7 +590,8 @@ class TimeoutCreate(TimeoutAction):
 
     # TODO: maybe just pass in a dictionary full of parameters?
     # pylint: disable=E1121
-    def __init__(self, name, auth_key_lines, image, flavor, userdata_filepath=None, preserve=0):
+    def __init__(self, name, auth_key_lines, image, flavor,
+                 userdata_filepath=None, preserve=None):
         """
         Callable instance to create VM or timeout by raising RuntimeError exception
 
@@ -564,6 +602,8 @@ class TimeoutCreate(TimeoutAction):
         :param userdata_filepath: Optional, path to file containing alternate cloud-config
                                   userdata.  The token '{auth_key_lines}' will be
                                   substituted with the ``auth_key_lines`` JSON list.
+        :param preserve: Optional, the number of hours (less one) the VM should be protected from
+                         deletion.  Only makes sense when a periodic 'reaper' run is configured.
         """
         self.os_rest = OpenstackREST()
 
@@ -612,8 +652,12 @@ class TimeoutCreate(TimeoutAction):
             flavorRef=flavor_details['id'],
             imageRef=image_details['id'],
             user_data=b64encode(userdata),
-            metadata=dict(preserve=int(preserve))
         )
+
+        if preserve > -1:
+            server_json['metadata'] = dict(preserve=str(preserve))  # hours - 1
+        else:
+            server_json['metadata'] = dict(preserve="-1")  # forever
 
         # Immediatly bail out if somehow another server exists with name
         if self.os_rest.server_list().count(name) > 1:
@@ -644,8 +688,7 @@ class TimeoutCreate(TimeoutAction):
                               % server_details['OS-EXT-STS:power_state'])
         if power_state == 'RUNNING' and vm_state == 'active':
             return server_details['id']
-        else:
-            return None
+        return None
 
 
 class TimeoutAssignFloatingIP(TimeoutAction):
@@ -756,8 +799,7 @@ class TimeoutAttachVolume(TimeoutAction):
             return None
         elif attached_to_server:
             return volume_id
-        else:
-            return None
+        return None
 
 
 class TimeoutDeleteVolume(TimeoutAction):
@@ -780,8 +822,7 @@ class TimeoutDeleteVolume(TimeoutAction):
                 # Gone now, whew! This is okay, removal was the goal.
                 # Satisfy all callers with expected dict() + sentinel
                 return dict(id=volume_id, attachments=[], sentinel=self.sentinel)
-            else:
-                raise  # Removal request collision w/o removal, can't handle this.
+            raise  # Removal request collision w/o removal, can't handle this.
 
     def am_done(self, volume_id):
         """
@@ -800,15 +841,14 @@ class TimeoutDeleteVolume(TimeoutAction):
                             volume_details.get('name', volume_id),
                             attachments)
             return volume_details  # bail out!
-        else:
-            logging.info("     Deleting volume %s: status %s",
-                         volume_id, volume_details['status'])
-            try:  # Prevent TOCTOU: id vanishes before query
-                self.os_rest.volume_request('/volumes/%s' % volume_id,
-                                            unwrap=None, method='delete')
-            except Exception:
-                return volume_details  # Removal was the goal
-            return None  # try again
+        logging.info("     Deleting volume %s: status %s",
+                     volume_id, volume_details['status'])
+        try:  # Prevent TOCTOU: id vanishes before query
+            self.os_rest.volume_request('/volumes/%s' % volume_id,
+                                        unwrap=None, method='delete')
+        except Exception:
+            return volume_details  # Removal was the goal
+        return None  # try again
 
 
 def discover(name=None, uuid=None, router_name=None, private=False, **dargs):
@@ -914,6 +954,29 @@ def destroy(name=None, uuid=None, **dargs):
     TimeoutDelete(server_id)()
     _destroy_volumes(volume_ids, server_id)
 
+
+def reap(**dargs):
+    """
+    Destroy running VMs older than their preserve value plus one (hours)
+    """
+    os_rest = OpenstackREST()
+    for server_id in os_rest.server_list(key='id'):
+        expires_at = os_rest.server_expires_at(server_id)
+        server_name = os_rest.response_json["name"]
+        now = datetime.datetime.utcnow()
+        try:
+            if expires_at > now:
+                logging.info("Server %s has %s remaining", server_name, expires_at - now)
+                continue
+            if dargs.get('verbose', False):
+                logging.info("Would have destroyed %s", server_name)
+            else:
+                logging.info("Destroying %s", server_name)
+                destroy(uuid=server_id)
+        except Exception:
+            logging.info("Server %s has indefinite lifetime", server_name)
+
+
 # Arguments come from argparse, listing them all for clarity of intent
 def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
            private=False, router_name=None, size=None,
@@ -932,9 +995,7 @@ def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
                               optional ``{auth_key_lines}`` token (JSON).
     :param dargs: Additional parsed arguments, possibly not relevant.
     """
-    preserve = dargs.get('preserve', 0)
-    if not preserve:
-        preserve = 0
+    preserve = dargs.get('preserve', None)
     del dargs  # not otherwise used
     pubkeys = []
     for pub_key_file in pub_key_files:
@@ -976,7 +1037,7 @@ def parse_args(argv, operation='help'):
     Examine command line arguments, show usage info if inappropriate for operation
 
     :param argv: List of command-line arguments
-    :param operation: String of 'discover', 'create', 'destroy' or 'help'
+    :param operation: String of 'discover', 'create', 'destroy', 'reap', or 'help'
     :returns: Dictionary of parsed command-line options
     """
     # Operate on a copy
@@ -986,7 +1047,7 @@ def parse_args(argv, operation='help'):
                                      epilog=EPILOG,
                                      add_help=ENABLE_HELP)
 
-    if operation != 'destroy':
+    if operation not in ('destroy', 'reap'):
         parser.add_argument('--image', '-i', default='CentOS-Cloud-7',
                             help=('If creating a VM, use this (existing) image instead'
                                   ' of "CentOS-Cloud-7" (Optional).'))
@@ -1004,9 +1065,12 @@ def parse_args(argv, operation='help'):
                             action='store_true',
                             help='If creating a VM, do not assign a floating IP (Optional).')
 
-        parser.add_argument('--preserve', default=0, type=int,
-                            help='Set the metadata key preserve=VALUE when specified.'
-                                 ' Otherwise it\'s 0 by default.')
+        parser.add_argument('--preserve', default=DEFAULT_PRESERVE, type=int,
+                            help='The number of hours beyond one, before'
+                                 ' running "%s" would force deletion.'
+                                 ' Set to "0" for indefinate, otherwise defaults to'
+                                 ' %s (Optional).  Takes no action in --verbose'
+                                 ' mode.' % (REAP_NAME, DEFAULT_PRESERVE))
 
         parser.add_argument('--size', '-s', default=None, type=int,
                             help=('If creating a VM, also create and attach'
@@ -1032,16 +1096,18 @@ def parse_args(argv, operation='help'):
                         help=('Major operations timeout (default %s) in seconds'
                               ' (Optional).' % DEFAULT_TIMEOUT))
 
-    parser.add_argument('name',
-                        help='The VM name to search for, create, or destroy (required)')
+    if operation != 'reap':
+        parser.add_argument('name',
+                            help='The VM name to search for, create, or destroy (required)')
 
     # Consumer of remaining arguments must come last
-    if operation != 'destroy':
+    if operation not in ('destroy', 'reap'):
         # "pubkey" will be a list, using "pubkeys" causes --help to be wrong
         # (workaround below)
         parser.add_argument('pubkey', nargs='+',
                             help=('One or more paths to ssh public key files'
-                                  ' (not required for "%s")' % DESTROY_NAME))
+                                  ' (not required for "%s" or "%s")'
+                                  % (DESTROY_NAME, REAP_NAME)))
 
     if operation == 'help':
         parser.print_help()
@@ -1109,6 +1175,10 @@ def main(argv, dargs, service_sessions):
         OpenstackREST(service_sessions)
         logging.info("Destroying VM %s", dargs['name'])
         destroy(**dargs)
+    elif dargs['operation'] == 'reap':
+        OpenstackREST(service_sessions)
+        logging.info("Reaping any VMs older than 1 + their preserve metadata value (hours)")
+        reap(**dargs)
 
 
 def api_debug_dump():
@@ -1206,8 +1276,7 @@ def _setup(venvdir, requirements, onlybin, nobin):
         pathname = ''
     if pathname.startswith(venvdir):
         return import_module('os_client_config')
-    else:
-        return _pip_upgrade_install(venvdir, requirements, onlybin, nobin)
+    return _pip_upgrade_install(venvdir, requirements, onlybin, nobin)
 
 
 def activate_and_setup(namespace, venvdir, requirements, onlybin, nobin):
@@ -1257,6 +1326,8 @@ if __name__ == '__main__':  # pylint: disable=C0103
         _dargs = parse_args(sys.argv, 'exclusive')
     elif basename == DESTROY_NAME:
         _dargs = parse_args(sys.argv, 'destroy')
+    elif basename == REAP_NAME:
+        _dargs = parse_args(sys.argv, 'reap')
     else:
         logging.error("Script was not called as %s, %s, or %s", *ALLOWED_NAMES)
         parse_args(sys.argv, 'help')  # exits

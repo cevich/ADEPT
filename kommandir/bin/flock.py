@@ -62,8 +62,7 @@ class Flock(object):
     def __str__(self):
         if self.is_locked:
             return "Locked (%s)" % self._lockfile.name
-        else:
-            return "Unlocked (%s)" % self._lockfile.name
+        return "Unlocked (%s)" % self._lockfile.name
 
     def __repr__(self):
         return 'Flock(%s)' % self._lockfile.name
