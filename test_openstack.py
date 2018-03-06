@@ -528,7 +528,7 @@ class TestDiscoverCreate(TestDiscoverCreateDestroyBase):
 
     def test_preserve(self):
         """Verify creation of VM sets preserve in the expected ways"""
-        for test in (None, True, False, 0, -1, 2):
+        for test in (self.uut.DEFAULT_PRESERVE, 0, 1, -1):
             with self.subTest(preserve=test), self.patched, self.patched_sr as mock_service_request:
                 self.uut.create(*self.create_args, preserve=test)
                 self.certify_stdout('foobar', '4.5.6.7')
@@ -540,10 +540,10 @@ class TestDiscoverCreate(TestDiscoverCreateDestroyBase):
                                                                    query, json_obj_query)
                 del call_args # Not used
                 metadata = json_obj.get('metadata', {})
-                if test is None:
-                    self.assertEqual(metadata.get('preserve'), 0)
-                else:
-                    self.assertEqual(metadata.get('preserve'), int(test))
+                # argparse handles int() conversion at front-end, no need to test.
+                expected = int(test)
+                actual = int(metadata.get('preserve'))
+                self.assertEqual(actual, expected)
             self.reset_session()
 
 
@@ -574,6 +574,65 @@ class TestDestroy(TestDiscoverCreateDestroyBase):
                                'More than one server',
                                self.uut.destroy, 'deleteme')
         self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
+
+
+class TestReap(TestDiscoverCreateDestroyBase):
+    """Test reap function with mocked keystone_session"""
+
+    resp_filename_prefix = '.test_openstack_TestReap.'
+
+    def setUp(self):
+        super(TestReap, self).setUp()
+        self.mock_open = mock_open(read_data='bibble babble')
+        self.patched = patch('%s.open' % self.UUT, self.mock_open, create=True)
+        self.destroy_dargs = None
+        self.create_patch('%s.destroy' % self.UUT, self.fake_destroy)
+        self.create_args = ('foobar', ['list', 'of', 'ssh', 'keys'],
+                            'image_name', 'flavor_name')
+
+    def fake_destroy(self, **dargs):
+        """Stand-in for actual destruction function"""
+        self.destroy_dargs = dargs
+
+    def test_verbose(self):
+        """Verify verbose mode destroys no servers"""
+        with self.patched:
+            self.uut.discover('foobar')
+            self.uut.reap(verbose=True)
+            self.uut.discover('foobar')
+            self.certify_stdout('foobar', '6.7.8.9')
+            self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
+            self.assertEqual(self.destroy_dargs, None)  # never called
+
+    def test_death(self):
+        """Verify expired server is destroyed"""
+        with self.patched:
+            self.uut.discover('foobar')
+            self.uut.reap()
+            self.assertRaisesRegex(IndexError, 'No server', self.uut.discover, 'foobar')
+            self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
+            self.assertEqual(self.destroy_dargs, dict(uuid='8d36cf2d-de3d-4cc7-9b51-b6bc48cffe06'))
+
+    def test_forever_good(self):
+        """Verify server with indefinate preserve is not destroyed"""
+        with self.patched:
+            self.uut.discover('foobar')
+            self.uut.reap()
+            self.uut.discover('foobar')
+            self.certify_stdout('foobar', '6.7.8.9')
+            self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
+            self.assertEqual(self.destroy_dargs, None)  # never called
+
+    def test_forever_bad(self):
+        """Verify server with invalid preserve is not destroyed"""
+        with self.patched:
+            self.uut.discover('foobar')
+            self.uut.reap()
+            self.uut.discover('foobar')
+            self.certify_stdout('foobar', '6.7.8.9')
+            self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
+            self.assertEqual(self.destroy_dargs, None)  # never called
+
 
 if __name__ == '__main__':
     unittest.main(failfast=True, catchbreak=True, verbosity=2)

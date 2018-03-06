@@ -148,14 +148,15 @@ class Parameters(Sequence):
         if cls._singleton is not None:
             cls._initialized = True
             return cls._singleton
-        else:
-            if source is None:
-                source = cls.default_source
-            # It inherits __new__ from it's ancestors
-            # pylint: disable=E1101
-            cls._singleton = super(Parameters, cls).__new__(cls)
-            return cls._singleton
+        if source is None:
+            source = cls.default_source
+        # It inherits __new__ from it's ancestors
+        # pylint: disable=E1101
+        cls._singleton = super(Parameters, cls).__new__(cls)
+        return cls._singleton
 
+    # There is no sequence __init__, so no super call needed.
+    # pylint: disable=W0231
     def __init__(self, source=None):
         if self._initialized:
             return
@@ -199,14 +200,12 @@ class Parameters(Sequence):
     def __getitem__(self, keyidx):
         if isinstance(keyidx, basestring):
             return getattr(self._data, keyidx)
-        else:
-            return self._data[keyidx]
+        return self._data[keyidx]
 
     def __getattr__(self, key):
         if key in self.FIELDS:
             return self[key]
-        else:
-            return getattr(super(Parameters, self), key)
+        return getattr(super(Parameters, self), key)
 
     @property
     def asdict(self):
@@ -269,8 +268,7 @@ class Parameters(Sequence):
         """
         if filepath == '-':
             return '-'
-        else:
-            return self.mangle_verify(name, os.path.exists, filepath, msgfmt)
+        return self.mangle_verify(name, os.path.exists, filepath, msgfmt)
 
     def verifyxtn(self, name, filepath,
                   msgfmt=("%s Error: %s is not a transition (yaml) file "
@@ -281,11 +279,10 @@ class Parameters(Sequence):
         filepath = self.verifyfile(name, filepath)
         if filepath == '-':
             return '-'
-        else:
-            return self.mangle_verify(name,
-                                      lambda _filepath:
-                                      _filepath.endswith('.%s' % XTN),
-                                      filepath, msgfmt)
+        return self.mangle_verify(name,
+                                  lambda _filepath:
+                                  _filepath.endswith('.%s' % XTN),
+                                  filepath, msgfmt)
 
     def verifystr(self, name, one_word,
                   msgfmt="%s Error: Unacceptable string: '%s'"):
@@ -302,8 +299,7 @@ class Parameters(Sequence):
         test_str = one_word.replace('_', '').replace('-', '')
         if isinstance(one_word, basestring) and test_str.isalnum():
             return one_word
-        else:
-            self.showusage(msgfmt % (name, one_word))
+        return self.showusage(msgfmt % (name, one_word))
 
 
 class ActionBase(object):
@@ -475,8 +471,7 @@ class Command(ActionBase):
                 os.path.normpath(os.path.realpath(fileitem)))
             # N/B Truncates file if exists
             return open(fileitem, "wb")
-        else:
-            return fileitem
+        return fileitem
 
     def init_stdfiles(self, new_env, **dargs):
         """
@@ -602,9 +597,8 @@ class Command(ActionBase):
         except OSError, xcept:
             if xcept.errno != 2:
                 raise
-            else:
-                raise OSError("[Errno 2] No such file or directory: %s"
-                              % self.popen_dargs['executable'])
+            raise OSError("[Errno 2] No such file or directory: %s"
+                          % self.popen_dargs['executable'])
         # No need to display them if they're headed to a file
         if child_proc.stderr or child_proc.stdout:
             sys.stderr.write('stdout/stderr =\n')
@@ -623,9 +617,8 @@ class Command(ActionBase):
             self.exitfile.write(str(returncode))
             sys.stderr.flush()
             return 0
-        else:
-            # Assume exits delt with here (exit with it!)
-            return returncode
+        # Assume exits delt with here (exit with it!)
+        return returncode
 
 
 class Playbook(Command):
@@ -641,10 +634,9 @@ class Playbook(Command):
     inventory = None
 
     def __str__(self, additional=None):
+        mine = {}
         if additional:
             mine = additional
-        else:
-            mine = {}
         for name in ('varsfile', 'limit'):
             thing = getattr(self, name)
             if thing:
@@ -698,15 +690,15 @@ class Playbook(Command):
                              lambda x: True,
                              value, msg_fmt)
 
-            if name is 'inventory':
+            if name == 'inventory':
                 args.extend(['--inventory', value])
                 self.inventory = value
-            elif name is 'config':
+            elif name == 'config':
                 new_env['ANSIBLE_CONFIG'] = value
-            elif name is 'varsfile' and os.path.isfile(value):
+            elif name == 'varsfile' and os.path.isfile(value):
                 args.extend(['--extra-vars', '@%s' % value])
                 self.varsfile = value
-            elif name is 'limit':
+            elif name == 'limit':
                 self.limit = limit
                 args.extend(['--limit', self.limit])
             else:
