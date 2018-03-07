@@ -25,9 +25,13 @@
 
   when: adept_debug
 
+- name: The complete output path is buffered
+  set_fact:
+    result: "{{ hostvars.kommandir.workspace }}/results/{{ inventory_hostname }}/{{ results_filepath }}"
+
 - name: Output results_filepath directory exists
   file:
-    path: '{{ (hostvars.kommandir.workspace ~ "/results/" ~ "/" ~ results_filepath) | dirname }}'
+    path: '{{ result | dirname }}'
     state: directory
   delegate_to: kommandir
 
@@ -35,5 +39,5 @@
   template:
     # peon_up includes this file, need full-path to template
     src: "{{ results_template_filepath }}"
-    dest: "{{ hostvars.kommandir.workspace }}/results/{{ inventory_hostname }}/{{ results_filepath }}"
+    dest: "{{ result }}"
   delegate_to: kommandir
