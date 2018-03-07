@@ -1,7 +1,7 @@
 This job ({{ job_name }}) is intended to exercise
-a subset of tests on a subset of peons to verify
-basic ADEPT and Docker Autotest functionality.
-It should execute relatively fast and not consume
-many resources.
+a small subset of tests against an all-defaults,
+vanilla set of peons to verify basic functionality.
+The set of tests is specified in the jobs
+``kommandir_vars.yml`` file.
 
 (src: {{ job_path }}/{{ job_docs_template_src }})

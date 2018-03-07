@@ -1,0 +1,22 @@
+---
+- name: userns | check if option is turned on in docker daemon
+  shell: grep -q 'userns-remap=default' /etc/sysconfig/docker
+  register: userns_option_found
+  changed_when: False
+  ignore_errors: yes
+
+- name: userns | enable option in docker daemon
+  shell: sed -i -e "s/^\(OPTIONS='.*\)'/\1 --userns-remap=default'/" /etc/sysconfig/docker
+  when: userns_option_found | failed
+
+- name: userns | create /etc/subuid and subgid
+  lineinfile: dest="/etc/{{ item }}" line="dockremap:100000:65536" create=yes
+  with_items: [ subuid, subgid ]
+
+- name: userns | turn on the sysctl, on reboot
+  lineinfile: dest="/etc/sysctl.d/99-docker-userns.conf"
+              line="user.max_user_namespaces = 100"
+              create=yes
+
+- name: userns | turn on the sysctl, now
+  shell: sysctl -p/etc/sysctl.d/99-docker-userns.conf

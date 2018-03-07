@@ -1,0 +1,3 @@
+---
+- name: docker is running
+  service: name={{ docker }} state=started enabled=yes

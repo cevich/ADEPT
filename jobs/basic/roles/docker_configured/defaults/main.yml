@@ -1,0 +1,9 @@
+---
+# Can also be 'docker-latest'
+docker: 'docker'
+
+# override with : --extra-vars storage_driver=overlay2
+storage_driver: 'devicemapper'
+
+# override with : --extra-vars user_namespaces=enabled
+user_namespaces: 'disabled'
