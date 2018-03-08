@@ -1,5 +1,0 @@
----
-
-# This is required in some openstack environments and basically harmless in others.
-# RH BZ 1357116
-openstack_mtu_workaround: True

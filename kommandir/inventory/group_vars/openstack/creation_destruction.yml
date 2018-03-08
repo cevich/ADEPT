@@ -44,7 +44,7 @@ cloud_provisioning_command:
             --image {{ peon_image | trim }} \
             --flavor {{ peon_flavor | trim }} \
             {{ "--private" if public_peons is undefined or public_peons != True else "" }} \
-            {{ "--size " ~ peon_size | trim if peon_size is defined else "" }} \
+            {{ "--size " ~ peon_size | trim if peon_size | default("",True) not in empty else "" }} \
             {{ "--userdata " ~ peon_userdata | trim if peon_userdata is defined else "" }} \
             {{ inventory_hostname }}-{{ uuid | trim }} \
             {{ ansible_private_key_file | trim }}.pub \

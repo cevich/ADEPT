@@ -20,6 +20,7 @@
     dest: "/etc/sysconfig/docker-latest-storage-setup"
     line: "{{ item }}"
   register: _dss_latest
+  when: ansible_distribution_version | version_compare('7.5', 'lt')
   with_items: '{{ sysconfig_dss_lines }}'
 
 # Necessary so docker / docker-latest service properly runs d-s-s
