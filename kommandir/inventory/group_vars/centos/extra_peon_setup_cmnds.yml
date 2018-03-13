@@ -1,0 +1,6 @@
+---
+
+# Addresses a bug fixed in 7.5 which made this not-required previously.
+# Setting it enables containers to run systemd and/or access host cgroups.
+extra_peon_setup_cmnds:
+  - setsebool -P container_manage_cgroup 1
