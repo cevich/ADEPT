@@ -3,9 +3,8 @@
 # Because I'm self-centered
 timezone: US/Eastern
 
-# We will configure our own filesystems/partitioning
 growpart:
-    mode: off
+    mode: auto
 
 # Don't add silly 'please login as' to .ssh/authorized_keys
 disable_root: false

@@ -22,9 +22,3 @@
       when: 'cleanup | default(True) and inventory_hostname != "kommandir"'
     - role: unsubscribed
       when: cleanup and "subscribed" in group_names
-
-- hosts: kommandir
-  vars_files:
-      - kommandir_vars.yml
-  roles:
-    - workspace_cleanup

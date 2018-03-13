@@ -1,8 +1,0 @@
----
-
-peon_groups:
-    - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
-    - fedora
-    - updated
-    - docker
-    - autotested

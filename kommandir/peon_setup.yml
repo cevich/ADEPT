@@ -2,72 +2,18 @@
 
 # N/B: This file can be overwritten by a copy from job_path.
 
+
 - hosts: peons
+  strategy: linear  # The add_host module can only be run using linear strategy
   vars_files:
       - kommandir_vars.yml
   roles:
     - common
     - peon_common
 
-      # Some roles should only ever be applied once
+      ##### Low-level roles only applied once, for speed and woopsie-avoidance
     - role: touchstone
       touch_touchstone: False
-
-    - role: rendered
-      when: rendered_templates | default() not in empty and
-            not hostvars[inventory_hostname].stone_touched
-
-    - role: subscribed
-      when: not hostvars[inventory_hostname].stone_touched and
-            rhsm is defined and
-            "subscribed" in group_names and
-            rhsm.username | default() not in empty and
-            rhsm.password | default() not in empty
-
-    - role: yumrepos
-      when: disable_all_rh_repos | default(False) in [True,False] or
-            enable_rh_repos | default() not in empty or
-            yum_repos | default() not in empty
-
-
-# Assume recycled peons have already completed low-level
-# setup/configuration
-- hosts: peons:!recycled
-  # Outside of debug-mode, run all peons as fast as possible
-  strategy: "{{ 'linear' if adept_debug | default(False) else 'free' }}"
-  vars_files:
-      - kommandir_vars.yml
-  roles: # N/B: failed_peon_junit role applied via role dependencies
-    - role: rawhide
-      when: not hostvars[inventory_hostname].stone_touched and
-            'fedora' in group_names and 'rawhide' in group_names
-
-    - role: atomic_rebase
-      when: is_atomic and
-            ostree_remote | default() not in empty and
-            ostree_remote.name | default() not in empty and
-            ostree_remote.url | default() not in empty and
-            ostree_remote.spec | default() not in empty and
-            not hostvars[inventory_hostname].stone_touched
-
-    - role: partitioned
-      when: not hostvars[inventory_hostname].stone_touched and
-            disk_device | default() not in empty and
-            parted_opts | default() not in empty
-
-    - role: rebooted
-      reboot_context: "beginning"
-      when: needs_reboot == True and
-            not hostvars[inventory_hostname].stone_touched
-
-    - role: lvm
-      when: not hostvars[inventory_hostname].stone_touched and
-            (lvg_ops | default() not in empty or
-             lvol_ops | default() not in empty)
-
-    - role: swap_enabled
-      when: not hostvars[inventory_hostname].stone_touched and
-            swap_device | default() not in empty
 
 
 - hosts: peons
@@ -75,8 +21,59 @@
   strategy: "{{ 'linear' if adept_debug | default(False) else 'free' }}"
   vars_files:
       - kommandir_vars.yml
-  roles: # N/B: failed_peon_junit role applied via role dependencies
+  roles:
+    - role: subscribed
+      when: not stone_touched and
+            rhsm is defined and
+            "subscribed" in group_names and
+            rhsm.username | default() not in empty and
+            rhsm.password | default() not in empty
 
+    - role: yumrepos
+      when: not stone_touched
+
+    - role: rawhide
+      when: not stone_touched and
+            'fedora' in group_names and 'rawhide' in group_names
+
+    - role: atomic_rebase
+      when: not stone_touched and
+            is_atomic and
+            ostree_remote | default() not in empty and
+            ostree_remote.name | default() not in empty and
+            ostree_remote.url | default() not in empty and
+            ostree_remote.spec | default() not in empty
+
+    - role: partitioned
+      when: not stone_touched and
+            disk_device | default() not in empty and
+            parted_opts | default() not in empty
+
+    - role: rebooted  # partitions or devices may have changed
+      reboot_context: "beginning"  # failed_peon_result debugging help
+      when: needs_reboot == True and
+            not stone_touched
+
+    - role: lvm
+      when: not stone_touched and
+            (lvg_ops | default() not in empty or
+             lvol_ops | default() not in empty)
+
+    - role: swap_enabled
+      when: not stone_touched and
+            swap_device | default() not in empty
+
+    ##### End of low-level setup, indicate completion for any future runs
+    - role: touchstone
+      touch_touchstone: True
+
+
+- hosts: peons
+  # Outside of debug-mode, run all peons as fast as possible
+  strategy: "{{ 'linear' if adept_debug | default(False) else 'free' }}"
+  vars_files:
+      - kommandir_vars.yml
+  roles:
     - role: installed
       when: not is_atomic and
             install_rpms | default() not in empty
@@ -86,79 +83,20 @@
             ostree_remote | default() in empty and
             'updated' in group_names
 
-    - role: rebooted
+    - role: rebooted  # utilize any changed/updated software
       reboot_context: "middle"
       when: needs_reboot == True
 
+    # Allow most/all prior tasks to run in permissive if necessary
+    - role: selinux_enforcing  # Allow most/all prior tasks to run in permissive if necessary
 
-- hosts: docker:docker-latest:&peons
-  # Outside of debug-mode, run all peons as fast as possible
-  strategy: "{{ 'linear' if adept_debug else 'free' }}"
-  vars_files:
-      - kommandir_vars.yml
-  roles: # N/B: failed_peon_junit role applied via role dependencies
-
-    - role: sysconfig_docker
-      when: ansible_distribution != 'Fedora' and
-            not hostvars[inventory_hostname].stone_touched
-
-    - role: liverestore_enabled
-      when: '"liverestore" in group_names and
-            not hostvars[inventory_hostname].stone_touched'
-
-    # These two are mutually exclusive
-    - role: docker-storage-setup
-      when: sysconfig_dss_lines | default([]) != [] and
-            "overlay2" not in group_names and
-            not hostvars[inventory_hostname].stone_touched
-    - role: overlay2_enabled
-      when: '"overlay2" in group_names and
-            not hostvars[inventory_hostname].stone_touched'
-
-
-- hosts: peons
-  # Outside of debug-mode, run all peons as fast as possible
-  strategy: "{{ 'linear' if adept_debug | default(False) else 'free' }}"
-  vars_files:
-      - kommandir_vars.yml
-  pre_tasks:
-    - name: Peon executes commands from extra_peon_setup_cmnds
-      shell: "{{ item }}"
-      register: result
-      with_items: '{{ extra_peon_setup_cmnds }}'
-      when: extra_peon_setup_cmnds | default() not in empty
-
-  roles:
-    - role: selinux_enforcing
-      when: not hostvars[inventory_hostname].stone_touched
-
-    # End of low-level one-time-only setup
-    - role: touchstone
-      touch_touchstone: True
-
-    # End of low-level one-time-only setup
-    - role: touchstone
-      touch_touchstone: True
-
-    # Starting/Restarting docker may run d-s-s
     - services
 
-    - role: rebooted
+    - role: rebooted  # Allow selinux to re-label if necessary
       reboot_context: "end"
       when: needs_reboot == True
 
+  post_tasks:
 
-- hosts: peons:autotested
-  # Outside of debug-mode, run all peons as fast as possible
-  strategy: "{{ 'linear' if adept_debug | default(False) else 'free' }}"
-  vars_files:
-      - kommandir_vars.yml
-  roles:
-
-    - role: autotested
-      when: '"autotested" in group_names and docker_autotest is defined'
-
-    - role: touchstone
-      # See recovery section in the subsequent play
-      touchstone_filepath: "/var/lib/autotested_touchstone"
-      touch_touchstone: True
+    - name: Containers using cgroups and/or systemd are permitted
+      seboolean: name=container_manage_cgroup persistent=yes state=yes

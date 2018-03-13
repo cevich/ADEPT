@@ -5,6 +5,3 @@ peon_groups:
     - rhel
     - subscribed
     - updated
-    - docker-latest
-    - overlay2
-    - autotested

@@ -14,4 +14,3 @@
   set_fact:
     needs_reboot: True
   when: result | changed
-

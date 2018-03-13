@@ -8,14 +8,3 @@
       - kommandir_vars.yml
   roles:
     - common
-
-- hosts: peons:autotested
-  vars_files:
-      - kommandir_vars.yml
-  roles:
-    - common
-    - peon_common
-    - role: touchstone
-      touchstone_filepath: "/var/lib/autotested_touchstone"
-    - role: autotested
-      when: stone_touched

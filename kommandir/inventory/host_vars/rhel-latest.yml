@@ -2,7 +2,4 @@
 
 peon_groups:
     - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
-    - fedoratomic
-    - updated
-    - docker
-    - autotested
+    - rhel

@@ -2,8 +2,5 @@
 
 peon_groups:
     - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
-    - rhel
-    - subscribed
+    - centos
     - updated
-    - docker-latest
-    - autotested

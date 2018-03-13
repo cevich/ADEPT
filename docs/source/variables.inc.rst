@@ -68,15 +68,6 @@ For example, if a variable is specific to a...
     during `the *cleanup* transition <tcct>`_.
     See also, `stonith`_.
 
-.. _cleanup_globs:
-
-``cleanup_globs``
-    List, defaults to ``[]``.
-    Not shared between *exekutir* and *kommandirs*.
-    A list of strings, each interpreted as a shell-glob, relative to ``workspace``.
-    Intended to mark certain sensitive files/directories for removal during
-    `the *cleanup* transition <tcct>`_.  See `adept_debug`_.
-
 .. _cloud_environment:
 
 ``cloud_environment``
@@ -129,8 +120,7 @@ For example, if a variable is specific to a...
     Same keys/values used for the Ansible ``shell`` module.  Represents a command to execute
     on the *exekutir* during the ``exekutir_workspace_setup``
     role.  Its purpose is to allow additional files to be copied into the workspace, such as
-    cloud or access credentials.  **N/B:** Ensure any copied
-    files are also listed in the `cleanup_globs`_ so they don't persist `after *cleanup* <tcct>`_.
+    cloud or access credentials.
 
 .. _extra_kommandir_setup:
 
@@ -139,12 +129,6 @@ For example, if a variable is specific to a...
     Not shared between *exekutir* and *kommandir*.
     Same as `extra_exekutir_setup`_.  It is executed on the *kommandir*, after
     every time the ``kommandir_workspace_update`` role is applied.
-
-``extra_peon_setup_cmnds``
-    List, defaults to ``Null``.
-    Only use on *kommandir*.
-    Whatever command-strings are in this list for a *peon*, will be executed after all
-    setup is completed from the default ``kommandir/peon_setup.yml`` playbook.
 
 .. _hostvarsfile:
 

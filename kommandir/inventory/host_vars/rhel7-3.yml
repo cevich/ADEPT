@@ -2,8 +2,6 @@
 
 peon_groups:
     - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
-    - rhelatomic
+    - rhel
     - subscribed
     - updated
-    - docker-latest
-    - autotested
