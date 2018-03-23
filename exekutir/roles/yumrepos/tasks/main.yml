@@ -2,12 +2,13 @@
 
 - assert:
     that:
-        - 'empty is defined'
         - 'ansible_distribution in ["RedHat","Fedora","CentOS"]'
-        - >
-            disable_all_rh_repos in [True,False] or
-            enable_rh_repos | default() not in [None,'',{}] or
-            yum_repos | default() not in [None,'',{}]
+
+- name: Key variables are displayed
+  debug:
+    var: "{{ item }}"
+  when: adept_debug
+  with_items: ["disable_all_rh_repos", "enable_rh_repos", "yum_repos"]
 
 # There are situations where default repositories are broken
 - name: All RH repositories are disabled in subscription manager

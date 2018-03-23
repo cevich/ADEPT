@@ -1,9 +1,0 @@
----
-
-peon_groups:
-    - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
-    - rhel
-    - subscribed
-    - updated
-    - docker
-    - autotested

@@ -1,2 +1,0 @@
-# <NVRA> <subtest path> <human-friendly description>
-docker-1.13.1-19.git27e468e.fc26.x86_64		docker_cli/run_volumes/oci_umount	looks like an old version of oci-umount

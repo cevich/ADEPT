@@ -132,8 +132,3 @@ a remote *kommandir* or any *peons*.
    few days ago (or the `stonith`_ flag is ``True``) then
    destroy it by executing the `cloud_destruction_command`_.
    (``exekutir/roles/kommandir_destroyed/`` role)
-
-#. If the *kommandir* was remote, or `adept_debug`_ is not set,
-   prune the workspace of any unnecessary or files with sensitive
-   contents (usernames/passwords) as set by the `cleanup_globs`_.
-   (``exekutir/roles/workspace_cleanup`` role)

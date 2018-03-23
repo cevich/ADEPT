@@ -1,6 +1,0 @@
----
-
-dependencies:
-    - role: failed_peon_result
-      this_role: "autotested"
-      when: "adept_context == 'setup'"
