@@ -95,8 +95,3 @@
     - role: rebooted  # Allow selinux to re-label if necessary
       reboot_context: "end"
       when: needs_reboot == True
-
-  post_tasks:
-
-    - name: Containers using cgroups and/or systemd are permitted
-      seboolean: name=container_manage_cgroup persistent=yes state=yes
