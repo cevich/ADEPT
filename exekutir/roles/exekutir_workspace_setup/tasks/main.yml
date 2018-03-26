@@ -50,9 +50,10 @@
 - name: Contents of exekutir's results directory moved to kommandir's
   synchronize:
     archive: True
-    src: '{{ workspace }}/results'
-    dest: "{{ kommandir_workspace }}"
-  when: (workspace ~ "/results") | is_dir
+    src: '{{ workspace }}/results/'
+    dest: "{{ kommandir_workspace }}/results/"
+  when: (workspace ~ "/results") | is_dir and
+        not (workspace ~ "/results") | is_link
 
 - name: exekutir's results directory is absent prior to linking
   file:
