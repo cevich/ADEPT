@@ -62,7 +62,7 @@ cmd2==0.7.0 --hash=sha256:5ab76a1f07dd5fd1cc3c15ba4080265f33b80c7fd748d71bd69a51
 debtcollector==1.13.0 --hash=sha256:a2dc44307da6f17432c63eb947b3bce0c43a9b3f4291fd62e9e6a3969f3c6645
 deprecation==1.0 --hash=sha256:36d2a2356ca89fb73f72bfb866a2f28e183535a7f131a3b34036bc48590165b6
 funcsigs==1.0.2 --hash=sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca
-functools32==3.2.3.post2 --hash=sha256:89d824aa6c358c421a234d7f9ee0bd75933a67c29588ce50aaa3acdf4d403fa0
+functools32==3.2.3.post2 --hash=sha256:89d824aa6c358c421a234d7f9ee0bd75933a67c29588ce50aaa3acdf4d403fa0 --hash=sha256:f6253dfbe0538ad2e387bd8fdfd9293c925d63553f5813c4e587745416501e6d
 iso8601==0.1.11 --hash=sha256:c68dbd1b6ecc0c13c1d94116aec79d5d5c3bc7444f99159b968f12d83cbc7fa6
 jsonpatch==1.15 --hash=sha256:58ae029a97322a576d8ede954387e84fbdc4dde648a9f84222fdf8c0738ab44c
 jsonpointer==1.10 --hash=sha256:24073101a4ade32dd65fba6ba42d0dd4098b4e7628e34cdddfa8176c452b19cc
@@ -83,7 +83,7 @@ packaging==16.8 --hash=sha256:99276dc6e3a7851f32027a68f1095cd3f77c148091b092ea86
 pbr==2.0.0 --hash=sha256:d9b69a26a5cb4e3898eb3c5cea54d2ab3332382167f04e30db5e1f54e1945e45
 pip==9.0.1 --hash=sha256:690b762c0a8460c303c089d5d0be034fb15a5ea2b75bdf565f40421f542fefb0
 positional==1.1.1 --hash=sha256:ef845fa46ee5a11564750aaa09dd7db059aaf39c44c901b37181e5ffa67034b0
-prettytable==0.7.2 --hash=sha256:a53da3b43d7a5c229b5e3ca2892ef982c46b7923b51e98f0db49956531211c4f
+prettytable==0.7.2 --hash=sha256:a53da3b43d7a5c229b5e3ca2892ef982c46b7923b51e98f0db49956531211c4f --hash=sha256:853c116513625c738dc3ce1aee148b5b5757a86727e67eff6502c7ca59d43c36
 pyparsing==2.2.0 --hash=sha256:fee43f17a9c4087e7ed1605bd6df994c6173c1e977d7ade7b651292fab2bd010
 python-cinderclient==2.0.1 --hash=sha256:aa6c3614514d28bd13006a2220a559f10088ceb54b7506888131f95942c158bc
 python-glanceclient==2.6.0 --hash=sha256:e77e63de240f4e183a0960c83eb434774746156571c9ea7e7ef4421365b1a762
@@ -1134,9 +1134,8 @@ def _pip_upgrade_install(venvdir, requirements, onlybin, nobin):
         reqs.writelines([req + '\n' for req in requirements])
 
     # Need a new-ish version that supports --require-hashes
-    pargs = [os.path.join(bindir, 'pip'), 'install',
-             '--upgrade', '--force-reinstall']
-    logging.debug(subprocess.check_output(pargs + ['pip>=8.0.2'],
+    pargs = [os.path.join(bindir, 'pip'), 'install',]
+    logging.debug(subprocess.check_output(pargs + ['pip==9.0.1'],
                                           close_fds=True, env=os.environ,
                                           stderr=subprocess.STDOUT))
     pargs += ['--require-hashes']
