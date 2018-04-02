@@ -1,0 +1,49 @@
+---
+- name: docker is installed
+  package: name={{ item }} state=present
+  with_items:
+    - "{{ docker }}"
+    - docker-selinux
+    - atomic
+
+- name: Workaround bug in < RHEL 7.5 with generic fix for all
+  seboolean:
+    name: container_manage_cgroup
+    state: yes
+    persistent: yes
+
+- name: explicitly declare storage driver
+  lineinfile: dest=/etc/sysconfig/{{ docker }}-storage-setup
+              line="STORAGE_DRIVER={{ storage_driver }}"
+
+- name: check if vdb exists
+  stat: path=/dev/vdb
+  when: storage_driver == 'devicemapper'
+  register: vdb
+
+- name: set up VG for docker
+  lvg: vg=vg-docker pvs=/dev/vdb
+  when: storage_driver == 'devicemapper'
+        and vdb.stat.isblk is defined
+        and vdb.stat.isblk
+
+- name: configure docker VG
+  lineinfile: dest=/etc/sysconfig/{{ docker }}-storage-setup line="VG=vg-docker"
+  when: storage_driver == 'devicemapper'
+        and vdb.stat.isblk is defined
+        and vdb.stat.isblk
+
+- name: enable options for user namespaces
+  import_tasks: userns.yml
+  when: user_namespaces == 'enabled'
+
+- name: run docker-storage-setup
+  command: "{{ docker }}-storage-setup"
+
+- name: select docker (not docker-latest)
+  shell: sed -i -e 's/^DOCKER/#DOCKER/' /etc/sysconfig/docker
+  when: docker == 'docker'
+
+- name: select docker-latest (not docker)
+  shell: sed -i -e 's/^#DOCKER/DOCKER/' /etc/sysconfig/docker
+  when: docker == 'docker-latest'

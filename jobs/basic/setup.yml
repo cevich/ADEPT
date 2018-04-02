@@ -1,0 +1,5 @@
+---
+
+- include: peon_creation.yml
+- include: peon_setup.yml
+- include: install-autotest.yml

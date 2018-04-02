@@ -1,7 +1,0 @@
----
-
-peon_groups:
-    - "{{ hostvars.kommandir.peon_cloud_group | mandatory }}"
-    - rhelatomic
-    - subscribed
-    - updated

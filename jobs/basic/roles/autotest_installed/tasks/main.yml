@@ -1,0 +1,30 @@
+---
+
+- name: install rpms needed for autotest
+  package: name={{ item }} state=present
+  with_items: "{{ autotest_rpm_deps }}"
+
+# ADEPT has already checked out the latest, simply copy it
+- name: install autotest, docker-autotest, and python-bugzilla
+  synchronize:
+    delete: True  # Clobber whatever happens to already be there
+    dest: "{{ item.dst }}"
+    links: True
+    perms: True
+    recursive: True
+    src: '{{ item.src }}'
+  with_items:
+    - src: 'cache/autotest/'
+      dst: '{{ destdir }}/'
+
+    - src: 'cache/autotest-docker/'
+      dst: '{{ destdir }}/client/tests/docker/'
+
+    # Avoid requiring EPEL just for one package + support running on Atomic
+    - src: 'cache/python-bugzilla/bugzilla/'
+      dst: '{{ destdir }}/client/tests/docker/bugzilla/'
+
+- name: autotest-docker | custom config
+  action: copy src=files/config_custom/{{item}}
+          dest="{{ destdir }}/client/tests/docker/config_custom/{{ item }}"
+  with_items: "{{ ini_files }}"

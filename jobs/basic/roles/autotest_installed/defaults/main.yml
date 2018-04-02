@@ -1,0 +1,11 @@
+---
+destdir:            /var/lib/autotest
+
+autotest_rpm_deps: [ procps, tar, findutils, bzip2, gdb, bridge-utils,
+                     nfs-utils, git, glibc-devel, python-bugzilla, which,
+                     cloud-utils-growpart, python-nose, python-unittest2,
+                     python2-mock, python-docutils, python-sphinx,
+                     python-sphinxcontrib-httpdomain, python-sphinx_rtd_theme,
+                     selinux-policy-targeted, libselinux-python ]
+
+ini_files:          [ control.ini, defaults.ini, tests.ini ]
