@@ -1,7 +1,0 @@
----
-
-docker_autotest_timeout: 30
-
-# Override group_vars since no updates are happening
-# and peons are using repos. baked into their images.
-rhsm:

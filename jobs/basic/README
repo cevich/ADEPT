@@ -1,7 +1,16 @@
-This job ({{ job_name }}) is intended to exercise
-a small subset of tests against an all-defaults,
-vanilla set of peons to verify basic functionality.
-The set of tests is specified in the jobs
-``kommandir_vars.yml`` file.
+The {{ job_name }} job is intended to exercise
+Docker with a small subset of tests.  It uses
+"all-defaults" peons and a simple Docker Autotest
+setup.
+
+Docker Autotest results for each peon are located
+under subdirectories by inventory-name.  Also
+in these subdirectories, are 'adept_result.txt' files
+containing details about the last job role that
+was successfully applied.
+
+Further details may be obtained by examining the
+exekutir or kommandir's ansible logs, located in
+their respective workspace directories.
 
 (src: {{ job_path }}/{{ job_docs_template_src }})

@@ -1,0 +1,50 @@
+---
+
+- name: Execute Docker Autotest
+  command: ./autotest-local "--tag={{ docker_autotest_tag }}" run docker
+  args:
+    chdir: /var/lib/autotest/client
+    creates: "{{ results_src_dirpath }}/status"
+  async: '{{ docker_autotest_timeout | int * 60 }}'
+
+- name: Results are converted into junit format
+  command: tests/docker/results2junit "--name={{ inventory_hostname }}" "{{ results_src_dirpath }}"
+  args:
+    chdir: /var/lib/autotest/client
+    creates: "{{ results_src_dirpath }}/results.junit"
+
+- name: Results are synchronized down to kommandir workspace
+  synchronize:
+    checksum: True
+    delete: True
+    dest: "{{ results_dst_dirpath }}/"
+    mode: "pull"
+    recursive: True
+    src: "{{ results_src_dirpath }}/"
+
+- name: Results are processed into human-readable text-table for e-mail
+  shell: 'tools/scan_results.py "{{ results_src_dirpath }}/status" | sed "s/GOOD/PASS/g"'
+  args:
+    chdir: /var/lib/autotest/client
+  register: result
+
+- name: Humans are notified by e-mail of autotest results
+  mail:
+    host: smtp.redhat.com
+    secure: try
+    to: '{{ notification_email }}'
+    from: 'nobody@redhat.com'
+    subject: "[ADEPT Results] Job {{ uuid }} completed on {{ inventory_hostname }}"
+    body: |
+        Key RPMs:
+        ----------
+        {{ lookup("pipe","cat " ~ key_rpms_filepath) }}
+
+        Autotest Results:
+        -----------------
+        {{ result.stdout }}
+
+        {% if notification_url | default("", True) | trim | length %}
+        Artifacts: {{ notification_url }}
+        {% endif %}
+  when: notification_email | default("", True) | trim | length
