@@ -3,7 +3,6 @@
 - hosts: peons
   roles:
     - autotest_installed
-    #- autotest_webserver  # TODO: nginx only in EPEL, use httpd?
     - has_swap
     - docker_configured
     - docker_running

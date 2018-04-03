@@ -1,2 +1,0 @@
-# Sigh. This is duplication with autotest_installed. Any ideas on how to fix?
-destdir: /var/lib/autotest
