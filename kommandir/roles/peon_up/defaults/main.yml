@@ -4,7 +4,5 @@
 # The default (13) comes from two DNS timeouts + one second
 wait_for_timeout: 13
 
-test_command_template: '{{ playbook_dir }}/roles/peon_up/templates/test_command.sh.j2'
-
 # When empty, do not include application of failed_peon_result role
 reboot_context:
