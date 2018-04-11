@@ -3,7 +3,6 @@
 - assert:
     that:
         - 'empty is defined'
-        - 'test_command_template is defined'
         - 'wait_for_timeout | default() not in empty'
         - "inventory_hostname != 'kommandir'"
         - "hostvars.kommandir.workspace is defined"
@@ -13,7 +12,7 @@
   debug:
     var: "{{ item }}"
   when: adept_debug
-  with_items: ["ansible_host","ansible_port","ansible_user","wait_for_timeout", 'reboot_context']
+  with_items: ["ansible_host","ansible_port","ansible_user","wait_for_timeout",'reboot_context']
 
 - name: Role was included by rebooted role, bypassing dependencies
   include: "{{ playbook_dir }}/roles/failed_peon_result/tasks/main.yml"
@@ -40,13 +39,12 @@
 # after zero retries.  Run a local shell command to do the detection, with retries,
 # until it's successful.
 - name: The command from template referenced by test_command_template is eventually successful
-  command: '{{ lookup("template", test_command_template) }}'
+  command: 'ansible -i inventory {{ inventory_hostname }} -m ping'
   register: result
   delegate_to: kommandir
   until: result | success
   retries: '{{ wait_for_timeout }}'
   delay: 1
-  when: test_command_template not in empty
 
 - name: The result of the command is displayed
   debug:
