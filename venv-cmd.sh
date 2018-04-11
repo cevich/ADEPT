@@ -40,8 +40,8 @@ mkdir -p "$PIPCACHE"
 # Don't recycle cache or bootstrap venv unless it succeeds
 trap 'rm -rf "$PIPCACHE" "$WORKSPACE/.venvbootstrap"' EXIT
 
-[ -n "$ARTIFACTS" ] || export ARTIFACTS="$WORKSPACE/results"
-export ARTIFACTS=$(readlink -f "$ARTIFACTS")
+ARTIFACTS="${ARTIFACTS:-$WORKSPACE/kommandir_workspace/results}"
+export ARTIFACTS
 mkdir -p "$ARTIFACTS"
 export LOGFILEPATH="$ARTIFACTS/$SCRIPT_NAME.log"
 
