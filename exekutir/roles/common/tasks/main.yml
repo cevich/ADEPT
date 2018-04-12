@@ -21,6 +21,11 @@
     that:
         # These come from host_vars or exekutir_vars.yml
         - "uuid is defined"
+        # Individual tests make for easier debugging
+        - "uuid | length <= 32"  # Must be valid username max length
+        - "uuid | length >= 4"  # Must be valid username min length
+        - "uuid | first | lower | search('[a-z]')"  # Must begin with letter
+        - "uuid | lower | search('^[a-z0-9\\.\\-_]{4,32}$')"  # only contain alnum, dash, dot, underscore
         - "job_path is defined"
         - "job_name is defined"
         - "kommandir_workspace is defined"
