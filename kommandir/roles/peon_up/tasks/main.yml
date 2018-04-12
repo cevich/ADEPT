@@ -38,8 +38,8 @@
 # Any remote module that fails will immediatly cause host to be marked uncreachable
 # after zero retries.  Run a local shell command to do the detection, with retries,
 # until it's successful.
-- name: The command from template referenced by test_command_template is eventually successful
-  command: 'ansible -i inventory {{ inventory_hostname }} -m ping'
+- name: The ansible ping module runs successfully against host
+  command: '{{ adept_path }}/venv-cmd.sh ansible -i inventory {{ inventory_hostname }} -m ping'
   register: result
   delegate_to: kommandir
   until: result | success
