@@ -17,11 +17,11 @@ peon_image: >
   {%- elif inventory_hostname|search("rhelatomic7-4") -%}rhel-atomic-cloud-7.4-released-latest
   {%- elif inventory_hostname|search("rhelatomic-latest") -%}rhel-atomic-cloud-7.5-released-latest
   {#- Fedora Images -#}\
-  {%- elif inventory_hostname|search("fedora25") -%}Fedora-Cloud-25
   {%- elif inventory_hostname|search("fedora26") -%}Fedora-Cloud-26
+  {%- elif inventory_hostname|search("fedora27") -%}Fedora-Cloud-27
   {#- Fedora Atomic Host Images -#}\
-  {%- elif inventory_hostname|search("fedoratomic25") -%}Fedora-Atomic-25
   {%- elif inventory_hostname|search("fedoratomic26") -%}Fedora-Atomic-26
+  {%- elif inventory_hostname|search("fedoratomic27") -%}Fedora-Atomic-27
   {#- CentOS 7 Images -#}\
   {%- elif inventory_hostname|search("centos7") -%}CentOS-Cloud-7
   {%- else -%}{{ 'Error: Peon not found while looking up image-name' | comment }}{%- endif -%}
