@@ -45,3 +45,7 @@
   debug:
     var: "result"
   when: adept_debug
+
+- name: Facts are gathered from the kommandir VM
+  setup:
+    gather_subset: min
