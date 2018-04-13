@@ -35,11 +35,9 @@
   retries: '{{ wait_for_timeout }}'
   delay: 1
 
-# Any remote module that fails will immediatly cause host to be marked uncreachable
-# after zero retries.  Run a local shell command to do the detection, with retries,
-# until it's successful.
-- name: The ansible ping module runs successfully against host
-  command: '{{ adept_path }}/venv-cmd.sh ansible -i inventory {{ inventory_hostname }} -m ping'
+# It's undesireable to have the host removed from inventory while it's still booting up.
+- name: The ansible raw module runs successfully on host
+  command: '{{ adept_path }}/venv-cmd.sh ansible -i inventory {{ inventory_hostname }} -m raw -a "{{ up_cmd }}"'
   register: result
   delegate_to: kommandir
   until: result | success

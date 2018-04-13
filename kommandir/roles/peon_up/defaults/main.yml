@@ -6,3 +6,6 @@ wait_for_timeout: 13
 
 # When empty, do not include application of failed_peon_result role
 reboot_context:
+
+# The raw command to execute on the remote host
+up_cmd: '/bin/true'
