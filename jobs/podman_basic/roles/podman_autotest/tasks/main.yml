@@ -1,0 +1,45 @@
+---
+
+- name: install rpms needed for autotest
+  package:
+    name: '{{ item }}'
+    state: present
+  with_items: "{{ autotest_rpm_deps }}"
+
+- name: Docker is NOT installed directly, or by dependency resolution.
+  package:
+    name: docker-client
+    state: absent
+
+- name: install autotest, podman-autotest
+  synchronize:
+    delete: True  # Clobber whatever happens to already be there
+    dest: "{{ item.dst }}"
+    links: True
+    perms: True
+    recursive: True
+    src: '{{ item.src }}'
+  when: item.src | is_dir
+  with_items:
+    - src: 'cache/autotest/'
+      dst: '{{ destdir }}/'
+
+    - src: 'cache/autotest-podman/'
+      dst: '{{ destdir }}/client/tests/podman/'
+
+- name: Avoid docker-autotest changes by using filter for podman output
+  file:
+    src: "{{ output_filter_path }}"
+    dest: "/usr/bin/docker"
+    state: link
+
+- name: Fix podman_output_filter selinux type
+  sefcontext:
+    setype: container_runtime_exec_t
+    target: "{{ output_filter_path }}"
+
+- name: Running systemd inside a container is permitted
+  seboolean:
+    name: container_manage_cgroup
+    state: True
+    persistent: True

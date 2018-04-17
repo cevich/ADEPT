@@ -1,0 +1,5 @@
+---
+
+results_src_dirpath: "/var/lib/autotest/client/results/{{ podman_autotest_tag }}"
+results_dst_dirpath: "{{ hostvars.kommandir.workspace }}/results/{{ inventory_hostname }}/{{ podman_autotest_tag }}"
+key_rpms_filepath: "{{ results_dst_dirpath }}/sysinfo/key_rpms"

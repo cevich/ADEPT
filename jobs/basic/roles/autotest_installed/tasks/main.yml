@@ -13,6 +13,7 @@
     perms: True
     recursive: True
     src: '{{ item.src }}'
+  when: item.src | is_dir
   with_items:
     - src: 'cache/autotest/'
       dst: '{{ destdir }}/'
