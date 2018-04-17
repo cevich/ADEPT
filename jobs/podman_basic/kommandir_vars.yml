@@ -1,0 +1,14 @@
+---
+
+# List of dictionaries, with options to the git ansible module.
+git_cache_args:
+    - repo: "https://github.com/autotest/autotest.git"
+      recursive: False
+      depth: 3
+      cachepath: 'autotest'
+      force: True
+    - repo: "https://github.com/autotest/autotest-docker.git"
+      version: "podman"
+      recursive: False
+      cachepath: 'autotest-podman'
+      force: True

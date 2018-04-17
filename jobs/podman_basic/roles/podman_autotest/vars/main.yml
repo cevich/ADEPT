@@ -1,0 +1,4 @@
+---
+
+destdir: "/var/lib/autotest"
+output_filter_path: "{{ destdir }}/client/tests/podman/podman_filter"

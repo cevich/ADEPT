@@ -1,0 +1,12 @@
+---
+
+# Name for results sub-directory
+podman_autotest_tag: default
+
+podman_autotest_timeout: 30  # minutes
+
+# When non-empty, e-mail address to send report to
+notification_email:
+
+# When non-empty, reference URL for e-mail, where result files persist
+notification_url:

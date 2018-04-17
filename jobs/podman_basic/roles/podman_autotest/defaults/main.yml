@@ -1,0 +1,3 @@
+---
+
+autotest_rpm_deps: [ "podman", ]

@@ -1,0 +1,11 @@
+---
+
+- include: default_setup.yml
+
+- hosts: peons
+  vars_files:
+      - kommandir_vars.yml
+  roles:
+    - podman_autotest
+    - has_swap
+    - success_peon_result
