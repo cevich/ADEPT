@@ -12,3 +12,6 @@
       - kommandir_vars.yml
   roles:
     - autotest_executed
+    - role: success_peon_result
+      vars:
+        results_template_filepath: adept_result_success.txt.j2

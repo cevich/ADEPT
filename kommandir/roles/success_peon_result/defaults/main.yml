@@ -1,0 +1,4 @@
+---
+
+# Full path to template indicating a successful result for this host
+success_template_filepath: "{{ playbook_dir }}/roles/success_peon_result/templates/adept_result.txt.j2"

@@ -1,8 +1,11 @@
 ---
 
 - hosts: peons
+  vars_files:
+      - kommandir_vars.yml
   roles:
     - autotest_installed
     - has_swap
     - docker_configured
     - docker_running
+    - success_peon_result
