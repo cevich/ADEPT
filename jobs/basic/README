@@ -1,16 +1,14 @@
-The {{ job_name }} job is intended to exercise
-Docker with a small subset of tests.  It uses
-"all-defaults" peons and a simple Docker Autotest
-setup.
+{# This is a jinja2 template rendered into the artifacts directory #}
 
-Docker Autotest results for each peon are located
-under subdirectories by inventory-name.  Also
-in these subdirectories, are 'adept_result.txt' files
-containing details about the last job role that
+The {{ job_name }} job is intended to exercise Docker with a small subset
+of tests.  It uses an "all-defaults" peon and Docker Autotest configuration.
+
+Docker Autotest results for each peon are located under subdirectories of
+this `results` directory (by inventory-name).  Also there are
+`adept_result.txt` files containing details about the last role that
 was successfully applied.
 
-Further details may be obtained by examining the
-exekutir or kommandir's ansible logs, located in
-their respective workspace directories.
+Further details may be obtained by examining the exekutir or kommandir's
+ansible logs, located in their respective workspace directories.
 
 (src: {{ job_path }}/{{ job_docs_template_src }})
