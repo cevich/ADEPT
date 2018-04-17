@@ -2,7 +2,6 @@
 
 # N/B: This file can be overwritten by a copy from job_path.
 
-
 - hosts: peons
   strategy: linear  # The add_host module can only be run using linear strategy
   vars_files:

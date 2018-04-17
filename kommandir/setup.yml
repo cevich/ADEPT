@@ -2,5 +2,6 @@
 
 # N/B: This file can be overwritten by a copy from job_path.
 
+- include: kommandir_setup.yml
 - include: peon_creation.yml
 - include: peon_setup.yml

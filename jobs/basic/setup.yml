@@ -1,5 +1,6 @@
 ---
 
+- include: kommandir_setup.yml
 - include: peon_creation.yml
 - include: peon_setup.yml
 - include: install-autotest.yml

@@ -1,0 +1,27 @@
+---
+
+- name: The destination directory always exists
+  file:
+    path: "{{ workspace }}/cache/{{ git_op.cachepath }}"
+    state: directory
+
+- name: git_op's options are fed to git module
+  git:
+    dest: "{{ workspace }}/cache/{{ git_op.cachepath }}"
+    repo: "{{ git_op.repo }}"
+    depth: "{{ git_op.depth | default(omit) }}"
+    recursive: "{{ git_op['recursive'] | default(omit) }}"
+    reference: "{{ git_op.reference | default(omit) }}"
+    refspec: "{{ git_op.refspec | default(omit) }}"
+    remote: "{{ git_op.remote | default(omit) }}"
+    version: "{{ git_op.version | default(omit) }}"
+    force: "{{ git_op.force | default(omit) if not always_force else True }}"
+  # Async-tasks always show changed.  Turn that off and evaluate it later.
+  changed_when: False
+  register: result
+  async: "{{ git_op_timeout }}"
+  poll: 0
+
+- name: git_op async-state is included in async_results list
+  set_fact:
+    async_results: "{{ async_results | union([result | combine(git_op)]) }}"
