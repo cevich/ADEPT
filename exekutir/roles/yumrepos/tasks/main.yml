@@ -33,6 +33,7 @@
     baseurl: "{{ item.baseurl }}"
     description: "Ansible added {{ item.name }} repo"
     gpgcheck: "{{ item.gpgcheck | default(True) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
     exclude: "{{ item.excludepkgs | default(omit) }}"
     includepkgs: "{{ item.includepkgs | default(omit) }}"
     metadata_expire: 900  # quarter-hour
