@@ -1,0 +1,5 @@
+---
+
+dependencies:
+    - role: failed_peon_result
+      this_role: "success_peon_result"

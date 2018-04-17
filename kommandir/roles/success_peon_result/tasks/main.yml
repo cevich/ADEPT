@@ -1,0 +1,7 @@
+---
+
+- include_role:
+    name: failed_peon_result
+    allow_duplicates: True
+  vars:
+    results_template_filepath: '{{ success_template_filepath }}'
