@@ -96,31 +96,6 @@
     mode: "0700"
     state: directory
 
-- name: Kommandir's workspace/cache is a directory
-  file:
-    path: "{{ kommandir_workspace }}/cache"
-    follow: True
-    state: directory
-  register: result
-
-- name: Kommandir's cache content checked out from git when directory created
-  git:
-    repo: "{{ item.repo }}"
-    dest: "{{ kommandir_workspace }}/cache/{{ item.cachepath }}"
-    # Shallow clone is much faster when specific branch/tag/version is _not_ used.
-    # Otherwise, if a version is specified, then the full history-depth is likely
-    # required to find it.
-    depth: "{{ omit if item.version is defined else item.depth | default(2) }}"
-    # HEAD is the default if not specified
-    version: "{{ item.version | default(omit) }}"
-    recursive: "{{ item.recursive | default(False) }}"
-    clone: "{{ item.clone | default(omit) }}"
-    refspec: "{{ item.refspec | default(omit) }}"
-    force: "{{ item.force | default(omit) }}"
-  when: result | changed and
-        git_cache_args is defined and git_cache_args not in [None,"",[],{}]
-  with_items: '{{ git_cache_args }}'
-
 - name: Remote Kommandir's workspace files have correct ownership
   command: "chown -R {{ uuid }}.{{ uuid }} {{ kommandir_workspace }}"
   when: "'nocloud' not in group_names"
@@ -141,4 +116,3 @@
   debug:
     var: result
   when: adept_debug
-

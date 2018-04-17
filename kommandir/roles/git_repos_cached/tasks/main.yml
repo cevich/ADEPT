@@ -1,0 +1,38 @@
+---
+
+- name: Temporary facts are initialized
+  set_fact:
+    result:
+    async_results: []
+
+- assert:
+    that:
+        - "inventory_hostname == 'kommandir'"
+        # Verify conformance with defaults, expected types, and values
+        - "git_op_timeout | default(0) >= 1"
+        - "git_op_status_delay | default(0) >= 1"
+        - "git_cache_args is defined"
+
+- name: Kommandir's workspace/cache is a directory
+  file:
+    path: "{{ workspace }}/cache"
+    follow: True
+    state: directory
+  register: mkdir_cache
+
+- name: Initialize kommandir's cache dir from git
+  block:
+
+    - name: All git operations are run in parallel
+      include_tasks: "{{ role_path }}/tasks/async_git.yml"
+      with_items: "{{ git_cache_args }}"
+      loop_control:
+        loop_var: "git_op"
+
+    - name: All parallel git operations are completed and successful
+      include_tasks: "{{ role_path }}/tasks/async_status.yml"
+      with_items: "{{ async_results }}"
+      loop_control:
+        loop_var: "async_result"
+
+  when: mkdir_cache | changed
