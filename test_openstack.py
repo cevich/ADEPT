@@ -372,7 +372,7 @@ class TestDiscoverCreateDestroyBase(TestCaseBase):
                 written = write_call[0][0]
                 break
         self.assertIsNotNone(written)
-        for token in ('---', 'host_name', 'ansible_ssh_host', 'ansible_ssh_user', 'ansible_become', 'ansible_connection'):
+        for token in ('---', 'host_name', 'ansible_ssh_host', 'ansible_ssh_user', 'ansible_connection'):
             self.assertIn(token, written)
         for value in (name, ip_address):
             self.assertIn(value, written)
