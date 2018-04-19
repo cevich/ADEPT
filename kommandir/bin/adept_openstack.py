@@ -127,7 +127,6 @@ host_uuid: {uuid}
 host_name: {name}
 ansible_user: root
 ansible_ssh_user: root
-ansible_become: False
 ansible_connection: ssh
 """
 
