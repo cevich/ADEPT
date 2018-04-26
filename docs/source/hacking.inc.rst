@@ -83,11 +83,13 @@ to include ``nocloud``.  If required, also enable
 
 .. _repeat_contexts:
 
-Avoid repeating any context transition more than once, against the same
-workspace or manually running Ansible.  Either can be done if needed,
-but require some manual manipulations of files in the workspace.
-It's safer to apply the ``cleanup`` context, then start over again
-with ``setup`` against a fresh workspace, with a fresh `uuid`_
+For reglar/automated use, avoid repeating any context transition more
+than once, against the same workspace or manually running Ansible.
+However, for development/debugging purposes, depending on the job-specifics,
+most contexts may be re-applied (within reason).  Doing this may require
+manual manipulation of the `uuid`_ unless existing VMs are to be re-used.
+Otherwise, it's safest to apply the ``cleanup`` context, then start over again
+with ``setup`` against a fresh workspace, with a fresh `uuid`_.
 
 OpenStack Cloud
 ------------------

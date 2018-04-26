@@ -196,7 +196,7 @@
     dest: "{{ workspace }}/cache"
     force: True  # kommandir_workspace_setup will create it
     state: link
-  when: not (workspace ~ "/cache") | is_dir
+  when: not (workspace ~ "/cache" | is_dir)
 
 - name: Kommandir doesn't appear in it's inventory hosts files to workaround ansible bug
   replace:
@@ -234,17 +234,7 @@
     ansible_private_key_file: >
         {{ '"{{' }} kommandir_workspace {{ '}}' }}/ssh/kommandir_key {{ '"' }}
 
-- name: This and future kommandir's are protected by clobbering existing ssh directory
-  file:
-    dest: "{{ kommandir_workspace }}/ssh"
-    state: absent
-
-- name: The dot-ssh directory is absent
-  file:
-    path: "{{ kommandir_workspace }}/.ssh"
-    state: absent
-
-- name: A new ssh directory is present for kommandir's workspace
+- name: A ssh directory is present for kommandir's workspace
   file:
     dest: "{{ kommandir_workspace }}/ssh"
     state: directory
@@ -255,28 +245,19 @@
     src: "{{ kommandir_workspace }}/ssh"
     state: link
 
-- name: Future kommandirs and peons protected by new kommandir ssh private key
+- name: Future kommandirs and peons protected by new ssh key
   command: ssh-keygen -f "{{ kommandir_workspace }}/ssh/kommandir_key" -N ""
   args:
-    creates: "{{ kommandir_workspace }}/ssh/kommandir_key.pub"
-    chdir: "{{ kommandir_workspace }}/ssh"
+    creates: "{{ kommandir_workspace }}/ssh/kommandir_key*"
 
-- name: Exekutir's public key contents are buffered
-  set_fact:
-    result: '{{ lookup("file", ansible_private_key_file ~ ".pub") }}'
-
-- name: Exekutir's sync. source ssh/authorized_keys allows Exekutir's public key
-  lineinfile:
-    dest: "{{ kommandir_workspace }}/ssh/authorized_keys"
-    line: '{{ result }}'
-    create: True
-    state: present
-
-- name: Kommandir's ssh directory contains exekutir's public key
+- name: Kommandir's ssh directory contains exekutir's public key and is authorized
   copy:
-    dest: "{{ kommandir_workspace }}/ssh/exekutir_key.pub"
-    # Meh, it's already buffered, why type the name again
-    content: '{{ result }}'
+    src: "{{ workspace }}/ssh/exekutir_key.pub"
+    dest: "{{ kommandir_workspace }}/ssh/{{ item }}"
+    mode: "0600"
+  with_items:
+    - "exekutir_key.pub"
+    - "authorized_keys"
 
 - name: Mandatory job documentation template is rendered into results dir
   template:

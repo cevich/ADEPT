@@ -19,7 +19,7 @@ Basic Definitions
 ``setup``, ``run``, and ``cleanup``
                                      The three context labels currently
                                      used in ADEPT.  Operationally,
-                                     the *run* context is dependent (to some degree)
+                                     the *run* context is dependent
                                      on a successful *setup* transition.  However,
                                      the *cleanup* context transition does not
                                      depend on success or failure of either
