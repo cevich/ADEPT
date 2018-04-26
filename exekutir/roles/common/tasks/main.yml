@@ -45,6 +45,7 @@
   set_fact:
     workspace_rsync_excludes:
         - "--exclude=.ssh"
+        - "--exclude=ssh"
         - "--exclude=.ansible"
         - "--exclude=.??*.lock"
         - "--exclude=.*cache"
