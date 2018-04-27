@@ -33,6 +33,7 @@ cloud_provisioning_command:
     command: >
         {{ hostvars.exekutir.kommandir_workspace }}/bin/openstack_discover_create.py \
             {{ "--verbose" if adept_debug == True else "" }} \
+            --preserve -1 \  # forever
             {{ "--lockdir=" ~ global_lockdir if global_lockdir|default() not in empty else ""}} \
             {{ "--userdata=" ~ hostvars.exekutir.workspace ~ "/roles/kommandir_discovered/files/kommandir_userdata.yml" }} \
             {{ kommandir_name }} \
