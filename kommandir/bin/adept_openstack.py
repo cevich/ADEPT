@@ -598,7 +598,7 @@ class TimeoutDelete(TimeoutAction):
         """Return remaining ids when server_id not found, None if still present."""
         server_ids = self.os_rest.server_list(key='id')
         if server_id in server_ids:
-            logging.info("    Deleting %s", server_id)
+            logging.info(">    Deleting %s", server_id)
             return None
         logging.info("Confirmed VM %s does not exist", server_id)
         return server_ids
@@ -870,13 +870,14 @@ class TimeoutDeleteVolume(TimeoutAction):
                             volume_details.get('name', volume_id),
                             attachments)
             return volume_details  # bail out!
-        logging.info("     Deleting volume %s: status %s",
+        logging.info(">     Deleting volume %s: status %s",
                      volume_id, volume_details['status'])
         try:  # Prevent TOCTOU: id vanishes before query
             self.os_rest.volume_request('/volumes/%s' % volume_id,
                                         unwrap=None, method='delete')
         except Exception:
             return volume_details  # Removal was the goal
+        logging.info("     Deleted volume %s", volume_id)
         return None  # try again
 
 
@@ -942,7 +943,7 @@ def _destroy_volumes(volume_ids, server_id):
     except (ValueError, IndexError):
         pass  # Volume named with server_id doesn't exist
     if volume_ids:
-        logging.info("Deleting leftover volumes:")
+        logging.info("Deleting volumes:")
         for volume_id in volume_ids:
             TimeoutDeleteVolume(volume_id)()
 
@@ -958,16 +959,11 @@ def destroy(name=None, uuid=None, **dargs):
     os_rest = OpenstackREST()
 
     # Prefer to operate on ID's because they can never race/clash
-    if uuid:
-        thing = uuid
-    elif name:
-        thing = name
+    if name:
         if os_rest.server_list().count(name) > 1:
             raise RuntimeError("More than one server %s found", name)
-    else:
+    elif uuid is None:
         raise ValueError("Must pass name and/or uuid to destroy()")
-
-    logging.info("Deleting VM %s", thing)
 
     server_id = None
     volume_ids = []
@@ -1048,7 +1044,7 @@ def create(name, pub_key_files, image, flavor,  # pylint: disable=R0913
         logging.info(">Creation successful, VM %s id %s", name, server_id)
 
         if size:
-            logging.info(">Attempting to create and attach %sGB size volume", size)
+            logging.info("Creating and attaching %sGB volume", size)
             # name is added to volume description
             TimeoutAttachVolume(name, server_id, int(size))()
 
@@ -1205,7 +1201,7 @@ def main(argv, dargs, service_sessions):
             logging.debug("%s: %s", xcept.__class__.__name__, str(xcept))
             try:
                 OpenstackREST(service_sessions)
-                logging.info('>Attempting to create new VM %s.', dargs['name'])
+                logging.info('Creating new VM %s.', dargs['name'])
                 create(**dargs)
             except:
                 logging.error("Original discovery-exception,"
