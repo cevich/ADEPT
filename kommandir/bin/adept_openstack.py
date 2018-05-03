@@ -418,8 +418,9 @@ class OpenstackREST(Singleton):
             launch_stamp = datetime.datetime.strptime(launched_at,
                                                       iso18601fmt).replace(microsecond=0)  # don't care
         except (TypeError, ValueError):
-            logging.error("Error parsing server %s launched_at stamp %s",
-                          uuid, launched_at)
+            logging.warning("Invalid server '%s' launched_at stamp '%s',"
+                            " perhaps it's being created/destroyed?",
+                            server_details.get('name', uuid), launched_at)
             return None
 
         try:

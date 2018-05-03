@@ -604,6 +604,16 @@ class TestReap(TestDiscoverCreateDestroyBase):
             self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
             self.assertEqual(self.destroy_dargs, None)  # destroy never called
 
+    def test_parse_err(self):
+        """Verify a bad launched_at value destroys no servers"""
+        with self.patched:
+            self.uut.reap()  # function keyword has hyphen
+            self.uut.discover('foobar')
+            self.certify_stdout('foobar', '6.7.8.9')  # Still there
+            # All fake responce JSON was consumed
+            self.assertEqual(self.fake_session.resp_mocks, [], self.leftovers())
+            self.assertEqual(self.destroy_dargs, None)  # destroy never called
+
     def test_death(self):
         """Verify expired server is destroyed"""
         with self.patched:
