@@ -1112,10 +1112,6 @@ def parse_args(argv, operation='help'):
                                   ' executions.'))
 
     # All operations get these
-    parser.add_argument('--dry-run', '-n', default=False,
-                        action='store_true',
-                        help=('Perform no actual cleanup or other actions, simply'
-                              ' display the actions that would have been taken.'))
     parser.add_argument('--verbose', '-v', default=False,
                         action='store_true',
                         help='Increase logging verbosity.')
@@ -1131,6 +1127,11 @@ def parse_args(argv, operation='help'):
     if operation != 'reap':
         parser.add_argument('name',
                             help='The VM name to search for, create, or destroy (required)')
+    else:
+        parser.add_argument('--dry-run', '-n', default=False,
+                            action='store_true',
+                            help=('Perform no actual cleanup or other actions, simply'
+                                  ' display the actions that would have been taken.'))
 
     # Consumer of remaining arguments must come last
     if operation not in ('destroy', 'reap'):
