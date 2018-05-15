@@ -20,10 +20,6 @@ then
     exit 3
 fi
 
-# The TYPOS value was formerly specified in .travis.yml
-# TODO: Remove this workaround in another/later PR
-sed -i -r -e '/^-        - TYPOS=/d' /tmp/commits_with_diffs
-
 echo "Examining $LINES change lines for typos:"
 egrep -a -i -2 --color=always "$TYPOS" /tmp/commits_with_diffs && exit 3
 
