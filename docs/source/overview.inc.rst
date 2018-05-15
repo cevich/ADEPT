@@ -13,83 +13,66 @@ transition file (``*.xn``), or the source Ansible role or script.
 The *setup* context transition
 -------------------------------
 
-#. Fundamental setup of *exekutir's* ssh keys, and copying the ``exekutir/`` directory
-   into `workspace`_.  (``exekutir.xn``)
+#. Fundamental setup of *exekutir's* ssh keys, and `workspace`_ directory.
+   (``exekutir.xn``)
 
-    * Copy local ``exekutir/*`` (form repo.) to `workspace`_.
-
-    * Drop default ``{{workspace}}/exekutir_vars.yml`` if not present.
+    * Copy repository's ``exekutir/*`` to the `workspace`_.
 
     * Copy ``$ANSIBLE_PRIVATE_KEY_FILE`` (and ``.pub``) or
       generate new ``{{workspace}}/ssh/exekutir_key``.
 
-#. Intermediate *exekutir* setup, check Ansible version, setup
-   separate `kommandir_workspace`_ directory.
+#. Intermediate *exekutir* setup, prepare the initial `kommandir_workspace`_
+   directory for future remote synchronization.
    (``exekutir/roles/exekutir_workspace_setup`` role)
 
-    * Copy ``kommandir/*`` (form repo.) to local ``{{kommandir_workspace}}``
+    * Copy ``kommandir/*`` (from repo.) to local ``{{kommandir_workspace}}``
 
-    * Duplicate all default playbooks so they may be both overridden, and re-used if needed.
-      i.e.,
-      ``{{kommandir_workspace}}/*.yml --> {{kommandir_workspace}}/default_*.yml``
+    * Backup default playbooks to allow selective re-use.
+      i.e. ``{{kommandir_workspace}}/*.yml --> {{kommandir_workspace}}/default_*.yml``
 
-    * Copy directory contents pointed to by `job_path`_ to `kommandir_workspace`_,
-      overwriting any files already there (i.e., from the ``kommandir/*`` source).
+    * Copy contents of `job_path`_ to `kommandir_workspace`_, overwriting any
+      existing files to allow customization.
 
-    * Check/Modify/Lock-down ``{{workspace}}/exekutir_vars.yml`` and
-      ``{{kommandir_workspace}}/kommandir_vars.yml``.
-
-    * Generate unique ssh key for *kommandir* to use for accessing *peons*
+    * Generate unique ssh key for *kommandir* to use for this job,
       in ``{{workspace}}/kommandir_workspace/ssh/kommandir_key``
 
 .. _kommandir_discovered:
 
-#. Create or discover the *kommandir*.
+#. Create or discover the remote *kommandir* VM if configured.
    (``exekutir/roles/kommandir_discovered`` role)
 
     * The *exekutir* has set the *kommandir's* Ansible group membership from contents
       of the `kommandir_groups`_ list.  (``exekutir/roles/common`` role)
 
-    * The `cloud_provisioning_command`_ is executed,
-      with its ``stdout`` parsed as a YAML dictionary, updating
-      ``{{workspace}}/inventory/host_vars/kommandir.yml``
-
     * Membership in `the ``nocloud`` Ansible group <local_kommandir>`_ will
       always cause the *kommandir* to be the same host as the *exekutir*
       (i.e., ``ansible_host: localhost``).
 
+    * Otherwise, the `cloud_provisioning_command`_ is executed,
+      with its ``stdout`` parsed as a YAML dictionary, updating
+      ``{{workspace}}/inventory/host_vars/kommandir.yml`` inventory variables.
+
 #. Complete *kommandir* VM setup (if needed), install packages,
    setup storage, etc. (``exekutir/roles/installed`` and ``kommandir_setup`` roles)
 
-#. Finalize the local or remote workspace for the *kommandir*.
+#. Finalize the workspace for a remote *kommandir* VM (if used).
    (``exekutir/roles/kommandir_workspace_update`` role)
 
-    * A remote *kommandir* has a `user named ``{{uuid}}`` created <uuid>`_.  The
-      user's ssh ``authorized_keys`` is updated with the contents from
-      ``$WORKSPACE/ssh/exekutir_key.pub``
+    * A remote *kommandir* has a `user named ``{{uuid}}`` created <uuid>`_.
 
-    * Remote *kommandir's* ``/home/{{uuid}}`` (its `workspace`_) destructively
-      synchronized from the *exekutir's* ``{{kommandir_workspace}}`` copy.
-
-    * Shell-module arguments in `extra_kommandir_setup`_ are executed.
+    * Remote *kommandir's* ``/home/{{uuid}}`` (its `workspace`_)
+      synchronized from the local ``{{kommandir_workspace}}`` copy.
 
 .. _jobxn_on_kommandir:
 
-#. Run ``job.xn`` on *kommandir* (local or remote).
-   (``exekutir.xn``)
+#. Run ``job.xn`` on *kommandir* (local or remote).  This file may be
+   overridden by a copy from `job_path`_ to customize testing operations.
+   The default simply executes the ``setup.yml`` playbook to create and
+   configure *peons* for testing purposes. (``exekutir.xn``)
 
-    * This transition file may have been overridden by a copy from `job_path`_.
-
-    * The default executes the ``setup.yml`` playbook, which creates and
-      configures any *peons* that are members of the "*peons*" Ansible group
-
-    * By default, *peons* are members of the "openstack" group, this can
-      be changed by overriding peon_cloud_group_ from the `high-level variables`_
-
-    * For a remote *kommandir*, the `uuid`_ user is used for execution.
-
-#. For a remote *kommandir*, synchronize ``/home/{{uuid}}`` (its `workspace`_)
-   back down to the *exekutir's* ``{{kommandir_workspace}}`` copy.
+#. For a remote *kommandir*, ``/home/{{uuid}}`` is synchronized
+   back down to the *exekutir's* local ``{{kommandir_workspace}}``
+   directory.  This prevents state from being bound to a remote system.
    (``exekutir/roles/kommandir_to_exekutir_sync`` role)
 
 .. _trct:
@@ -97,15 +80,20 @@ The *setup* context transition
 The *run* context transition
 -----------------------------
 
-#. Create or discover the *kommandir* VM (if needed), set it up,
-   install packages, etc.
+#. Create or discover the *kommandir* VM. If needed, set it up,
+   install packages, etc. exactly as in *setup*.  This prevents
+   the need to maintain a persistent slave-host.
 
-#. Run ``job.xn`` on *kommandir* (local or remote).
-   The default copy simply executes the ``run.yml`` playbook.
-   (``exekutir.xn``)
+#. Synchronize the local ``{{kommandir_workspace}}`` to a remote
+   *kommandir* (if used).  (``exekutir/roles/kommandir_workspace_update``)
 
-#. For a remote *kommandir*, synchronize ``/home/{{uuid}}`` (its `workspace`_)
-   back down to the *exekutir's* ``{{kommandir_workspace}}`` copy.
+#. Run ``job.xn`` on *kommandir* (local or remote).  Same as in
+   *setup*, this may have been overridden by a copy from `job_path`_.  The
+   default simply executes the ``run.yml`` playbook.  (``exekutir.xn``)
+
+#. For a remote *kommandir*, ``/home/{{uuid}}`` is synchronized
+   back down to the *exekutir's* local ``{{kommandir_workspace}}``
+   directory.  This prevents state from being bound to a remote system.
    (``exekutir/roles/kommandir_to_exekutir_sync`` role)
 
 .. _tcct:
@@ -117,18 +105,25 @@ The *cleanup* context transition.
 successful.  It may not exit successfully, but it must never orphan
 a remote *kommandir* or any *peons*.
 
-#. Create or discover the *kommandir* VM (if needed), set it up,
-   install packages, etc.
+#. Create or discover the *kommandir* VM. If needed, set it up,
+   install packages, etc.  This may fail again if it also failed
+   during *setup* or *run* - this is normal.
 
-#. Run ``job.xn`` on *kommandir* (local or remote).
-   The default copy simply executes the ``cleanup.yml`` playbook.
+#. If possible, synchronize the local ``{{kommandir_workspace}}`` to a remote
+   *kommandir* (if used).  (``exekutir/roles/kommandir_workspace_update``)
+
+#. If accessible, run ``job.xn`` on *kommandir* (local or remote).
+   The default copy simply executes the ``cleanup.yml`` playbook
+   to handle deallocation of *peons* and other resources.
    (``exekutir.xn``)
 
-#. For a remote *kommandir*, synchronize ``/home/{{uuid}}`` (its `workspace`_)
-   back down to the *exekutir's* ``{{kommandir_workspace}}`` copy.
+#. For a remote *kommandir*, ``/home/{{uuid}}`` is synchronized
+   back down to the *exekutir's* local ``{{kommandir_workspace}}``
+   directory.  This prevents state from being bound to a remote system.
    (``exekutir/roles/kommandir_to_exekutir_sync`` role)
 
-#. Examine the state of the remote *kommandir*.  If it was installed/setup more than a
-   few days ago (or the `stonith`_ flag is ``True``) then
-   destroy it by executing the `cloud_destruction_command`_.
+#. Examine the state of the remote *kommandir*.  If configured
+   for automatic destruction (after some number of days), it
+   will be destroyed.  It will also be removed if the `stonith`_
+   flag is ``True``,  to support testing of the *kommandir* setup itself.
    (``exekutir/roles/kommandir_destroyed/`` role)
