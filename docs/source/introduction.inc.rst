@@ -3,19 +3,22 @@
 Introduction
 =============
 
-Both Autotest_ and `Docker Autotest`_ represent excellent and comprehensive testing
-frameworks. However, they are lacking in modern system configuration and orchestration
-capabilities. Especially, those required for Continuous Integration testing systems.
+ADEPT provides the ground-work for managing and executing tests against
+systems through multiple Ansible playbooks.  It supports the industry-standard
+practice of utilizing a separate triggering/scheduling versus execution host.
+Jobs may be defined in-repo or externally, and use the standard Ansible
+directory structure.  Jobs may define their own playbooks, roles,
+and scripts or re-use any of the content provided.
 
-This project aims to bridge those gaps, supporting any available cloud provisioning,
-or management system.  Along with a highly configurable, Ansible-based system
-configuration, test execution, and artifact collection.  While not tightly
-bound to `Docker Autotest`_, it is the default framework employed.
+Systems management, be it local or cloud, is extremely flexible.  Though
+an OpenStack setup is the default, any custom host-management tooling
+may be used.  Changing and maintaining management tooling is very smooth
+since the interface is simple and well defined.  No persistent systems or
+data-stores are required, though both may be utilized.
 
-Finally, since entry-point capabilities often unknown and fixed, ADEPT has
-very low initial dependency and resource requirements.  The included ``adept.py``
-program, along with a simple YAML input file directives, guides the entire whole
-operation.
-
-.. _autotest: http://autotest.github.io/
-.. _`docker autotest`: https://github.com/autotest/autotest-docker
+Finally, since initiator-host capabilities are often unknown and fixed,
+ADEPT has very low dependency and resource requirements.  The included
+``adept.py`` program, along with a simple YAML input file directives,
+bootstraps Ansible operations for every job.  While Ansible and it's
+dependencies are gathered at runtime, and confined within a python
+virtual environment.
