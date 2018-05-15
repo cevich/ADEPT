@@ -38,8 +38,8 @@
     copy_links: true  # Relative links wouldn't work afterwards
     delete: true  # Exekutir's copy is always authorative
     checksum: True  # Don't trust remote clock
-    # Do not clobber contents of a pre-seeded cache directory
-    rsync_opts: '{{ workspace_rsync_excludes | union(["--exclude=cache"]) }}'
+    # Do not clobber contents of a pre-seeded cache directory or permit rogue ssh keys
+    rsync_opts: '{{ workspace_rsync_excludes | union(["--exclude=cache", "--exclude=ssh"]) }}'
   no_log: '{{ no_log_synchronize }}'
 
 - name: kommandir's workspace contains a results directory

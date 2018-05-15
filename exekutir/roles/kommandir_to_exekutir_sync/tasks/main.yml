@@ -18,7 +18,8 @@
     group: False  # Would require permissions on exekutir
     owner: False  # Same
     mode: pull
-    rsync_opts: "{{ workspace_rsync_excludes }}"
+    # Preserve local ssh directory
+    rsync_opts: "{{ workspace_rsync_excludes | union(['--exclude=ssh']) }}"
     src: "{{ kommandir_workspace }}/"
     dest: "{{ hostvars.exekutir.kommandir_workspace }}"
   # Kommandir may have died or gone/away
