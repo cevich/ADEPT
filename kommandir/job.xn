@@ -9,9 +9,11 @@
     name: "ANSIBLE_CONFIG"
     value: "$WORKSPACE/ansible.cfg"
 
+# Pass along terminal type
 - variable:
     name: "TERM"
-    value: "ansi"
+    from_env: "TERM"
+    default: "dumb"
 
 - command:
     contexts:
