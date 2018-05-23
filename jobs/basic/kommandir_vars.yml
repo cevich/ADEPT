@@ -12,3 +12,6 @@ git_cache_args:
       recursive: False
       cachepath: "python-bugzilla"
       version: "v1.2.2"
+
+# Make peons live longer than the default (4) hours.
+peon_preservation: 8
