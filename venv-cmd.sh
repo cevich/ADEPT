@@ -110,5 +110,4 @@ trap EXIT
 source "$WORKSPACE/$VENV_DIRNAME/bin/activate"
 echo "Executing $@"
 echo
-"$@"
-deactivate  # just in case
+exec "$@"
