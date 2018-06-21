@@ -39,7 +39,7 @@ class TestVerboseFilter(TestCase):
         self.logger = logging.getLogger()
         self.message_list = []
 
-    def _test_basic(self, level, verbose, expect):
+    def _test_init(self, level, verbose):
         # Grrr. The Logger thing is a global, and there doesn't seem to be
         # a way to get a new one each time. For addHandler() and addFilter()
         # to work, we need to delve into internals.
@@ -51,6 +51,9 @@ class TestVerboseFilter(TestCase):
         self.message_list = []
         self.logger.addHandler(MyHandler(self.message_list))
         self.logger.addFilter(self.a_o.VerboseFilter(level, verbose))
+
+    def _test_basic(self, level, verbose, expect):
+        self._test_init(level, verbose)
 
         # Always log the same messages...     pylint: disable=C0326
         logging.debug( "this is DEBUG")
@@ -66,6 +69,18 @@ class TestVerboseFilter(TestCase):
                 expect_list.append('this is {}'.format(level_name))
 
         self.assertEqual(self.message_list, expect_list)
+
+    def test_exception(self):
+        """
+        logger can be invoked with non-string messages; make sure our
+        filter doesn't choke on those.
+        """
+        self._test_init(logging.DEBUG, False)
+
+        import exceptions
+        exception_arg = exceptions.IndexError
+        logging.error(exception_arg)
+        self.assertEqual(self.message_list, [exception_arg])
 
 def test_generator(test_info):
     """

@@ -158,9 +158,11 @@ class VerboseFilter(logging.Filter):
         self.verbose = verbose
 
     def filter(self, record):
-        # Always strip leading '>', no matter what level we're at
-        if record.msg.startswith('>'):
-            record.msg = record.msg.lstrip('>').lstrip()
+        # record.msg may not be string; use getMessage to guarantee string form
+        msg = record.getMessage()
+        if msg.startswith('>'):
+            # Always remove leading '>'; this overrides the record string
+            record.msg = msg.lstrip('>').lstrip()
             # When logging at INFO level (default), allow these only if verbose
             if self.level == logging.INFO and record.levelno == self.level:
                 return self.verbose
