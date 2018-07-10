@@ -158,9 +158,9 @@ class VerboseFilter(logging.Filter):
         self.verbose = verbose
 
     def filter(self, record):
-        # record.msg may not be string; use getMessage to guarantee string form
-        msg = record.getMessage()
-        if msg.startswith('>'):
+        # record.msg may not be string, but '>' processing requires one
+        msg = record.msg
+        if isinstance(msg, str) and msg.startswith('>'):
             # Always remove leading '>'; this overrides the record string
             record.msg = msg.lstrip('>').lstrip()
             # When logging at INFO level (default), allow these only if verbose

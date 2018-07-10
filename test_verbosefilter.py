@@ -23,7 +23,7 @@ class MyHandler(logging.Handler):
         self.message_list = message_list
 
     def emit(self, record):
-        self.message_list.append(record.msg)
+        self.message_list.append(record.getMessage())
 
 
 class TestVerboseFilter(TestCase):
@@ -80,7 +80,20 @@ class TestVerboseFilter(TestCase):
         import exceptions
         exception_arg = exceptions.IndexError
         logging.error(exception_arg)
-        self.assertEqual(self.message_list, [exception_arg])
+        self.assertEqual(self.message_list, [str(exception_arg)])
+
+    def test_reformatting(self):
+        """
+        2018-07-10 fixes issue seen by cevich in production: if message
+        is a format string (with percent sign), and includes further
+        arguments, an earlier version of our filter would crash
+        with 'not all arguments converted' because we replaced
+        the format string with the *formatted* one. This subtest
+        fails under that earlier revision.
+        """
+        self._test_init(logging.DEBUG, True)
+        logging.info(">string with %s", "extra args")
+        self.assertEqual(self.message_list, ["string with extra args"])
 
 def test_generator(test_info):
     """
