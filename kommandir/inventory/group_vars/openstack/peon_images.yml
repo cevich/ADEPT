@@ -12,7 +12,7 @@ peon_image: >
   {%- elif inventory_hostname|search("rhel7-3-latest") -%}rhel-7.3-server-x86_64-latest
   {%- elif inventory_hostname|search("rhel7-4-latest") -%}rhel-7.4-server-x86_64-latest
   {%- elif inventory_hostname|search("rhel7-5-latest") -%}rhel-7.5-server-x86_64-latest
-  {%- elif inventory_hostname|search("rhel-latest") -%}rhel-7.5-server-x86_64-latest
+  {%- elif inventory_hostname|search("rhel-latest") -%}rhel-7.6-server-x86_64-nightly
   {#- RHEL Atomic Host Images -#}\
   {%- elif inventory_hostname|search("rhelatomic7-2") -%}rhel-atomic-cloud-7.2-released-latest
   {%- elif inventory_hostname|search("rhelatomic7-3") -%}rhel-atomic-cloud-7.3-released-latest
